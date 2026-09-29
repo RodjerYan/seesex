@@ -38,6 +38,16 @@ const EnvSchema = z.object({
     emptyToUndefined,
     z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info'),
   ),
+  // Загрузка фото (S3): каталог относительно apps/api, лимит файла, макс. фото на партнера.
+  UPLOAD_DIR: z.preprocess(emptyToUndefined, z.string().min(1).default('./uploads')),
+  MAX_FILE_SIZE: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().positive().default(5 * 1024 * 1024),
+  ),
+  MAX_PHOTOS_PER_PARTNER: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().positive().default(3),
+  ),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
