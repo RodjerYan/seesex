@@ -1,5 +1,8 @@
 import { BarChart3, Heart, Home, Lock, Settings, Users, type LucideIcon } from 'lucide-react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+
+import { SecurityLock } from '../components/security/SecurityLock';
+import { useAutoLock } from '../hooks/useAutoLock';
 
 interface NavItem {
   to: string;
@@ -30,6 +33,10 @@ function linkClassName(isActive: boolean): string {
  * и сайдбар на десктопе (sm+).
  */
 export default function Layout() {
+  const navigate = useNavigate();
+  // Автоблокировка (неактивность / фон вкладки) + ручная блокировка из шапки.
+  const { locked, settings, lock, unlock } = useAutoLock();
+
   return (
     <div className="min-h-dvh bg-surface text-slate-100">
       <header className="app-header fixed inset-x-0 top-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm">
@@ -47,7 +54,8 @@ export default function Layout() {
             type="button"
             aria-label="Заблокировать приложение"
             onClick={() => {
-              // TODO(S5): экран блокировки SecurityLock (PIN/пароль/биометрия).
+              if (settings.secretHash) lock();
+              else navigate('/settings'); // Секрет не задан — предложить настроить PIN.
             }}
             className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
@@ -55,6 +63,8 @@ export default function Layout() {
           </button>
         </div>
       </header>
+
+      <SecurityLock locked={locked} settings={settings} onUnlock={unlock} />
 
       {/* Desktop: сайдбар вместо нижнего таб-бара (sm+). */}
       <aside

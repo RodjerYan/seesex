@@ -152,6 +152,20 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     });
   };
 
+  const response = await sendWithRefresh(send, auth);
+  if (!response.ok) throw await toApiError(response);
+  if (response.status === 204) return undefined as T;
+  return (await response.json()) as T;
+}
+
+/**
+ * Общий конвейер: Bearer -> при 401 (и только при auth) refresh -> однократный retry.
+ * Возвращает «сырой» Response; ошибки HTTP не бросает — это делает вызывающий код.
+ */
+async function sendWithRefresh(
+  send: (token: string | null) => Promise<Response>,
+  auth: boolean,
+): Promise<Response> {
   let response = await send(auth ? authAdapter?.getAccessToken() ?? null : null);
 
   if (response.status === 401 && auth) {
@@ -164,10 +178,44 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
       throw await toApiError(response);
     }
   }
+  return response;
+}
 
+/**
+ * POST multipart/form-data (загрузка фото events/partners).
+ * Content-Type вручную НЕ выставляем — boundary подставляет браузер.
+ */
+export async function uploadForm<T>(path: string, formData: FormData): Promise<T> {
+  const url = buildUrl(path);
+  const send = (token: string | null): Promise<Response> => {
+    const headers = new Headers();
+    headers.set('Accept', 'application/json');
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    return fetch(url, { method: 'POST', headers, body: formData });
+  };
+
+  const response = await sendWithRefresh(send, true);
   if (!response.ok) throw await toApiError(response);
-  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/** Сырой запрос (экспорт json/csv): нужен Blob + Content-Disposition. */
+export async function rawRequest(path: string, options: RequestOptions = {}): Promise<Response> {
+  const { method = 'GET', body, query, auth = true, headers, signal } = options;
+  const url = buildUrl(path, query);
+  const send = (token: string | null): Promise<Response> => {
+    const finalHeaders = new Headers(headers);
+    finalHeaders.set('Accept', 'application/json, text/csv, */*');
+    if (body !== undefined) finalHeaders.set('Content-Type', 'application/json');
+    if (auth && token) finalHeaders.set('Authorization', `Bearer ${token}`);
+    return fetch(url, {
+      method,
+      headers: finalHeaders,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal,
+    });
+  };
+  return sendWithRefresh(send, auth);
 }
 
 /** Короткие обёртки HTTP-методов. */
