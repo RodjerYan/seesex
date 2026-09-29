@@ -10,7 +10,7 @@ services:
     name: xtracker-web
     runtime: node
     plan: free
-    buildCommand: cd apps/api && npm install && npx prisma generate && npm run build && npx prisma migrate deploy && npx prisma db seed && cd ../web && npm install && npm run build && cp -r ./dist ../api/public
+    buildCommand: cd apps/api && npm install --include=dev && npx prisma generate && npm run build && DATABASE_URL="$(echo "$DATABASE_URL" | sed 's/-pooler//')" npx prisma migrate deploy && npx prisma db seed && cd ../web && npm install --include=dev && npm run build && cp -r ./dist ../api/public
     startCommand: cd apps/api && node dist/index.js
     healthCheckPath: /health
     envVars:
