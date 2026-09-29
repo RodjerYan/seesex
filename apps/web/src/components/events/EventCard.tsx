@@ -8,7 +8,7 @@ import type { CalendarStatus, EventView } from '../../types/api';
 import { cx } from '../ui/controls';
 import { Stars } from '../ui/Stars';
 
-const STATUS_LABEL: Record<CalendarStatus, string> = {
+export const STATUS_LABEL: Record<CalendarStatus, string> = {
   occurred: 'Состоялось',
   planned: 'Запланировано',
   turndown: 'Отказ',
@@ -17,7 +17,7 @@ const STATUS_LABEL: Record<CalendarStatus, string> = {
 const STATUS_CLASS: Record<CalendarStatus, string> = {
   occurred: 'border-red-500/40 bg-red-500/10 text-red-300',
   planned: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
-  turndown: 'border-slate-600 bg-slate-800 text-slate-400',
+  turndown: 'border-white/10 bg-white/[0.06] text-slate-400',
 };
 
 interface EventCardProps {
@@ -33,8 +33,8 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
   const positionNames = event.positions.map((position) => position.name);
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 transition-colors hover:border-slate-700">
-      <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+    <div className={cx('stagger', 'glass transition-colors hover:ring-1 hover:ring-white/10')}>
+      <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-sm font-medium text-slate-100">
@@ -78,12 +78,12 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
       </Link>
 
       {onDelete ? (
-        <div className="flex justify-end border-t border-slate-800 px-3 py-2">
+        <div className="flex justify-end border-t border-white/10 px-3 py-2">
           <button
             type="button"
             onClick={onDelete}
             aria-label="Удалить событие"
-            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             Удалить

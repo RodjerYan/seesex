@@ -12,11 +12,12 @@
  */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Search } from 'lucide-react';
-import { useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { dayKey, formatTime } from '../../lib/format';
+import { PositionIcon } from '../../lib/positionIcons';
 import { useAllPositions, usePartners } from '../../lib/queries';
 import type { EventView } from '../../types/api';
 import { Stars } from '../ui/Stars';
@@ -61,28 +62,40 @@ interface EventFormValues {
   notes: string;
 }
 
-function digitsRule(max: number, label: string) {
-  return (value: string): true | string => {
-    if (value === '') return true;
-    if (!/^\d+$/.test(value)) return `${label}: только целое число`;
-    if (Number(value) > max) return `${label}: не больше ${max}`;
-    return true;
-  };
+/**
+ * Проверка «целое число ≤ max»: null — значение корректно, иначе текст ошибки.
+ *
+ * Важно: zod `.refine(check)` считает непустую строку truthy, т.е. check,
+ * возвращающий текст ошибки, НЕ создаёт issue. Поэтому проверяем через
+ * `superRefine` + `ctx.addIssue` — иначе ошибки «только целое число»/«не больше N»
+ * молча пропускались бы (поле отправлялось бы пустым/обнулённым).
+ */
+function digitsIssue(value: string, max: number, label: string): string | null {
+  if (value === '') return null;
+  if (!/^\d+$/.test(value)) return `${label}: только целое число`;
+  if (Number(value) > max) return `${label}: не больше ${max}`;
+  return null;
+}
+
+/** Добавляет issue в контекст superRefine, если значение некорректно. */
+function checkDigits(ctx: z.RefinementCtx, value: string, max: number, label: string): void {
+  const issue = digitsIssue(value, max, label);
+  if (issue) ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue });
 }
 
 const eventFormSchema = z
   .object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Укажите дату'),
     time: z.string().regex(/^\d{2}:\d{2}$/, 'Укажите время'),
-    duration: z.string().refine(digitsRule(43_200, 'Длительность'), 'Некорректная длительность'),
+    duration: z.string().superRefine((value, ctx) => checkDigits(ctx, value, 43_200, 'Длительность')),
     status: z.enum(['occurred', 'planned', 'turndown']),
-    eventType: z.string().min(1),
-    customType: z.string().max(64),
-    title: z.string().max(200),
-    calories: z.string().refine(digitsRule(100_000, 'Калории'), 'Некорректные калории'),
-    heartRate: z.string().refine(digitsRule(400, 'Пульс'), 'Некорректный пульс'),
-    initiatedBy: z.string().max(100),
-    notes: z.string().max(20_000),
+    eventType: z.string().min(1, 'Укажите тип события'),
+    customType: z.string().max(64, 'Свой тип: не больше 64 символов'),
+    title: z.string().max(200, 'Название: не больше 200 символов'),
+    calories: z.string().superRefine((value, ctx) => checkDigits(ctx, value, 100_000, 'Калории')),
+    heartRate: z.string().superRefine((value, ctx) => checkDigits(ctx, value, 400, 'Пульс')),
+    initiatedBy: z.string().max(100, 'Инициатор: не больше 100 символов'),
+    notes: z.string().max(20_000, 'Заметки: не больше 20 000 символов'),
   })
   .superRefine((values, ctx) => {
     const dateTime = new Date(`${values.date}T${values.time}`);
@@ -119,6 +132,12 @@ interface EventFormProps {
   submitLabel: string;
   submitting: boolean;
   formError?: string | null;
+  /**
+   * «Отмена»: вызывается после подтверждения, если форма изменена
+   * (isDirty). Без пропа кнопка «Отмена» не показывается — её рисует сама
+   * страница (см. EventEdit).
+   */
+  onCancel?: () => void;
   onSubmit: (payload: EventPayload) => void;
 }
 
@@ -142,6 +161,7 @@ export function EventForm({
   submitLabel,
   submitting,
   formError,
+  onCancel,
   onSubmit,
 }: EventFormProps): ReactElement {
   const now = new Date();
@@ -171,7 +191,7 @@ export function EventForm({
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues,
@@ -234,8 +254,31 @@ export function EventForm({
 
   const typeFieldDisabled = status === 'turndown';
 
+  /** Явный отказ от сохранения: при изменённой форме — подтверждение ухода. */
+  const handleCancel = (): void => {
+    if (isDirty && !window.confirm('Есть несохранённые изменения. Выйти без сохранения?')) return;
+    onCancel?.();
+  };
+
+  // Сбой сохранения показываем баннером вверху формы — доскроливаем до него,
+  // иначе пользователь, стоящий у кнопки, его не увидит.
+  const errorBannerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (formError) errorBannerRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [formError]);
+
   return (
     <form onSubmit={submit} noValidate>
+      {formError ? (
+        <div
+          ref={errorBannerRef}
+          role="alert"
+          className="mb-4 scroll-mt-20 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3 text-sm font-medium text-red-300"
+        >
+          {formError}
+        </div>
+      ) : null}
+
       <Card className="mb-4">
         <SectionTitle>Когда и что</SectionTitle>
 
@@ -320,7 +363,7 @@ export function EventForm({
                     'rounded-full border px-3 py-1 text-xs transition-colors',
                     active
                       ? 'border-primary-400 bg-primary/20 text-primary-400'
-                      : 'border-slate-700 text-slate-400 hover:bg-slate-800',
+                      : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',
                   )}
                 >
                   {partner.name}
@@ -354,7 +397,7 @@ export function EventForm({
               />
             </div>
 
-            <div className="max-h-56 overflow-y-auto rounded-lg border border-slate-800">
+            <div className="max-h-56 overflow-y-auto rounded-lg border border-white/10">
               {filteredPositions.length === 0 ? (
                 <p className="px-3 py-4 text-center text-xs text-slate-500">Ничего не найдено</p>
               ) : (
@@ -367,11 +410,14 @@ export function EventForm({
                       aria-pressed={active}
                       onClick={() => toggle(position.id, positionIds, setPositionIds)}
                       className={cx(
-                        'flex w-full items-center justify-between gap-2 border-b border-slate-800/70 px-3 py-2 text-left text-xs transition-colors last:border-b-0',
-                        active ? 'bg-primary/15 text-primary-400' : 'text-slate-300 hover:bg-slate-800',
+                        'flex w-full items-center justify-between gap-2 border-b border-white/10 px-3 py-2 text-left text-xs transition-colors last:border-b-0',
+                        active ? 'bg-primary/15 text-primary-400' : 'text-slate-300 hover:bg-white/[0.06]',
                       )}
                     >
-                      <span className="truncate">{position.name}</span>
+                      <div className="flex items-center gap-2 truncate">
+                        <PositionIcon name={position.name} className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span className="truncate">{position.name}</span>
+                      </div>
                       <span className="shrink-0 text-[10px] uppercase text-slate-500">
                         {position.category}
                       </span>
@@ -428,11 +474,22 @@ export function EventForm({
         </Field>
       </Card>
 
-      {formError ? <ErrorText>{formError}</ErrorText> : null}
-
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? 'Сохраняем…' : submitLabel}
-      </Button>
+      <div className="flex gap-2">
+        {onCancel ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex-1"
+            disabled={submitting}
+            onClick={handleCancel}
+          >
+            Отмена
+          </Button>
+        ) : null}
+        <Button type="submit" className={onCancel ? 'flex-1' : 'w-full'} disabled={submitting}>
+          {submitting ? 'Сохраняем…' : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

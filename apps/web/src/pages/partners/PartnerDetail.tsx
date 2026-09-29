@@ -24,7 +24,7 @@ const MAX_PHOTOS = 3;
 
 function DataRow({ label, value }: { label: string; value: string | null | undefined }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-800/70 py-2 last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2 last:border-b-0">
       <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
       <dd className="text-right text-sm text-slate-200">{value || '—'}</dd>
     </div>
@@ -119,14 +119,14 @@ export default function PartnerDetail(): ReactElement {
         <Link
           to="/partners"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
         <div className="flex flex-wrap justify-end gap-2">
           <Link
             to={`/partners/${partner.id}/edit`}
-            className="flex items-center gap-1 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/[0.06]"
           >
             <Pencil className="h-4 w-4" aria-hidden="true" />
             Изменить
@@ -218,7 +218,7 @@ export default function PartnerDetail(): ReactElement {
                   type="button"
                   aria-label="Удалить фото"
                   onClick={() => deletePhoto(photo.id)}
-                  className="absolute right-1 top-1 rounded-full bg-slate-900/80 p-1.5 text-slate-300 hover:text-red-400"
+                  className="absolute right-1 top-1 rounded-full bg-white/[0.08] p-1.5 text-slate-300 hover:text-red-400"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

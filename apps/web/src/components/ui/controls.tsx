@@ -1,5 +1,5 @@
 /**
- * Базовые элементы форм (mobile-first, тема: dark slate + indigo).
+ * Базовые элементы форм (mobile-first, тема: iOS 27 Liquid Glass dark).
  * Вынесены сюда, чтобы одинаковые стили не дублировались по всем страницам.
  */
 import { forwardRef } from 'react';
@@ -13,9 +13,9 @@ import type {
 } from 'react';
 
 export const inputClass =
-  'w-full rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 ' +
-  'placeholder:text-slate-500 focus:border-primary-400 focus:outline-none focus:ring-1 ' +
-  'focus:ring-primary-400 disabled:opacity-50';
+  'w-full rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2.5 text-sm text-slate-100 ' +
+  'placeholder:text-slate-500 focus:border-primary focus:outline-none focus:ring-1 ' +
+  'focus:ring-primary/40 disabled:opacity-50';
 
 export const inputErrorClass = 'border-red-500/70';
 
@@ -31,7 +31,7 @@ export function Card({
   className?: string;
 }): ReactElement {
   return (
-    <div className={cx('rounded-xl border border-slate-800 bg-slate-900/60 p-4', className)}>
+    <div className={cx('glass p-4', className)}>
       {children}
     </div>
   );
@@ -113,10 +113,10 @@ export const Select = forwardRef<
 type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-600 disabled:hover:bg-primary',
-  ghost: 'border border-slate-700 text-slate-200 hover:bg-slate-800',
-  danger: 'bg-red-600/90 text-white hover:bg-red-600',
-  quiet: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800',
+  primary: 'bg-primary text-white hover:bg-primary-600 active:bg-primary-600 disabled:hover:bg-primary',
+  ghost: 'bg-white/[0.06] text-slate-200 hover:bg-white/[0.12] active:bg-white/[0.12]',
+  danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-600',
+  quiet: 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] active:bg-white/[0.06]',
 };
 
 export function Button({
@@ -131,8 +131,8 @@ export function Button({
       type={type}
       {...props}
       className={cx(
-        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium',
-        'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
+        'press inline-flex items-center justify-center gap-2 rounded-full h-12 px-5 text-sm font-medium',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
         'disabled:cursor-not-allowed disabled:opacity-50',
         BUTTON_VARIANTS[variant],
         className,
@@ -158,7 +158,7 @@ export function Fab({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-transform hover:bg-primary-600 active:scale-95 sm:bottom-8"
+      className="press fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full glass text-primary shadow-lg shadow-black/30 transition-transform hover:scale-[1.02] active:scale-[0.98] sm:bottom-8"
     >
       {children}
     </button>
@@ -167,7 +167,7 @@ export function Fab({
 
 export function ErrorText({ children }: { children: ReactNode }): ReactElement {
   return (
-    <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+    <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
       {children}
     </p>
   );

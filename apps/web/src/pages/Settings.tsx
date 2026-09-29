@@ -60,7 +60,7 @@ export default function Settings(): ReactElement {
           <ErrorBlock error={meQuery.error} onRetry={() => void meQuery.refetch()} />
         ) : meQuery.data ? (
           <dl>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-800/70 py-2">
+            <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2">
               <dt className="text-xs text-slate-500">E-mail</dt>
               <dd className="truncate text-sm text-slate-200">{meQuery.data.email ?? '—'}</dd>
             </div>
@@ -83,7 +83,7 @@ export default function Settings(): ReactElement {
           <li key={item.to}>
             <Link
               to={item.to}
-              className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700"
+              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10"
             >
               <div className="flex min-w-0 items-start gap-3">
                 <span className="mt-0.5 shrink-0">{item.icon}</span>

@@ -9,13 +9,13 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'xTracker - Интимный трекер',
-        short_name: 'xTracker',
-        description: 'Конфиденциальный трекер интимной жизни',
+        name: 'SeeSex — Личный дневник событий, статистика и календарь',
+        short_name: 'SeeSex',
+        description: 'Личный дневник событий, статистика и календарь',
         start_url: '/',
         display: 'standalone',
-        background_color: '#0f172a',
-        theme_color: '#6366f1',
+        background_color: '#000000',
+        theme_color: '#000000',
         orientation: 'portrait',
         lang: 'ru-RU',
         categories: ['health', 'lifestyle'],

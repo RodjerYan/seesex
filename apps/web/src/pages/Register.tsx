@@ -88,7 +88,7 @@ export default function Register(): ReactElement {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5"
+          className="glass p-5"
         >
           <Field label="Email" htmlFor="reg-email" error={errors.email?.message}>
             <Input

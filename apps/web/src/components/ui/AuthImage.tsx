@@ -48,7 +48,7 @@ export function AuthImage({ src, alt, className }: AuthImageProps): ReactElement
   if (failed) {
     return (
       <div
-        className={`flex items-center justify-center bg-slate-800 text-slate-600 ${className ?? ''}`}
+        className={`flex items-center justify-center bg-white/[0.08] text-slate-600 ${className ?? ''}`}
         role="img"
         aria-label={alt}
       >
@@ -60,7 +60,7 @@ export function AuthImage({ src, alt, className }: AuthImageProps): ReactElement
   if (!url) {
     return (
       <div
-        className={`flex items-center justify-center bg-slate-800 ${className ?? ''}`}
+        className={`flex items-center justify-center bg-white/[0.08] ${className ?? ''}`}
         role="status"
         aria-label="Загрузка изображения"
       >

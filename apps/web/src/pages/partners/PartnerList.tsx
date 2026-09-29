@@ -33,19 +33,19 @@ export default function PartnerList(): ReactElement {
             <button
               type="button"
               onClick={() => navigate('/partners/new')}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+              className="rounded-full h-12 px-5 text-sm font-medium text-white bg-primary hover:bg-primary-600 active:bg-primary-600"
             >
               Добавить партнёра
             </button>
           }
         />
       ) : (
-        <ul className="space-y-3">
+        <ul className="stagger space-y-3">
           {(partnersQuery.data ?? []).map((partner) => (
             <li key={partner.id}>
               <Link
                 to={`/partners/${partner.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:ring-1 hover:ring-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-medium text-slate-100">

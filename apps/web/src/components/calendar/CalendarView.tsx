@@ -91,13 +91,13 @@ export function CalendarView({
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+    <div className="glass p-3">
       <div className="mb-2 flex items-center justify-between">
         <button
           type="button"
           aria-label="Предыдущий месяц"
           onClick={() => shift(-1)}
-          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -108,7 +108,7 @@ export function CalendarView({
           type="button"
           aria-label="Следующий месяц"
           onClick={() => shift(1)}
-          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -149,7 +149,7 @@ export function CalendarView({
                   inMonth ? 'text-slate-200' : 'text-slate-600',
                   isSelected
                     ? 'bg-primary/20 ring-1 ring-primary-400'
-                    : 'hover:bg-slate-800',
+                    : 'hover:bg-white/[0.06]',
                 )}
               >
                 <span
@@ -184,7 +184,7 @@ export function CalendarView({
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-800 pt-2 text-[10px] text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-2 text-[10px] text-slate-500">
         <span className="flex items-center gap-1">
           <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" /> состоялось
         </span>

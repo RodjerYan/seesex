@@ -1,5 +1,5 @@
 import { BarChart3, Heart, Home, Lock, Settings, Users, type LucideIcon } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 import { SecurityLock } from '../components/security/SecurityLock';
 import { useAutoLock } from '../hooks/useAutoLock';
@@ -20,12 +20,18 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/settings', label: 'Настройки', icon: Settings },
 ];
 
-function linkClassName(isActive: boolean): string {
-  const base =
-    'flex flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-2 transition-colors';
+function tabLinkClassName(isActive: boolean): string {
+  const base = 'flex flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-2 transition-colors';
   return isActive
-    ? `${base} text-primary-400`
-    : `${base} text-slate-400 hover:text-slate-200`;
+    ? `${base} text-primary`
+    : `${base} text-slate-500`;
+}
+
+function sidebarLinkClassName(isActive: boolean): string {
+  const base = 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors';
+  return isActive
+    ? `${base} text-primary bg-white/[0.06]`
+    : `${base} text-slate-400 hover:bg-white/[0.06] hover:text-slate-100`;
 }
 
 /**
@@ -34,12 +40,13 @@ function linkClassName(isActive: boolean): string {
  */
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   // Автоблокировка (неактивность / фон вкладки) + ручная блокировка из шапки.
   const { locked, settings, lock, unlock } = useAutoLock();
 
   return (
     <div className="min-h-dvh bg-surface text-slate-100">
-      <header className="app-header fixed inset-x-0 top-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm">
+      <header className="app-header fixed inset-x-0 top-0 z-30 glass-strong">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-2">
             <span
@@ -57,7 +64,7 @@ export default function Layout() {
               if (settings.secretHash) lock();
               else navigate('/settings'); // Секрет не задан — предложить настроить PIN.
             }}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="press rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Lock className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -69,20 +76,14 @@ export default function Layout() {
       {/* Desktop: сайдбар вместо нижнего таб-бара (sm+). */}
       <aside
         aria-label="Навигация"
-        className="app-sidebar fixed bottom-0 left-0 z-20 hidden w-56 flex-col gap-1 border-r border-slate-800 bg-slate-900/70 sm:flex"
+        className="app-sidebar fixed bottom-0 left-0 z-20 hidden w-56 flex-col gap-1 glass-strong sm:flex"
       >
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-primary/15 text-primary-400'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
-              }`
-            }
+            className={({ isActive }) => sidebarLinkClassName(isActive)}
           >
             <Icon className="h-4 w-4" aria-hidden="true" />
             {label}
@@ -97,12 +98,12 @@ export default function Layout() {
       {/* Mobile: нижняя таб-навигация. */}
       <nav
         aria-label="Основная навигация"
-        className="app-tabbar fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-900/95 backdrop-blur-sm sm:hidden"
+        className="app-tabbar fixed inset-x-0 bottom-0 z-30 glass-strong sm:hidden"
       >
         <ul className="mx-auto flex max-w-lg items-stretch justify-around">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <li key={to}>
-              <NavLink to={to} end={end} className={({ isActive }) => linkClassName(isActive)}>
+              <NavLink to={to} end={end} className={({ isActive }) => tabLinkClassName(isActive)}>
                 <Icon className="h-5 w-5" aria-hidden="true" />
                 <span className="text-[10px] font-medium">{label}</span>
               </NavLink>

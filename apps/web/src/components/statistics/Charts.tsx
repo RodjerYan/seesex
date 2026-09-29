@@ -27,12 +27,12 @@ export function ColumnBars({
         const ratio = item.value / max;
         return (
           <div key={`${item.label}-${index}`} className="group relative flex h-full min-w-0 flex-1 flex-col justify-end">
-            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-200 group-hover:block">
+            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/[0.08] backdrop-blur-md border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-200 group-hover:block">
               {valueLabel ? valueLabel(item.value) : item.value}
             </span>
             <div
-              className="w-full rounded-t bg-primary/70 transition-colors group-hover:bg-primary"
-              style={{ height: `${Math.max(2, ratio * 100)}%` }}
+              className="w-full rounded-t bg-primary/70 animate-grow-up transition-colors group-hover:bg-primary"
+              style={{ height: `${Math.max(2, ratio * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint ?? `${item.label}: ${item.value}`}
             />
             <span className="mt-1 truncate text-center text-[9px] text-slate-500">{item.label}</span>
@@ -57,10 +57,10 @@ export function RowBars({ items, suffix }: { items: ChartItem[]; suffix?: string
               {suffix ?? ''}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-primary-400/80"
-              style={{ width: `${Math.max(3, (item.value / max) * 100)}%` }}
+              className="h-full rounded-full bg-primary-400/80 animate-grow-up"
+              style={{ width: `${Math.max(3, (item.value / max) * 100)}%`, transformOrigin: 'left', animationDelay: `${index * 40}ms` }}
               title={item.hint}
             />
           </div>
@@ -81,7 +81,7 @@ export function StatTile({
   hint?: string;
 }): ReactElement {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+    <div className="glass p-3">
       <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-slate-100">{value}</p>
       {hint ? <p className="mt-0.5 text-[11px] text-slate-500">{hint}</p> : null}

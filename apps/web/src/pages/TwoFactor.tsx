@@ -143,7 +143,7 @@ function AuthShell({ title, children }: { title: string; children: ReactNode }):
           <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-100">{title}</h1>
           <p className="mt-1 text-sm text-slate-500">Введите 6-значный код</p>
         </div>
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">{children}</div>
+        <div className="glass p-5">{children}</div>
       </div>
     </div>
   );

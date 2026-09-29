@@ -1,7 +1,7 @@
 /**
  * Генератор PWA-иконок xTracker (PNG, без внешних зависимостей).
  *
- * Рисует процедурно: фон — indigo #6366f1 (theme_color манифеста),
+ * Рисует процедурно: фон — systemBlue #0A84FF (theme_color манифеста),
  * знак «x» — белые скруглённые штрихи с антиалиасингом (покрытие по
  * расстоянию до отрезка). Кодирует PNG вручную (IHDR/IDAT/IEND + CRC32),
  * используя node:zlib для сжатия строк изображения.
@@ -16,7 +16,7 @@ import { deflateSync } from 'node:zlib';
 
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'icons');
 
-const BACKGROUND = [0x63, 0x66, 0xf1, 255]; // #6366f1
+const BACKGROUND = [0x0a, 0x84, 0xff, 255]; // #0A84FF
 const FOREGROUND = [255, 255, 255, 255];
 
 // --- PNG encoder -------------------------------------------------------------

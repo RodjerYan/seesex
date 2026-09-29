@@ -8,6 +8,7 @@ import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
+import { PositionIcon } from '../lib/positionIcons';
 import {
   allPositionsQueryKey,
   categoriesQueryKey,
@@ -20,7 +21,7 @@ import type { PositionView, WishlistView } from '../types/api';
 
 function DataRow({ label, value }: { label: string; value: string | null | undefined }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-800/70 py-2 last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2 last:border-b-0">
       <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
       <dd className="text-right text-sm text-slate-200">{value || '—'}</dd>
     </div>
@@ -110,7 +111,7 @@ export default function PositionDetail(): ReactElement {
         <Link
           to="/positions"
           aria-label="Назад в каталог"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -156,7 +157,10 @@ export default function PositionDetail(): ReactElement {
 
       <div className="mb-4">
         <p className="text-xs uppercase tracking-wide text-slate-500">{position.category}</p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-100">{position.name}</h1>
+        <div className="mt-1 flex items-center gap-3">
+          <PositionIcon name={position.name} className="w-7 h-7 text-primary-400" />
+          <h1 className="text-xl font-semibold tracking-tight text-slate-100">{position.name}</h1>
+        </div>
         <p className="mt-1 text-xs text-slate-500">
           {position.isSystem ? 'Системная позиция' : 'Пользовательская позиция'}
           {position.iconName ? ` · иконка: ${position.iconName}` : ''}

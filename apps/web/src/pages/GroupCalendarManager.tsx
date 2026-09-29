@@ -134,7 +134,7 @@ export default function GroupCalendarManager(): ReactElement {
             <li key={calendar.id}>
               <Link
                 to={`/group-calendars/${calendar.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>

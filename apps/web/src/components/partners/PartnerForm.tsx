@@ -159,7 +159,7 @@ export function PartnerForm({
         <label className="flex items-center gap-2 text-sm text-slate-300">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-primary focus:ring-primary-400"
+            className="h-4 w-4 rounded border-slate-600 bg-white/[0.08] text-primary focus:ring-primary-400"
             checked={isPrimary}
             onChange={(event) => setValue('isPrimary', event.target.checked)}
           />
@@ -187,7 +187,7 @@ export function PartnerForm({
               type="button"
               aria-label="Удалить поле"
               onClick={() => setPairs((current) => current.filter((_, i) => i !== index))}
-              className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-400 hover:bg-slate-800 hover:text-red-400"
+              className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-400 hover:bg-white/[0.06] hover:text-red-400"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>

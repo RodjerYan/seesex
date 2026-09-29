@@ -41,7 +41,7 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
           type="button"
           aria-label={`Оценка ${star}`}
           onClick={() => onChange(star)}
-          className="rounded p-0.5 transition-colors hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          className="rounded p-0.5 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <Star
             aria-hidden="true"

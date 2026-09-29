@@ -12,6 +12,7 @@
     "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.5",
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.104.0",
     "@xtracker/shared": "*",

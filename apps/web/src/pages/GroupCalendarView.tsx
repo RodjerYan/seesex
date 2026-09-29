@@ -16,11 +16,12 @@ import {
   useGroupCalendar,
   useGroupCalendarEvents,
 } from '../lib/queries';
-import type { EventView, GroupCalendarView } from '../types/api';
+import type { CalendarStatus, EventView, GroupCalendarView } from '../types/api';
+import { STATUS_LABEL } from '../components/events/EventCard';
 
 function DataRow({ label, value }: { label: string; value: ReactNode }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-800/70 py-2 last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2 last:border-b-0">
       <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
       <dd className="text-right text-sm text-slate-200">{value || '—'}</dd>
     </div>
@@ -96,7 +97,7 @@ export default function GroupCalendarView(): ReactElement {
         <Link
           to="/group-calendars"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -138,7 +139,7 @@ export default function GroupCalendarView(): ReactElement {
                   type="button"
                   aria-label="Скопировать код"
                   onClick={() => void copyCode()}
-                  className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-primary-400"
+                  className="rounded p-1 text-slate-400 hover:bg-white/[0.06] hover:text-primary-400"
                 >
                   <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -157,7 +158,7 @@ export default function GroupCalendarView(): ReactElement {
             {calendar.members.map((member) => (
               <li
                 key={member.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs"
               >
                 <span className="truncate text-slate-300">{member.email ?? member.userId}</span>
                 <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
@@ -208,7 +209,7 @@ export default function GroupCalendarView(): ReactElement {
             <li key={event.id}>
               <Link
                 to={`/events/${event.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3 transition-colors hover:border-slate-700"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-3 transition-colors hover:border-white/10"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">
@@ -219,7 +220,7 @@ export default function GroupCalendarView(): ReactElement {
                   </p>
                 </div>
                 <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
-                  {event.status}
+                  {STATUS_LABEL[event.status as CalendarStatus] ?? event.status}
                 </span>
               </Link>
             </li>

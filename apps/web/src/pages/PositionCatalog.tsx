@@ -7,6 +7,7 @@ import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../com
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
+import { PositionIcon } from '../lib/positionIcons';
 import {
   allPositionsQueryKey,
   categoriesQueryKey,
@@ -30,17 +31,20 @@ function PositionRow({
   onDelete?: () => void;
 }): ReactElement {
   return (
-    <li className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5">
-      <div className="min-w-0">
-        <Link to={`/positions/${position.id}`} className="block truncate text-sm font-medium text-slate-100 hover:text-primary-400">
-          {position.name}
-        </Link>
-        <p className="mt-0.5 flex items-center gap-2 truncate text-[11px] text-slate-500">
-          <span className="rounded border border-slate-700 px-1.5 py-0.5 uppercase tracking-wide">
-            {position.category}
-          </span>
-          {position.isSystem ? 'системная' : 'своя'}
-        </p>
+    <li className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors hover:ring-1 hover:ring-white/10">
+      <div className="min-w-0 flex items-center gap-3">
+        <PositionIcon name={position.name} className="w-5 h-5 text-slate-400 shrink-0" />
+        <div>
+          <Link to={`/positions/${position.id}`} className="block truncate text-sm font-medium text-slate-100 hover:text-primary-400">
+            {position.name}
+          </Link>
+          <p className="mt-0.5 flex items-center gap-2 truncate text-[11px] text-slate-500">
+            <span className="rounded border border-white/10 bg-white/[0.06] px-1.5 py-0.5 uppercase tracking-wide">
+              {position.category}
+            </span>
+            {position.isSystem ? 'системная' : 'своя'}
+          </p>
+        </div>
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <button
@@ -49,7 +53,7 @@ function PositionRow({
           title={inWishlist ? 'Уже в вишлисте' : 'Добавить в вишлист'}
           disabled={inWishlist}
           onClick={onAddToWishlist}
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-amber-300 disabled:opacity-40"
+          className="press rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-amber-300 disabled:opacity-40"
         >
           <Star className={inWishlist ? 'h-4 w-4 fill-amber-400 text-amber-400' : 'h-4 w-4'} aria-hidden="true" />
         </button>
@@ -59,7 +63,7 @@ function PositionRow({
             aria-label="Удалить позицию"
             title="Удалить позицию"
             onClick={onDelete}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400"
+            className="press rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -177,7 +181,7 @@ export default function PositionCatalog(): ReactElement {
           className={
             category === ''
               ? 'shrink-0 rounded-full border border-primary-400 bg-primary/10 px-3 py-1 text-xs text-primary-400'
-              : 'shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400'
+              : 'shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-slate-400'
           }
         >
           Все
@@ -190,7 +194,7 @@ export default function PositionCatalog(): ReactElement {
             className={
               category === item
                 ? 'shrink-0 rounded-full border border-primary-400 bg-primary/10 px-3 py-1 text-xs text-primary-400'
-                : 'shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400'
+                : 'shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-slate-400'
             }
           >
             {item}
@@ -263,7 +267,7 @@ export default function PositionCatalog(): ReactElement {
           }
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {filtered.map((position) => (
             <PositionRow
               key={position.id}

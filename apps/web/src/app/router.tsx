@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactElement } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 
 import Layout from './Layout';
 import { RequireAuth } from './RequireAuth';
@@ -36,6 +36,20 @@ function FullPageLoader(): ReactElement {
       className="flex min-h-dvh items-center justify-center bg-surface text-sm text-slate-400"
     >
       Загрузка…
+    </div>
+  );
+}
+
+/** Wrapper that triggers page transition on route change via key remount. */
+function PageTransitionOutlet(): ReactElement {
+  const location = useLocation();
+  return (
+    <div
+      key={location.pathname + location.search + location.hash}
+      className="animate-[page-in_280ms_cubic-bezier(0.32,0.72,0,1)]"
+      role="main"
+    >
+      <Outlet />
     </div>
   );
 }

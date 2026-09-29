@@ -80,7 +80,7 @@ export default function Login(): ReactElement {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5"
+          className="glass p-5"
         >
           {state.registered ? (
             <p className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">

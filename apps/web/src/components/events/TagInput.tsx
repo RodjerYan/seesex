@@ -61,7 +61,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           type="button"
           onClick={addLocal}
           aria-label={`Добавить: ${label}`}
-          className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-300 transition-colors hover:bg-slate-800"
+          className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-300 transition-colors hover:bg-white/[0.06]"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -72,7 +72,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           {group.saved.map((item) => (
             <span
               key={item.id}
-              className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-300"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-white/[0.08] px-2 py-0.5 text-xs text-slate-300"
             >
               {item.name}
               <button

@@ -99,7 +99,7 @@ export default function Wishlist(): ReactElement {
         <label className="flex items-center gap-2 text-xs text-slate-400">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-primary focus:ring-primary-400"
+            className="h-4 w-4 rounded border-white/10 bg-white/[0.06] text-primary focus:ring-primary/40"
             checked={showCompleted}
             onChange={(event) => setShowCompleted(event.target.checked)}
           />
@@ -202,11 +202,11 @@ export default function Wishlist(): ReactElement {
           }
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {entries.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+              className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors hover:ring-1 hover:ring-white/10"
             >
               <div className="min-w-0">
                 {entry.positionId ? (
@@ -246,11 +246,7 @@ export default function Wishlist(): ReactElement {
                   title={entry.isCompleted ? 'Вернуть в планы' : 'Отметить выполненным'}
                   onClick={() => toggle.mutate(entry)}
                   disabled={toggle.isPending}
-                  className={
-                    entry.isCompleted
-                      ? 'rounded-lg p-2 text-emerald-400 hover:bg-slate-800'
-                      : 'rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-emerald-400'
-                  }
+                  className="press rounded-lg p-2 transition-colors hover:bg-white/[0.06] hover:text-emerald-400"
                 >
                   <Check className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -261,7 +257,7 @@ export default function Wishlist(): ReactElement {
                   onClick={() => {
                     if (window.confirm('Удалить запись из вишлиста?')) remove.mutate(entry.id);
                   }}
-                  className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-red-400"
+                  className="press rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-red-400"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
