@@ -7,8 +7,8 @@ services:
     name: xtracker-web
     runtime: node
     plan: starter
-    buildCommand: cd apps/api && npm install && npm run build && cd ../web && npm install && npm run build && cp -r ../web/dist ./public
-    startCommand: cd apps/api && npm start
+    buildCommand: cd apps/api && npm install && npx prisma generate && npm run build && npx prisma migrate deploy && npx prisma db seed && cd ../web && npm install && npm run build && cp -r ../web/dist ./public
+    startCommand: cd apps/api && node dist/index.js
     healthCheckPath: /health
     disk:
       name: uploads
@@ -41,6 +41,9 @@ services:
         value: '3'
       - key: PORT
         value: '10000'
+      # Пусто = фронт ходит в API по относительным путям /api (тот же origin на Render).
+      - key: VITE_API_URL
+        value: ''
 
 databases:
   - name: xtracker-db

@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import fs from 'node:fs';
+import path from 'node:path';
 import express, { type Express, type Request, type Response } from 'express';
 import helmet from 'helmet';
 import { config } from './lib/config';
@@ -32,14 +34,19 @@ export function createApp(): Express {
     helmet({
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ["'none'"],
+          defaultSrc: ["'self'"],
           baseUri: ["'none'"],
           objectSrc: ["'none'"],
-          scriptSrc: ["'none'"],
-          styleSrc: ["'none'"],
-          imgSrc: ["'self'", 'data:'],
+          // SPA-бандлы и SW: только свои файлы (ранее 'none' — ломало прод-раздачу фронта).
+          scriptSrc: ["'self'"],
+          // Tailwind-бандл + инлайновые style-атрибуты React.
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'blob:'],
+          fontSrc: ["'self'", 'data:'],
           connectSrc: ["'self'"],
-          formAction: ["'none'"],
+          manifestSrc: ["'self'"],
+          workerSrc: ["'self'"],
+          formAction: ["'self'"],
           frameAncestors: ["'none'"],
           // HSTS — только в проде (на http-локале бесполезен).
           upgradeInsecureRequests: config.NODE_ENV === 'production' ? [] : null,
@@ -68,6 +75,20 @@ export function createApp(): Express {
   app.use('/api/settings', settingsRouter);
   app.use('/api/export', exportRouter);
   app.use('/api/files', filesRouter);
+
+  // Статика собранного SPA (render.yaml: build копирует web/dist -> apps/api/public).
+  // В dev её нет — SPA отдаёт vite dev-сервер, поэтому ветка условная.
+  const spaDir = path.resolve(__dirname, '..', 'public');
+  if (fs.existsSync(path.join(spaDir, 'index.html'))) {
+    app.use(express.static(spaDir, { index: false, maxAge: '1h' }));
+    // SPA fallback: любые не-API маршруты (React Router) -> index.html.
+    app.get(/^\/(?!api\/|health$).*/, (req: Request, res: Response, next) => {
+      res.setHeader('Cache-Control', 'no-store');
+      res.sendFile(path.join(spaDir, 'index.html'), (err) => {
+        if (err) next();
+      });
+    });
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);

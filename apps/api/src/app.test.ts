@@ -307,7 +307,12 @@ describe('security middleware', () => {
   it('sets security headers (helmet) and rejects malformed JSON', async () => {
     const res = await request(app).get('/api/health');
     expect(res.headers['x-content-type-options']).toBe('nosniff');
-    expect(res.headers['content-security-policy']).toContain("default-src 'none'");
+    const csp = res.headers['content-security-policy'] ?? '';
+    // Статика SPA раздаётся этим же сервером → 'self'; запреты сохранены.
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("object-src 'none'");
     expect(res.headers['x-powered-by']).toBeUndefined();
 
     const bad = await request(app)
