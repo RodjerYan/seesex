@@ -1,0 +1,32 @@
+# зависимости
+node_modules/
+
+# сборка
+dist/
+build/
+*.tsbuildinfo
+apps/api/public/
+
+# окружение (секреты)
+.env
+.env.local
+.env.*.local
+
+# пользовательские данные (фото)
+uploads/
+
+# логи
+*.log
+npm-debug.log*
+
+# редакторы/ОС
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# workspace оркестратора — в git не тащить
+.ai/
+
+# тесты
+coverage/

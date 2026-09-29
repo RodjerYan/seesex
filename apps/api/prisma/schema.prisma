@@ -1,0 +1,284 @@
+// xTracker — Prisma schema (PostgreSQL 15)
+// Поля User/Event/Partner/Position/Wishlist/GroupCalendar — точно по request.md;
+// Profile/Session/RefreshToken/PartnerPhoto/EventPhoto/Mood/Place/Accessory/
+// PeriodTracking/PeriodEntry/GroupCalendarMember — вспомогательные модели связей.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String?  @unique
+  passwordHash    String
+  totpSecret      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lockEnabled     Boolean  @default(true)
+  lockMethod      String   @default("PIN")
+  autoLockTimeout Int      @default(60)
+
+  profile              Profile?
+  events               Event[]
+  partners             Partner[]
+  positions            Position[]
+  wishlists            Wishlist[]
+  groupCalendars       GroupCalendar[]        @relation("CreatedGroupCalendars")
+  calendarMemberships  GroupCalendarMember[]
+  sessions             Session[]
+  refreshTokens        RefreshToken[]
+  moods                Mood[]
+  places               Place[]
+  accessories          Accessory[]
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  displayName String?
+  birthDate   DateTime?
+  heightCm    Int?
+  weightKg    Float?
+  bio         String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  userId     String
+  userAgent  String?
+  ipHash     String? // хеш, не сырой IP — приватность
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Event {
+  id              String    @id @default(uuid())
+  userId          String
+  title           String?
+  eventType       String    @default("SEX")
+  isCustomType    Boolean   @default(false)
+  date            DateTime
+  duration        Int?
+  rating          Int?
+  notes           String?
+  calories        Int?
+  heartRate       Int?
+  initiatedBy     String?
+  groupCalendarId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupCalendar GroupCalendar? @relation(fields: [groupCalendarId], references: [id], onDelete: SetNull)
+
+  partners     Partner[]
+  positions    Position[]
+  moods        Mood[]       @relation("EventMoods")
+  places       Place[]      @relation("EventPlaces")
+  accessories  Accessory[]  @relation("EventAccessories")
+  photos       EventPhoto[]
+
+  @@index([userId, date])
+  @@index([groupCalendarId, date])
+}
+
+model Partner {
+  id                 String   @id @default(uuid())
+  userId             String
+  name               String
+  nickname           String?
+  gender             String?
+  sexualOrientation  String?
+  pronouns           String?
+  relationshipStatus String?
+  isPrimary          Boolean  @default(false)
+  customFields       Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos         PartnerPhoto[]
+  periodTracking PeriodTracking?
+
+  events Event[]
+}
+
+model PartnerPhoto {
+  id        String   @id @default(uuid())
+  partnerId String
+  filePath  String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+}
+
+model EventPhoto {
+  id        String   @id @default(uuid())
+  eventId   String
+  filePath  String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model Position {
+  id       String  @id @default(uuid())
+  userId   String
+  name     String
+  category String  @default("STANDARD")
+  iconName String?
+  isCustom Boolean @default(false)
+  isSystem Boolean @default(false)
+
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events          Event[]
+  wishlistEntries Wishlist[]
+
+  @@index([userId, category])
+}
+
+model Wishlist {
+  id             String    @id @default(uuid())
+  userId         String
+  positionId     String?
+  customName     String?
+  customCategory String?
+  isCompleted    Boolean   @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position Position? @relation(fields: [positionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+model GroupCalendar {
+  id         String   @id @default(uuid())
+  name       String
+  inviteCode String   @unique
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  creator User                  @relation("CreatedGroupCalendars", fields: [createdBy], references: [id], onDelete: Cascade)
+  members GroupCalendarMember[]
+  events  Event[]
+}
+
+model GroupCalendarMember {
+  id              String        @id @default(uuid())
+  groupCalendarId String
+  userId          String
+  role            String        @default("MEMBER")
+  joinedAt        DateTime      @default(now())
+
+  groupCalendar GroupCalendar @relation(fields: [groupCalendarId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupCalendarId, userId])
+  @@index([userId])
+}
+
+// Словарь настроений: userId = null — системная запись, иначе — пользовательская.
+model Mood {
+  id       String  @id @default(uuid())
+  userId   String?
+  name     String
+  iconName String?
+  color    String?
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events Event[] @relation("EventMoods")
+
+  @@index([userId])
+}
+
+// Словарь мест проведения.
+model Place {
+  id       String  @id @default(uuid())
+  userId   String?
+  name     String
+  iconName String?
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events Event[] @relation("EventPlaces")
+
+  @@index([userId])
+}
+
+// Словарь аксессуаров/атрибутов.
+model Accessory {
+  id       String  @id @default(uuid())
+  userId   String?
+  name     String
+  iconName String?
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events Event[] @relation("EventAccessories")
+
+  @@index([userId])
+}
+
+// Трекер циклов: одна запись на партнера + история периодов.
+model PeriodTracking {
+  id                  String   @id @default(uuid())
+  partnerId           String   @unique
+  lastPeriodStart     DateTime?
+  averageCycleLength  Int      @default(28)
+  averagePeriodLength Int      @default(5)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  partner Partner         @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  entries  PeriodEntry[]
+}
+
+model PeriodEntry {
+  id               String         @id @default(uuid())
+  periodTrackingId String
+  startDate        DateTime
+  endDate          DateTime?
+  symptoms         String?
+  notes            String?
+  createdAt        DateTime       @default(now())
+
+  periodTracking PeriodTracking @relation(fields: [periodTrackingId], references: [id], onDelete: Cascade)
+
+  @@index([startDate])
+}
