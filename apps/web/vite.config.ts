@@ -34,7 +34,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            // Относительный паттерн (любой origin + /api/...), НЕ api.xtracker.app:
+            // Относительный паттерн (любой origin + /api/...), НЕ api.seesex.app:
             // одиночный деплой — API раздаётся с того же origin, что и статика.
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkFirst',

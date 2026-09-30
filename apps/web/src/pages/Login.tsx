@@ -74,7 +74,7 @@ export default function Login(): ReactElement {
             x
           </span>
           <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-100">Вход</h1>
-          <p className="mt-1 text-sm text-slate-500">xTracker — приватный трекер</p>
+          <p className="mt-1 text-sm text-slate-500">SeeSex — Интимный трекер</p>
         </div>
 
         <form

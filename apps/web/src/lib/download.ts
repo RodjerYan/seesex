@@ -9,8 +9,8 @@ import { ApiError, rawRequest } from './api';
 export type ExportKind = 'json' | 'csv';
 
 const FALLBACK_NAME: Record<ExportKind, string> = {
-  json: 'xtracker-export.json',
-  csv: 'xtracker-export-events.csv',
+  json: 'seesex-export.json',
+  csv: 'seesex-events.csv',
 };
 
 function filenameFrom(header: string | null, kind: ExportKind): string {

@@ -55,7 +55,7 @@ export default function Layout() {
             >
               x
             </span>
-            <span className="text-base font-semibold tracking-tight">xTracker</span>
+            <span className="text-base font-semibold tracking-tight">SeeSex</span>
           </div>
           <button
             type="button"
