@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      injectRegister: 'auto',
+      // Единственный регистратор — явный import { registerSW } из
+      // 'virtual:pwa-register' в src/main.tsx (workbox-window). 'auto' генерировал
+      // бы dist/registerSW.js с второй navigator.serviceWorker.register() в проде.
+      injectRegister: false,
       registerType: 'autoUpdate',
       manifest: {
         name: 'SeeSex — Личный дневник событий, статистика и календарь',

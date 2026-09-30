@@ -83,7 +83,7 @@ export default function Settings(): ReactElement {
           <li key={item.to}>
             <Link
               to={item.to}
-              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors press hover:border-white/10 active:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <div className="flex min-w-0 items-start gap-3">
                 <span className="mt-0.5 shrink-0">{item.icon}</span>

@@ -70,7 +70,7 @@ export default function Register(): ReactElement {
   });
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-surface px-4 py-10">
+    <div className="flex app-dvh items-center justify-center bg-surface px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <span

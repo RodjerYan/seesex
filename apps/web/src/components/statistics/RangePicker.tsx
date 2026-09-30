@@ -85,7 +85,7 @@ export function RangePicker({
               value={value.from}
               max={value.to || undefined}
               onChange={(event) => onChange({ ...value, from: event.target.value })}
-              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-sm text-slate-100 focus:border-primary-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:border-primary-400 focus:outline-none"
             />
           </label>
           <label className="block">
@@ -95,7 +95,7 @@ export function RangePicker({
               value={value.to}
               min={value.from || undefined}
               onChange={(event) => onChange({ ...value, to: event.target.value })}
-              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-sm text-slate-100 focus:border-primary-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:border-primary-400 focus:outline-none"
             />
           </label>
         </div>

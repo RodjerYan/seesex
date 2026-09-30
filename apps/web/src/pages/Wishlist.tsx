@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, Plus, Trash2, X } from 'lucide-react';
+import { Check, Heart, Plus, Trash2, X } from 'lucide-react';
 import { useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
+import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
@@ -75,7 +76,7 @@ export default function Wishlist(): ReactElement {
     return showCompleted ? all : all.filter((entry) => !entry.isCompleted);
   }, [wishlistQuery.data, showCompleted]);
 
-  if (wishlistQuery.isLoading) return <LoadingBlock label="Загрузка вишлиста…" />;
+  if (wishlistQuery.isLoading) return <CardSkeleton label="Загрузка вишлиста…" />;
   if (wishlistQuery.isError) {
     return (
       <section className="px-4 py-6 sm:px-6">
@@ -191,7 +192,8 @@ export default function Wishlist(): ReactElement {
       ) : null}
 
       {entries.length === 0 ? (
-        <EmptyBlock
+        <EmptyState
+          icon={Heart}
           title="Вишлист пуст"
           description="Запишите позиции, которые хочется попробовать."
           action={
@@ -206,7 +208,7 @@ export default function Wishlist(): ReactElement {
           {entries.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors hover:ring-1 hover:ring-white/10"
+              className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20"
             >
               <div className="min-w-0">
                 {entry.positionId ? (

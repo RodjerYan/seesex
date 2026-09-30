@@ -237,6 +237,22 @@ body {
     animation: shimmer 1.4s infinite;
   }
 
+  /* Skeleton card — пульсация glass-карточки в route-fallback (Layout ContentSkeleton).
+     Шimmer-полоски внутри даёт класс .skeleton. */
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .skeleton-card {
+    animation: skeleton-pulse 1.8s ease-in-out infinite;
+  }
+
   /* ============================================================
      3. GLOW ACCENTS — «КОНФЕТА»
      ============================================================ */
@@ -368,6 +384,9 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
@@ -376,5 +395,60 @@ body {
     /* 14rem = ширина сайдбара + граница. */
     padding-left: calc(var(--sal) + 14rem);
     padding-bottom: calc(var(--sab) + 2.5rem);
+  }
+}
+
+/* ============================================================
+   4. FLOATING TAB PILL — нижняя таб-пилюля (T10-S1)
+   Материал на основе .glass / .glass-strong: тёмный серый
+   полупрозрачный glass (токен slate-800 ≈ макет rgba(60,60,67,.65-.8)),
+   backdrop-blur + -webkit-backdrop-filter, тонкая световая обводка
+   сверху (rgba(255,255,255,.15-.25)), мягкая тень.
+   Позиционирование/радиус/размеры — Tailwind-утилиты в Layout.tsx.
+   ============================================================ */
+.glass-pill {
+  background: rgba(58, 58, 60, 0.72); /* slate-800 (токен темы) с альфой под макет. */
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+/* ============================================================
+   5. SAFARI / iOS FIXES (T9-S2)
+   ============================================================ */
+
+/* dvh fallback for iOS < 15.4 — utility class replacing min-h-dvh */
+.app-dvh {
+  min-height: 100dvh;
+}
+@supports not (min-height: 100dvh) {
+  .app-dvh {
+    min-height: 100vh;
+  }
+}
+
+/* Prevent rubber-band / pull-to-refresh on iOS 16+ (no-op on iOS < 16) */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
+/* ============================================================
+   6. TAP FEEDBACK (T7-S2)
+   На touch ховер «прилипает», а tap-highlight глушится preflight'ом —
+   iOS-аудит (Safari): много hover-состояний без :active. Глобально:
+   нажатие на ссылку/кнопку слегка затемняет её. Точечный тюнинг —
+   utility-классы active:* (выше по специфичности: 0,2,0 > 0,1,1),
+   например active:opacity-100 у таб-пилюли в Layout.tsx.
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+  a:active,
+  button:active {
+    opacity: 0.7;
   }
 }

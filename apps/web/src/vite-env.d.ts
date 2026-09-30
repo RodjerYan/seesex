@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 /** Переменные окружения фронтенда (VITE_*). */
 interface ImportMetaEnv {

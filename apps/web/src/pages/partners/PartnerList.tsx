@@ -1,9 +1,10 @@
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Users } from 'lucide-react';
 import { type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Fab } from '../../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../../components/ui/states';
+import { Button, Fab } from '../../components/ui/controls';
+import { CardSkeleton, EmptyState } from '../../components/ui/listStates';
+import { ErrorBlock } from '../../components/ui/states';
 import { formatDate } from '../../lib/format';
 import { usePartners } from '../../lib/queries';
 
@@ -22,22 +23,15 @@ export default function PartnerList(): ReactElement {
       </div>
 
       {partnersQuery.isLoading ? (
-        <LoadingBlock label="Загрузка партнёров…" />
+        <CardSkeleton label="Загрузка партнёров…" />
       ) : partnersQuery.isError ? (
         <ErrorBlock error={partnersQuery.error} onRetry={() => void partnersQuery.refetch()} />
       ) : (partnersQuery.data ?? []).length === 0 ? (
-        <EmptyBlock
+        <EmptyState
+          icon={Users}
           title="Партнёров пока нет"
           description="Добавьте первого партнёра, чтобы отмечать события с ним."
-          action={
-            <button
-              type="button"
-              onClick={() => navigate('/partners/new')}
-              className="rounded-full h-12 px-5 text-sm font-medium text-white bg-primary hover:bg-primary-600 active:bg-primary-600"
-            >
-              Добавить партнёра
-            </button>
-          }
+          action={<Button onClick={() => navigate('/partners/new')}>Добавить партнёра</Button>}
         />
       ) : (
         <ul className="stagger space-y-3">
@@ -45,7 +39,7 @@ export default function PartnerList(): ReactElement {
             <li key={partner.id}>
               <Link
                 to={`/partners/${partner.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:ring-1 hover:ring-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-medium text-slate-100">

@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactElement } from 'react';
-import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import Layout from './Layout';
 import { RequireAuth } from './RequireAuth';
@@ -28,12 +28,17 @@ const GroupCalendarView = lazy(() => import('../pages/GroupCalendarView'));
 const Settings = lazy(() => import('../pages/Settings'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
-function FullPageLoader(): ReactElement {
+/**
+ * Fallback внешнего Suspense — только публичные маршруты (/login, /register, /2fa, *),
+ * которые лежат вне Layout. Компактный блок по центру на ambient-фоне body,
+ * без fullscreen-заливки bg-surface (иначе — чёрный экран).
+ */
+function RouteLoadingFallback(): ReactElement {
   return (
     <div
       role="status"
       aria-label="Загрузка"
-      className="flex min-h-dvh items-center justify-center bg-surface"
+      className="flex min-h-[50vh] items-center justify-center px-4"
     >
       <div className="inline-flex items-center gap-3 glass rounded-3xl px-6 py-5 text-sm text-slate-400">
         <svg className="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24" aria-hidden="true">
@@ -46,30 +51,21 @@ function FullPageLoader(): ReactElement {
   );
 }
 
-/** Wrapper that triggers page transition on route change via key remount. */
-function PageTransitionOutlet(): ReactElement {
-  const location = useLocation();
-  return (
-    <div
-      key={location.pathname + location.search + location.hash}
-      className="animate-[page-in_280ms_cubic-bezier(0.32,0.72,0,1)]"
-      role="main"
-    >
-      <Outlet />
-    </div>
-  );
-}
-
 /**
  * Маршрутизация v6.
  * - Публичные: /login, /register, /2fa (заглушки, наполнит S5).
  * - Приватные: всё под RequireAuth + Layout (нижний таб-бар / сайдбар).
  * - 401 -> api.ts: refresh -> retry -> clearSession -> RequireAuth -> /login.
+ * - Внешний Suspense ловит только маршруты вне Layout (иначе React уронит
+ *   ошибку на suspended lazy); приватные страницы гасит собственный Suspense
+ *   вокруг <Outlet/> внутри Layout — шапка/таб-бар/ambient при этом видны.
+ * - PageTransitionOutlet удалён как мёртвый код: нигде не использовался
+ *   (page-in-keyframes продолжают применяться в SecurityLock).
  */
 export default function AppRouter(): ReactElement {
   return (
     <BrowserRouter>
-      <Suspense fallback={<FullPageLoader />}>
+      <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

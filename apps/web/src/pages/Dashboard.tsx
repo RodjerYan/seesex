@@ -2,7 +2,7 @@
  * Главная: приветствие + дата, мини-календарь месяца, события выбранного дня,
  * сводка (useOverview) и последние события + быстрые действия.
  */
-import { ArrowRight, CalendarDays, Plus, Users } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarDays, Plus, Sparkles, Users } from 'lucide-react';
 import { useMemo, useState, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -10,7 +10,8 @@ import { CalendarView } from '../components/calendar/CalendarView';
 import { EventCard } from '../components/events/EventCard';
 import { StatTile } from '../components/statistics/Charts';
 import { Button, Card, SectionTitle } from '../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
+import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { ErrorBlock } from '../components/ui/states';
 import { dayKey, formatDate } from '../lib/format';
 import { useEvents, useOverview, type EventsFilter } from '../lib/queries';
 
@@ -95,7 +96,7 @@ export default function Dashboard(): ReactElement {
           </div>
           <Link
             to={`/events?date=${selectedDate}`}
-            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 hover:text-primary"
+            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 transition-colors hover:text-primary active:text-primary"
           >
             В списке
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -103,11 +104,12 @@ export default function Dashboard(): ReactElement {
         </div>
 
         {dayQuery.isLoading ? (
-          <LoadingBlock label="Загрузка событий дня…" />
+          <CardSkeleton label="Загрузка событий дня…" />
         ) : dayQuery.isError ? (
           <ErrorBlock error={dayQuery.error} onRetry={() => void dayQuery.refetch()} />
         ) : dayEvents.length === 0 ? (
-          <EmptyBlock
+          <EmptyState
+            icon={CalendarDays}
             title="В этот день событий нет"
             description="Выберите другой день в календаре или добавьте новое событие."
             action={
@@ -129,12 +131,13 @@ export default function Dashboard(): ReactElement {
       <div className="mb-4">
         <SectionTitle>Сводка</SectionTitle>
         {overviewQuery.isLoading ? (
-          <LoadingBlock label="Загрузка сводки…" />
+          <CardSkeleton count={1} label="Загрузка сводки…" />
         ) : overviewQuery.isError ? (
           <ErrorBlock error={overviewQuery.error} onRetry={() => void overviewQuery.refetch()} />
         ) : overviewQuery.data ? (
           overviewQuery.data.totalEvents === 0 ? (
-            <EmptyBlock
+            <EmptyState
+              icon={BarChart3}
               title="Сводка появится после первого события"
               description="Пока данных нет — добавьте событие, чтобы увидеть статистику."
               action={
@@ -178,7 +181,7 @@ export default function Dashboard(): ReactElement {
           </h2>
           <Link
             to="/events"
-            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 hover:text-primary"
+            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 transition-colors hover:text-primary active:text-primary"
           >
             Все события
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -186,11 +189,12 @@ export default function Dashboard(): ReactElement {
         </div>
 
         {recentQuery.isLoading ? (
-          <LoadingBlock label="Загрузка событий…" />
+          <CardSkeleton label="Загрузка событий…" />
         ) : recentQuery.isError ? (
           <ErrorBlock error={recentQuery.error} onRetry={() => void recentQuery.refetch()} />
         ) : recentEvents.length === 0 ? (
-          <EmptyBlock
+          <EmptyState
+            icon={Sparkles}
             title="Событий пока нет"
             description="Начните с первого события — оно появится здесь."
             action={

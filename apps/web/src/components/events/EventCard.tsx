@@ -34,7 +34,7 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
   const positionNames = event.positions.map((position) => position.name);
 
   return (
-    <div className={cx('glass transition-colors hover:ring-1 hover:ring-white/10')}>
+    <div className={cx('glass transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20')}>
       <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -84,7 +84,7 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
             type="button"
             onClick={onDelete}
             aria-label="Удалить событие"
-            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.12] active:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             Удалить

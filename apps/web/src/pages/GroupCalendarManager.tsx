@@ -1,17 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Users } from 'lucide-react';
+import { CalendarDays, Plus, Users } from 'lucide-react';
 import { useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
+import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
 import { groupCalendarsQueryKey, useGroupCalendars } from '../lib/queries';
 import type { GroupCalendarView } from '../types/api';
 
-/** Менеджер групповых календарией: список, создание по имени, вступление по коду. */
+/** Менеджер групповых календариев: список, создание по имени, вступление по коду. */
 export default function GroupCalendarManager(): ReactElement {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -120,13 +121,20 @@ export default function GroupCalendarManager(): ReactElement {
       </h2>
 
       {calendarsQuery.isLoading ? (
-        <LoadingBlock label="Загрузка календарей…" />
+        <CardSkeleton label="Загрузка календарей…" />
       ) : calendarsQuery.isError ? (
         <ErrorBlock error={calendarsQuery.error} onRetry={() => void calendarsQuery.refetch()} />
       ) : (calendarsQuery.data ?? []).length === 0 ? (
-        <EmptyBlock
-          title="Календарией пока нет"
-          description="Создайте свой или вступите по коду."
+        <EmptyState
+          icon={CalendarDays}
+          title="Календариев пока нет"
+          description="Создайте свой или вступите по коду приглашения."
+          action={
+            <Button onClick={() => document.getElementById('gcm-name')?.focus()}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Создать календарь
+            </Button>
+          }
         />
       ) : (
         <ul className="stagger space-y-2">
@@ -134,7 +142,7 @@ export default function GroupCalendarManager(): ReactElement {
             <li key={calendar.id}>
               <Link
                 to={`/group-calendars/${calendar.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors press hover:border-white/10 active:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>

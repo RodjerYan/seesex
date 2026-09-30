@@ -7,6 +7,10 @@ import AppRouter from './app/router';
 import { queryClient } from './lib/queryClient';
 import './index.css';
 
+// Register service worker for PWA (vite-plugin-pwa with registerType: 'autoUpdate')
+import { registerSW } from 'virtual:pwa-register';
+registerSW({ immediate: true });
+
 const container = document.getElementById('root');
 if (!container) {
   throw new Error('Не найден контейнер #root в index.html');

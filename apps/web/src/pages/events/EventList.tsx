@@ -1,11 +1,12 @@
-import { Plus } from 'lucide-react';
+import { CalendarDays, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { EventCard } from '../../components/events/EventCard';
 import { Button, ErrorText, Fab, Field, Select } from '../../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../../components/ui/states';
+import { EmptyState, CardSkeleton } from '../../components/ui/listStates';
+import { ErrorBlock } from '../../components/ui/states';
 import { api } from '../../lib/api';
 import { MS_PER_DAY, eventsRu, formatDate, isValidDayKey } from '../../lib/format';
 import { errorMessage } from '../../lib/errors';
@@ -111,6 +112,8 @@ export default function EventList(): ReactElement {
 
   const events = eventsQuery.data?.events ?? [];
   const total = eventsQuery.data?.total ?? 0;
+  // Активны ли фильтры — влияет на текст пустого состояния (T7-S2).
+  const hasFilters = period !== 'all' || partnerId !== '' || day !== null;
 
   return (
     <section className="px-4 py-6 sm:px-6">
@@ -167,17 +170,22 @@ export default function EventList(): ReactElement {
       ) : null}
 
       {eventsQuery.isLoading ? (
-        <LoadingBlock label="Загрузка событий…" />
+        <CardSkeleton label="Загрузка событий…" />
       ) : eventsQuery.isError ? (
         <ErrorBlock error={eventsQuery.error} onRetry={() => void eventsQuery.refetch()} />
       ) : events.length === 0 ? (
-        <EmptyBlock
-          title="Событий нет"
-          description="За выбранным фильтром ничего не нашлось."
+        <EmptyState
+          icon={CalendarDays}
+          title={hasFilters ? 'Ничего не найдено' : 'Событий пока нет'}
+          description={
+            hasFilters
+              ? 'За выбранным фильтром ничего не нашлось — попробуйте изменить период или партнёра.'
+              : 'Запишите первое событие, чтобы видеть статистику и напоминания.'
+          }
           action={
             <Button onClick={() => navigate('/events/new')}>
               <Plus className="h-4 w-4" aria-hidden="true" />
-              Добавить событие
+              Создать событие
             </Button>
           }
         />

@@ -4,7 +4,8 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
-import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
+import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { PositionIcon } from '../lib/positionIcons';
@@ -31,13 +32,13 @@ function PositionRow({
   onDelete?: () => void;
 }): ReactElement {
   return (
-    <li className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors hover:ring-1 hover:ring-white/10">
+    <li className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20">
       <div className="min-w-0 flex items-center gap-3">
         <PositionIcon name={position.name} className="w-5 h-5 text-slate-400 shrink-0" />
         <div className="min-w-0">
           <Link
             to={`/positions/${position.id}`}
-            className="block truncate text-sm font-medium text-slate-100 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="block truncate text-sm font-medium text-slate-100 transition-colors hover:text-primary-400 active:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
             {position.name}
           </Link>
@@ -140,7 +141,7 @@ export default function PositionCatalog(): ReactElement {
     onError: (error) => setActionError(errorMessage(error)),
   });
 
-  if (positionsQuery.isLoading) return <LoadingBlock label="Загрузка каталога…" />;
+  if (positionsQuery.isLoading) return <CardSkeleton label="Загрузка каталога…" />;
   if (positionsQuery.isError) {
     return (
       <section className="px-4 py-6 sm:px-6">
@@ -259,7 +260,8 @@ export default function PositionCatalog(): ReactElement {
       ) : null}
 
       {filtered.length === 0 ? (
-        <EmptyBlock
+        <EmptyState
+          icon={Search}
           title="Ничего не найдено"
           description="Измените поиск или создайте свою позицию."
           action={

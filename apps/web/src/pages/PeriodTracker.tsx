@@ -193,7 +193,7 @@ export default function PeriodTracker(): ReactElement {
                       value={record.endDate ?? ''}
                       min={record.startDate}
                       onChange={(event) => onUpdateEnd(record, event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                      className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
                     />
                   </label>
                 </div>

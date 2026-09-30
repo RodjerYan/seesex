@@ -4,10 +4,12 @@
  * Стратегия хранения (см. также README.md, раздел «Токены»):
  * - accessToken + user -> localStorage (переживает перезагрузку страницы;
  *   access токен короткоживущий (15 мин) — приемлемо для SPA);
- * - refreshToken -> sessionStorage (только текущая вкладка): так «свежий»
- *   refresh переживает reload, но не копируется в другие вкладки/вкладки
- *   после закрытия. httpOnly-cookie недоступен для нашего API (Bearer в теле),
- *   поэтому sessionStorage — прагматичный компромисс. XSS-риск описан в README.
+ * - refreshToken -> localStorage (ключ xtracker.refresh): переживает закрытие
+ *   браузера/приложения, чтобы пользователь не вводил логин/пароль повторно.
+ *   XSS-трейдофф: refresh доступен любому JS в origin. httpOnly-cookie невозможен,
+ *   так как API принимает refresh только в теле запроса ({ refreshToken }),
+ *   cookie-flow в бэкенде не реализован (вне скоупа). Митигации: короткий TTL
+ *   access (15 мин), helmet/CSP на бэке, отсутствие стороннего JS.
  */
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -30,6 +32,23 @@ type LoginResponse = (AuthTokens & { user: SessionUser }) | { requires2FA: true;
 export const AUTH_STORAGE_KEY = 'xtracker.auth';
 export const REFRESH_STORAGE_KEY = 'xtracker.refresh';
 
+function readLocalStorage(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalStorage(key: string, value: string | null): void {
+  try {
+    if (value === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, value);
+  } catch {
+    // Приватный режим Safari и т.п. — молча работаем без persistence.
+  }
+}
+
 function readSessionStorage(key: string): string | null {
   try {
     return window.sessionStorage.getItem(key);
@@ -47,8 +66,25 @@ function writeSessionStorage(key: string, value: string | null): void {
   }
 }
 
-/** Модульный refresh-токен (sessionStorage), вне React-состояния. */
-let refreshToken: string | null = readSessionStorage(REFRESH_STORAGE_KEY);
+/**
+ * Миграция: если в localStorage нет refresh, а в sessionStorage есть старое значение
+ * — переносим в localStorage и удаляем из sessionStorage.
+ * Это сохраняет сессии пользователей, обновивших приложение.
+ */
+function migrateRefreshToken(): string | null {
+  const local = readLocalStorage(REFRESH_STORAGE_KEY);
+  if (local) return local;
+  const session = readSessionStorage(REFRESH_STORAGE_KEY);
+  if (session) {
+    writeLocalStorage(REFRESH_STORAGE_KEY, session);
+    writeSessionStorage(REFRESH_STORAGE_KEY, null);
+    return session;
+  }
+  return null;
+}
+
+/** Модульный refresh-токен (localStorage), вне React-состояния. */
+let refreshToken: string | null = migrateRefreshToken();
 
 export interface AuthState {
   accessToken: string | null;
@@ -105,25 +141,36 @@ export const useAuthStore = create<AuthState>()(
           // Best-effort: даже если бэкенд недоступен — чистим локально.
         } finally {
           get().clearSession();
+          // Дополнительно чистим sessionStorage (миграция могла оставить хвост).
+          writeSessionStorage(REFRESH_STORAGE_KEY, null);
         }
       },
 
       setSession: (tokens, user) => {
         refreshToken = tokens.refreshToken;
-        writeSessionStorage(REFRESH_STORAGE_KEY, tokens.refreshToken);
+        writeLocalStorage(REFRESH_STORAGE_KEY, tokens.refreshToken);
         set({ accessToken: tokens.accessToken, user });
       },
 
       clearSession: () => {
         refreshToken = null;
-        writeSessionStorage(REFRESH_STORAGE_KEY, null);
+        writeLocalStorage(REFRESH_STORAGE_KEY, null);
         set({ accessToken: null, user: null });
+        // zustand persist после set() выше синхронно пишет в localStorage ключ
+        // xtracker.auth = {"state":{accessToken:null,user:null},"version":0}.
+        // QA-приём (T8-S2): после logout ни в localStorage, ни в sessionStorage
+        // не должно остаться ни одного ключа с префиксом xtracker.* — гасим
+        // persist-ключ сразу после записи. clearStorage() вызывается только в
+        // runtime (clearSession), не на init/гидрации. Побочно: при следующем
+        // login/write persist и migrateRefreshToken() создадут ключи заново — ок.
+        useAuthStore.persist.clearStorage();
       },
     }),
     {
       name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      // Refresh намеренно НЕ попадает в localStorage — только sessionStorage.
+      // Refresh хранится отдельно в localStorage (ключ xtracker.refresh),
+      // не в zustand persist — чтобы не дублировать и контролировать миграцию.
       partialize: (state) => ({ accessToken: state.accessToken, user: state.user }),
     },
   ),
@@ -135,7 +182,7 @@ setAuthAdapter({
   getRefreshToken: () => refreshToken,
   applyRefreshedTokens: ({ accessToken, refreshToken: nextRefreshToken }) => {
     refreshToken = nextRefreshToken;
-    writeSessionStorage(REFRESH_STORAGE_KEY, nextRefreshToken);
+    writeLocalStorage(REFRESH_STORAGE_KEY, nextRefreshToken);
     useAuthStore.setState({ accessToken });
   },
   onSessionExpired: () => useAuthStore.getState().clearSession(),

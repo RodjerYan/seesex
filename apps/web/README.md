@@ -41,12 +41,9 @@ public/icons/   # icon-192/512, icon-maskable, apple-touch-icon (PNG)
 | Токен | Хранилище | Ключ | Почему |
 | --- | --- | --- | --- |
 | `accessToken` + `user` | `localStorage` | `xtracker.auth` | Переживает перезагрузку; access живёт 15 минут, потери минимальны. |
-| `refreshToken` | `sessionStorage` | `xtracker.refresh` | Переживает reload **только в текущей вкладке**, не переходит в другие вкладки и исчезает при закрытии вкладки. |
+| `refreshToken` | `localStorage` | `xtracker.refresh` | Переживает закрытие браузера/приложения — пользователь не вводит логин/пароль повторно. Миграция из старого `sessionStorage` выполняется автоматически при загрузке. |
 
-Почему не `localStorage` для refresh: там он жил бы бессрочно и был бы доступен любому
-JS-коду любой вкладки — blast radius выше. Почему не httpOnly-cookie: API принимает
-refresh только в теле запроса (`{ refreshToken }`), cookie-flow в бэкенде не реализован
-(вне скоупа S4).
+Почему не `sessionStorage` для refresh: там он исчезал при закрытии вкладки/браузера, заставляя логиниться снова. Почему не httpOnly-cookie: API принимает refresh только в теле запроса (`{ refreshToken }`), cookie-flow в бэкенде не реализован (вне скоупа).
 
 **Оставшийся риск:** XSS в SPA может прочитать оба токена (доступны из JS). Митигации:
 короткий TTL access (15 мин), helmet/CSP на бэке, отсутствие стороннего JS. Идеал —
