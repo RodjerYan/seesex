@@ -30,3 +30,6 @@ npm-debug.log*
 
 # тесты
 coverage/
+
+# локальные сессии/локи opencode
+.opencode/

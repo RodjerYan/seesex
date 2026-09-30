@@ -124,7 +124,7 @@ export default function PeriodTracker(): ReactElement {
       <Card className="mb-4">
         <SectionTitle>Добавить цикл</SectionTitle>
         <form onSubmit={onAdd}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 min-w-0">
             <Field label="Начало *" htmlFor="pt-start">
               <Input
                 id="pt-start"

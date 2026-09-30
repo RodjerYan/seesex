@@ -9,6 +9,11 @@
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
 
+  /* Tab-bar geometry (coupled with .fab-mobile bottom offset). */
+  --tabbar-height: 3.5rem;   /* h-11 (2.75rem) + py-2 (0.5rem) */
+  --tabbar-bottom: calc(var(--sab) + 1rem);
+  --fab-bottom-mobile: calc(var(--tabbar-bottom) + var(--tabbar-height) + 1rem); /* 1rem gap above tab-bar */
+
   color-scheme: dark;
 }
 
@@ -100,7 +105,7 @@ body {
   /* Основной контент: отступ под fixed-header, над нижним таб-баром (mobile-first). */
   .app-main {
     padding-top: calc(var(--sat) + 3.5rem);
-    padding-bottom: calc(var(--sab) + 5.5rem);
+    padding-bottom: calc(var(--sab) + 7.5rem);
     padding-left: var(--sal);
     padding-right: var(--sar);
   }
@@ -394,7 +399,7 @@ body {
   .app-main {
     /* 14rem = ширина сайдбара + граница. */
     padding-left: calc(var(--sal) + 14rem);
-    padding-bottom: calc(var(--sab) + 2.5rem);
+    padding-bottom: calc(var(--sab) + 3.5rem);
   }
 }
 
@@ -406,6 +411,20 @@ body {
    сверху (rgba(255,255,255,.15-.25)), мягкая тень.
    Позиционирование/радиус/размеры — Tailwind-утилиты в Layout.tsx.
    ============================================================ */
+
+  /* FAB positioning: above tab-bar on mobile, standard on desktop */
+  .fab-mobile {
+    position: fixed;
+    right: 1rem;
+    bottom: var(--fab-bottom-mobile);
+    z-index: 20;
+  }
+  @media (min-width: 640px) {
+    .fab-mobile {
+      bottom: 2rem; /* sm:bottom-8 equivalent */
+    }
+  }
+
 .glass-pill {
   background: rgba(58, 58, 60, 0.72); /* slate-800 (токен темы) с альфой под макет. */
   backdrop-filter: blur(40px) saturate(200%);

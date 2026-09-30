@@ -158,7 +158,7 @@ export function Fab({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="press fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full glass text-primary shadow-lg shadow-black/30 transition-transform hover:scale-[1.02] active:scale-[0.98] sm:bottom-8"
+      className="press fab-mobile flex h-14 w-14 items-center justify-center rounded-full glass text-primary shadow-lg shadow-black/30 transition-transform hover:scale-[1.02] active:scale-[0.98]"
     >
       {children}
     </button>

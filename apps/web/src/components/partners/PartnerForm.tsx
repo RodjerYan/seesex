@@ -120,7 +120,7 @@ export function PartnerForm({
           <Input id="pf-nickname" maxLength={120} {...register('nickname')} />
         </Field>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Пол" htmlFor="pf-gender">
             <Select id="pf-gender" {...register('gender')}>
               {GENDERS.map((value) => (
@@ -141,7 +141,7 @@ export function PartnerForm({
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Местоимения" htmlFor="pf-pronouns" error={errors.pronouns?.message}>
             <Input id="pf-pronouns" placeholder="она/её" maxLength={60} {...register('pronouns')} />
           </Field>

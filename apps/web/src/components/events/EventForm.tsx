@@ -283,7 +283,7 @@ export function EventForm({
       <Card className="mb-4">
         <SectionTitle>Когда и что</SectionTitle>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Дата" htmlFor="ev-date" error={errors.date?.message}>
             <Input id="ev-date" type="date" invalid={Boolean(errors.date)} {...register('date')} />
           </Field>
@@ -292,7 +292,7 @@ export function EventForm({
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Статус" htmlFor="ev-status">
             <Select id="ev-status" {...register('status')}>
               <option value="occurred">Состоялось</option>
@@ -443,7 +443,7 @@ export function EventForm({
           <Stars value={rating} onChange={setRating} onClear={() => setRating(null)} size="md" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Калории" htmlFor="ev-cal" error={errors.calories?.message}>
             <Input id="ev-cal" inputMode="numeric" placeholder="0" invalid={Boolean(errors.calories)} {...register('calories')} />
           </Field>
