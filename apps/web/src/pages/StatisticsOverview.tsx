@@ -21,6 +21,7 @@ import {
   usePositionStats,
   useRatings,
 } from '../lib/queries';
+import { eventTypeLabel } from '../lib/eventTypeLabels';
 
 function numberOr(value: number | null | undefined, fallback = '—'): string {
   if (value === null || value === undefined || Number.isNaN(value)) return fallback;
@@ -170,7 +171,7 @@ export default function StatisticsOverview(): ReactElement {
                 <SectionTitle>По типам</SectionTitle>
                 <RowBars
                   items={overviewQuery.data.eventsByType.map((item) => ({
-                    label: item.eventType,
+                    label: eventTypeLabel(item.eventType),
                     value: item.count,
                   }))}
                 />

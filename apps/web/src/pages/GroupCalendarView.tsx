@@ -17,6 +17,7 @@ import {
   useGroupCalendarEvents,
 } from '../lib/queries';
 import type { CalendarStatus, EventView, GroupCalendarView } from '../types/api';
+import { eventTypeLabel } from '../lib/eventTypeLabels';
 import { STATUS_LABEL } from '../components/events/EventCard';
 
 function DataRow({ label, value }: { label: string; value: ReactNode }): ReactElement {
@@ -213,7 +214,7 @@ export default function GroupCalendarView(): ReactElement {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">
-                    {event.title || event.eventType}
+                    {event.title || eventTypeLabel(event.eventType)}
                   </p>
                   <p className="mt-0.5 truncate text-[11px] text-slate-500">
                     {formatDateTime(event.date)}

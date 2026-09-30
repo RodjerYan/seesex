@@ -113,7 +113,7 @@ export const Select = forwardRef<
 type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-600 active:bg-primary-600',
+  primary: 'grad-intimate text-white hover:brightness-110 active:brightness-95',
   ghost: 'bg-white/[0.06] text-slate-200 hover:bg-white/[0.12] active:bg-white/[0.12]',
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-600',
   quiet: 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] active:bg-white/[0.06]',

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { formatDate, formatDuration, formatTime } from '../../lib/format';
 import type { CalendarStatus, EventView } from '../../types/api';
 import { cx } from '../ui/controls';
+import { eventTypeLabel } from '../../lib/eventTypeLabels';
 import { Stars } from '../ui/Stars';
 
 export const STATUS_LABEL: Record<CalendarStatus, string> = {
@@ -42,7 +43,7 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
               <span className="ml-2 text-xs font-normal text-slate-500">{formatTime(date)}</span>
             </p>
             <p className="mt-0.5 text-xs text-slate-400">
-              {event.title || event.eventType}
+              {event.title || eventTypeLabel(event.eventType)}
               {event.isCustomType ? ' · свой тип' : ''}
             </p>
           </div>

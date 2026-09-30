@@ -20,7 +20,10 @@ body,
 
 body {
   margin: 0;
-  background-color: #000000;
+  background-color: #07040A;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 41, 110, 0.10), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% -20%, rgba(191, 90, 242, 0.07), transparent 55%);
   color: #F2F2F7;
   font-family:
     -apple-system,
@@ -43,10 +46,10 @@ body {
     padding-top: var(--sat);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(20, 20, 22, 0.72);
+    background: rgba(30, 16, 26, 0.75);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 0.5px solid rgba(255, 107, 163, 0.12);
   }
 
   /* Основной контент: отступ под fixed-header, над нижним таб-баром (mobile-first). */
@@ -62,10 +65,10 @@ body {
     padding-bottom: calc(var(--sab) + 0.25rem);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(20, 20, 22, 0.72);
+    background: rgba(30, 16, 26, 0.75);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-top: 0.5px solid rgba(255, 107, 163, 0.12);
     min-height: 3.5rem;
   }
 
@@ -75,15 +78,15 @@ body {
     padding-top: calc(var(--sat) + 3.5rem);
     padding-bottom: 1rem;
     padding-left: var(--sal);
-    background: rgba(20, 20, 22, 0.72);
+    background: rgba(30, 16, 26, 0.75);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-right: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-right: 0.5px solid rgba(255, 107, 163, 0.12);
   }
 
   /* Glass utilities */
   .glass {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 240, 246, 0.10);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     box-shadow:
@@ -92,10 +95,11 @@ body {
       inset 0 -0.5px 0 rgba(0, 0, 0, 0.45),
       0 8px 32px rgba(0, 0, 0, 0.45);
     border-radius: 28px;
+    border: 1px solid rgba(255, 107, 163, 0.30);
   }
 
   .glass-strong {
-    background: rgba(20, 20, 22, 0.72);
+    background: rgba(30, 16, 26, 0.75);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     box-shadow:
@@ -104,6 +108,7 @@ body {
       inset 0 -0.5px 0 rgba(0, 0, 0, 0.45),
       0 8px 32px rgba(0, 0, 0, 0.45);
     border-radius: 28px;
+    border: 1px solid rgba(255, 107, 163, 0.30);
   }
 
   .press {
@@ -133,6 +138,19 @@ body {
     );
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
+  }
+
+  /* Intimate gradient CTA */
+.grad-intimate {
+    background-image: linear-gradient(135deg, #FF2A5D 0%, #A550D9 100%);
+}
+
+  .grad-intimate:hover {
+    filter: brightness(1.08);
+  }
+
+  .grad-intimate:active {
+    filter: brightness(0.95);
   }
 
   /* Page transition animation */

@@ -51,7 +51,7 @@ export default function Layout() {
           <div className="flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-lg grad-intimate text-sm font-bold text-white"
             >
               x
             </span>

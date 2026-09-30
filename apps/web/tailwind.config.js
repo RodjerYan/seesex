@@ -1,4 +1,4 @@
-/** Tailwind CSS v3 — iOS 27 Liquid Glass dark theme (pure black + system colors). */
+/** Tailwind CSS v3 — rose accent dark theme. */
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -6,10 +6,10 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0A84FF',
-          400: '#409CFF',
-          500: '#0A84FF',
-          600: '#0060DF',
+          DEFAULT: '#F5296E',
+          400: '#FF6BA3',
+          500: '#F5296E',
+          600: '#D0134F',
         },
         surface: '#000000',
         // iOS neutral grays (slate override)

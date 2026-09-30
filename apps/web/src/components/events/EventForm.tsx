@@ -20,6 +20,7 @@ import { dayKey, formatTime } from '../../lib/format';
 import { PositionIcon } from '../../lib/positionIcons';
 import { useAllPositions, usePartners } from '../../lib/queries';
 import type { EventView } from '../../types/api';
+import { eventTypeLabel } from '../../lib/eventTypeLabels';
 import { Stars } from '../ui/Stars';
 import { Button, Card, ErrorText, Field, Input, MutedText, SectionTitle, Select, TextArea, cx } from '../ui/controls';
 import { LoadingBlock } from '../ui/states';
@@ -292,7 +293,7 @@ export function EventForm({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Статус" htmlFor="ev-status" hint="Отказ кодируется типом TURNDOWN">
+          <Field label="Статус" htmlFor="ev-status">
             <Select id="ev-status" {...register('status')}>
               <option value="occurred">Состоялось</option>
               <option value="planned">Запланировано</option>
@@ -314,13 +315,13 @@ export function EventForm({
           <Select id="ev-type" disabled={typeFieldDisabled} {...register('eventType')}>
             {EVENT_TYPE_PRESETS.filter((item) => item !== 'CUSTOM').map((item) => (
               <option key={item} value={item}>
-                {item}
+                {eventTypeLabel(item)}
               </option>
             ))}
             <option value="CUSTOM">Свой тип…</option>
           </Select>
           {typeFieldDisabled ? (
-            <MutedText>При статусе «Отказ» тип события будет TURNDOWN.</MutedText>
+            <MutedText>При статусе «Отказ» событие сохранится как отказ.</MutedText>
           ) : null}
         </Field>
 

@@ -13,6 +13,7 @@ import { Card, SectionTitle } from '../components/ui/controls';
 import { ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { formatDate } from '../lib/format';
 import { useCustomStats, useGroupCalendars } from '../lib/queries';
+import { eventTypeLabel } from '../lib/eventTypeLabels';
 
 /** Расширенная статистика: произвольный период + фильтр по групповым календарям. */
 export default function StatisticsCustom(): ReactElement {
@@ -119,11 +120,11 @@ export default function StatisticsCustom(): ReactElement {
           {statsQuery.data.eventsByType.length > 0 ? (
             <div className="mt-4">
               <SectionTitle>По типам</SectionTitle>
-              <RowBars
-                items={statsQuery.data.eventsByType.map((item) => ({
-                  label: item.eventType,
-                  value: item.count,
-                }))}
+<RowBars
+                  items={statsQuery.data.eventsByType.map((item) => ({
+                    label: eventTypeLabel(item.eventType),
+                    value: item.count,
+                  }))}
               />
             </div>
           ) : (
