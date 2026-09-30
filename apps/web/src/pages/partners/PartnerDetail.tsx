@@ -227,7 +227,7 @@ export default function PartnerDetail(): ReactElement {
           </div>
         )}
         {photosLeft > 0 ? (
-          <p className="mt-2 text-[11px] text-slate-600">Можно добавить ещё {photosLeft} фото.</p>
+          <p className="mt-2 text-[11px] text-slate-500">Можно добавить ещё {photosLeft} фото.</p>
         ) : null}
       </Card>
 
@@ -255,12 +255,12 @@ export default function PartnerDetail(): ReactElement {
         ) : (eventsQuery.data?.events ?? []).length === 0 ? (
           <EmptyBlock title="Событий нет" description="Отметьте первое событие с этим партнёром." />
         ) : (
-          <div className="space-y-3">
+          <div className="stagger space-y-3">
             {(eventsQuery.data?.events ?? []).map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
             {(eventsQuery.data?.events ?? []).length < (eventsQuery.data?.total ?? 0) ? (
-              <Link to={`/events`} className="block text-center text-xs text-primary-400 hover:text-primary">
+              <Link to={`/events`} className="block text-center text-xs text-primary-400 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
                 Показать все события →
               </Link>
             ) : null}

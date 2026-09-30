@@ -118,7 +118,7 @@ export default function Dashboard(): ReactElement {
             }
           />
         ) : (
-          <div className="space-y-3">
+          <div className="stagger space-y-3">
             {dayEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -201,7 +201,7 @@ export default function Dashboard(): ReactElement {
             }
           />
         ) : (
-          <div className="space-y-3">
+          <div className="stagger space-y-3">
             {recentEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}

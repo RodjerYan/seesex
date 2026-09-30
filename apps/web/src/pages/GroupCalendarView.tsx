@@ -97,7 +97,7 @@ export default function GroupCalendarView(): ReactElement {
         <Link
           to="/group-calendars"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -131,7 +131,7 @@ export default function GroupCalendarView(): ReactElement {
         <dl>
           <DataRow label="Участников" value={String(calendar.memberCount)} />
           <DataRow
-            label="Invite-код"
+            label="Код приглашения"
             value={calendar.inviteCode ? (
               <span className="inline-flex items-center gap-2">
                 <span className="font-mono tracking-widest">{calendar.inviteCode}</span>
@@ -158,7 +158,7 @@ export default function GroupCalendarView(): ReactElement {
             {calendar.members.map((member) => (
               <li
                 key={member.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs"
               >
                 <span className="truncate text-slate-300">{member.email ?? member.userId}</span>
                 <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
@@ -204,12 +204,12 @@ export default function GroupCalendarView(): ReactElement {
           description="Добавьте первое событие в общий календарь."
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {(eventsQuery.data ?? []).map((event) => (
             <li key={event.id}>
               <Link
                 to={`/events/${event.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-3 transition-colors hover:border-white/10"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">

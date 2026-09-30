@@ -39,7 +39,8 @@ export function Toast({
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-24 z-40 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 z-40 flex justify-center px-4"
+      style={{ bottom: 'calc(56px + env(safe-area-inset-bottom) + 16px)' }}
     >
       <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[rgba(28,28,30,0.9)] px-4 py-3 text-sm font-medium text-slate-100 shadow-lg backdrop-blur-md">
         <span

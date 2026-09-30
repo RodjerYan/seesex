@@ -66,6 +66,7 @@ body {
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+    min-height: 3.5rem;
   }
 
   /* Desktop-сайдбар (sm+): появляется вместо таб-бара. */
@@ -82,7 +83,7 @@ body {
 
   /* Glass utilities */
   .glass {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.10);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     box-shadow:
@@ -182,6 +183,26 @@ body {
   .stagger > *:nth-child(18) { animation-delay: 680ms; }
   .stagger > *:nth-child(19) { animation-delay: 720ms; }
   .stagger > *:nth-child(20) { animation-delay: 760ms; }
+  .stagger > *:nth-child(21) { animation-delay: 800ms; }
+  .stagger > *:nth-child(22) { animation-delay: 840ms; }
+  .stagger > *:nth-child(23) { animation-delay: 880ms; }
+  .stagger > *:nth-child(24) { animation-delay: 920ms; }
+  .stagger > *:nth-child(25) { animation-delay: 960ms; }
+  .stagger > *:nth-child(26) { animation-delay: 1000ms; }
+  .stagger > *:nth-child(27) { animation-delay: 1040ms; }
+  .stagger > *:nth-child(28) { animation-delay: 1080ms; }
+  .stagger > *:nth-child(29) { animation-delay: 1120ms; }
+  .stagger > *:nth-child(30) { animation-delay: 1160ms; }
+  .stagger > *:nth-child(31) { animation-delay: 1200ms; }
+  .stagger > *:nth-child(32) { animation-delay: 1240ms; }
+  .stagger > *:nth-child(33) { animation-delay: 1280ms; }
+  .stagger > *:nth-child(34) { animation-delay: 1320ms; }
+  .stagger > *:nth-child(35) { animation-delay: 1360ms; }
+  .stagger > *:nth-child(36) { animation-delay: 1400ms; }
+  .stagger > *:nth-child(37) { animation-delay: 1440ms; }
+  .stagger > *:nth-child(38) { animation-delay: 1480ms; }
+  .stagger > *:nth-child(39) { animation-delay: 1520ms; }
+  .stagger > *:nth-child(40) { animation-delay: 1560ms; }
 
   /* Bar growth animation for charts */
   @keyframes grow-up {

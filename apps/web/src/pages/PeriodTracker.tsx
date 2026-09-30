@@ -193,7 +193,7 @@ export default function PeriodTracker(): ReactElement {
                       value={record.endDate ?? ''}
                       min={record.startDate}
                       onChange={(event) => onUpdateEnd(record, event.target.value)}
-                      className="rounded border border-slate-700 bg-white/[0.08] px-2 py-1 text-[11px] text-slate-300"
+                      className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
                     />
                   </label>
                 </div>
@@ -201,7 +201,7 @@ export default function PeriodTracker(): ReactElement {
                   type="button"
                   aria-label="Удалить запись"
                   onClick={() => onDelete(record.id)}
-                  className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-white/[0.06] hover:text-red-400"
+                  className="shrink-0 rounded-xl p-2 text-slate-400 hover:bg-white/[0.06] hover:text-red-400"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -251,7 +251,7 @@ export default function PeriodTracker(): ReactElement {
                 {statsQuery.data.trackings.map((tracking) => (
                   <li
                     key={tracking.partnerId}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-white/10 px-3 py-2 text-xs"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-3 py-2 text-xs"
                   >
                     <Link
                       to={`/partners/${tracking.partnerId}`}

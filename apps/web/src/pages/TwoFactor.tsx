@@ -138,7 +138,7 @@ function AuthShell({ title, children }: { title: string; children: ReactNode }):
             aria-hidden="true"
             className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white"
           >
-            x
+            S
           </span>
           <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-100">{title}</h1>
           <p className="mt-1 text-sm text-slate-500">Введите 6-значный код</p>

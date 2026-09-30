@@ -43,7 +43,7 @@ function NamedList({ items, to }: { items: { id: string; name: string }[]; to?: 
           <Link
             key={item.id}
             to={to(item.id)}
-            className="rounded-full border border-slate-700 px-2 py-0.5 text-xs text-slate-300 hover:border-primary-400 hover:text-primary-400"
+            className="rounded-full border border-slate-700 px-2 py-0.5 text-xs text-slate-300 hover:border-primary-400 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
             {item.name}
           </Link>
@@ -120,14 +120,14 @@ export default function EventDetail(): ReactElement {
         <Link
           to="/events"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
         <div className="flex gap-2">
           <Link
             to={`/events/${item.id}/edit`}
-            className="flex items-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/[0.06]"
+            className="flex items-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
             <Pencil className="h-4 w-4" aria-hidden="true" />
             Изменить
@@ -195,7 +195,7 @@ export default function EventDetail(): ReactElement {
             <Row label="Групповой календарь">
               <Link
                 to={`/group-calendars/${item.groupCalendar.id}`}
-                className="text-primary-400 hover:text-primary"
+                className="text-primary-400 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               >
                 {item.groupCalendar.name}
               </Link>

@@ -63,7 +63,7 @@ export default function PartnerList(): ReactElement {
                       .join(' · ') || 'Без дополнительных данных'}
                   </p>
                 </div>
-                <span className="shrink-0 text-xs text-slate-600">{formatDate(partner.createdAt)}</span>
+                <span className="shrink-0 text-xs text-slate-500">{formatDate(partner.createdAt)}</span>
               </Link>
             </li>
           ))}

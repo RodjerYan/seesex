@@ -25,10 +25,10 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
           <Star
             key={star}
             aria-hidden="true"
-            className={cx(iconClass, star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-700')}
+            className={cx(iconClass, star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-500')}
           />
         ))}
-        <span className="ml-1 text-xs text-slate-400">{rating}/5</span>
+        <span className="ml-1 text-xs text-slate-400">{rating} из 5</span>
       </span>
     );
   }
@@ -47,7 +47,7 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
             aria-hidden="true"
             className={cx(
               iconClass,
-              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-600',
+              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-500',
             )}
           />
         </button>

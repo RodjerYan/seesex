@@ -83,7 +83,7 @@ export default function Settings(): ReactElement {
           <li key={item.to}>
             <Link
               to={item.to}
-              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10"
+              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <div className="flex min-w-0 items-start gap-3">
                 <span className="mt-0.5 shrink-0">{item.icon}</span>
@@ -92,7 +92,7 @@ export default function Settings(): ReactElement {
                   <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-600" aria-hidden="true" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
             </Link>
           </li>
         ))}

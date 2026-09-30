@@ -99,7 +99,7 @@ export default function Wishlist(): ReactElement {
         <label className="flex items-center gap-2 text-xs text-slate-400">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-white/10 bg-white/[0.06] text-primary focus:ring-primary/40"
+            className="h-4 w-4 rounded border-white/10 bg-white/[0.06] text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
             checked={showCompleted}
             onChange={(event) => setShowCompleted(event.target.checked)}
           />

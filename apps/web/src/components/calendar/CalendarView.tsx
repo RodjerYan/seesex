@@ -165,7 +165,7 @@ export function CalendarView({
                   {events.slice(0, 3).map((event) => (
                     <span
                       key={event.id}
-                      className={cx('h-1.5 w-1.5 rounded-full', STATUS_DOT[event.status])}
+                      className={cx('h-2 w-2 rounded-full', STATUS_DOT[event.status])}
                     />
                   ))}
                 </span>
@@ -186,13 +186,13 @@ export function CalendarView({
 
       <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-2 text-[10px] text-slate-500">
         <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" /> состоялось
+          <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" /> состоялось
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" /> отказ
+          <span className="h-2 w-2 rounded-full bg-slate-400" aria-hidden="true" /> отказ
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-violet-500" aria-hidden="true" /> запланировано
+          <span className="h-2 w-2 rounded-full bg-violet-500" aria-hidden="true" /> запланировано
         </span>
       </div>
     </div>

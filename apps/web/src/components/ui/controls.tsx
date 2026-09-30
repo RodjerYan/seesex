@@ -14,8 +14,8 @@ import type {
 
 export const inputClass =
   'w-full rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2.5 text-sm text-slate-100 ' +
-  'placeholder:text-slate-500 focus:border-primary focus:outline-none focus:ring-1 ' +
-  'focus:ring-primary/40 disabled:opacity-50';
+  'placeholder:text-slate-500 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ' +
+  'disabled:opacity-50';
 
 export const inputErrorClass = 'border-red-500/70';
 
@@ -113,7 +113,7 @@ export const Select = forwardRef<
 type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-600 active:bg-primary-600 disabled:hover:bg-primary',
+  primary: 'bg-primary text-white hover:bg-primary-600 active:bg-primary-600',
   ghost: 'bg-white/[0.06] text-slate-200 hover:bg-white/[0.12] active:bg-white/[0.12]',
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-600',
   quiet: 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] active:bg-white/[0.06]',

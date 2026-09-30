@@ -159,7 +159,7 @@ export function PartnerForm({
         <label className="flex items-center gap-2 text-sm text-slate-300">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-slate-600 bg-white/[0.08] text-primary focus:ring-primary-400"
+            className="h-4 w-4 rounded border-slate-600 bg-white/[0.08] text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
             checked={isPrimary}
             onChange={(event) => setValue('isPrimary', event.target.checked)}
           />

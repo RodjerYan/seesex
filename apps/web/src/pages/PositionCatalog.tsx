@@ -35,7 +35,10 @@ function PositionRow({
       <div className="min-w-0 flex items-center gap-3">
         <PositionIcon name={position.name} className="w-5 h-5 text-slate-400 shrink-0" />
         <div>
-          <Link to={`/positions/${position.id}`} className="block truncate text-sm font-medium text-slate-100 hover:text-primary-400">
+          <Link
+            to={`/positions/${position.id}`}
+            className="block truncate text-sm font-medium text-slate-100 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          >
             {position.name}
           </Link>
           <p className="mt-0.5 flex items-center gap-2 truncate text-[11px] text-slate-500">

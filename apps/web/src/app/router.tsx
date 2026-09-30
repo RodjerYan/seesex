@@ -33,9 +33,15 @@ function FullPageLoader(): ReactElement {
     <div
       role="status"
       aria-label="Загрузка"
-      className="flex min-h-dvh items-center justify-center bg-surface text-sm text-slate-400"
+      className="flex min-h-dvh items-center justify-center bg-surface"
     >
-      Загрузка…
+      <div className="inline-flex items-center gap-3 glass rounded-3xl px-6 py-5 text-sm text-slate-400">
+        <svg className="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24" aria-hidden="true">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
+          <circle className="opacity-75" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="30 60" strokeLinecap="round" />
+        </svg>
+        Загрузка…
+      </div>
     </div>
   );
 }

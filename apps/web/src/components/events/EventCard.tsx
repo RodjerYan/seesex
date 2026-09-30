@@ -33,7 +33,7 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
   const positionNames = event.positions.map((position) => position.name);
 
   return (
-    <div className={cx('stagger', 'glass transition-colors hover:ring-1 hover:ring-white/10')}>
+    <div className={cx('glass transition-colors hover:ring-1 hover:ring-white/10')}>
       <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
         <div className="flex items-start justify-between gap-2">
           <div>

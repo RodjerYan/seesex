@@ -71,7 +71,7 @@ export default function Login(): ReactElement {
             aria-hidden="true"
             className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white"
           >
-            x
+            S
           </span>
           <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-100">Вход</h1>
           <p className="mt-1 text-sm text-slate-500">SeeSex — Интимный трекер</p>
@@ -99,7 +99,7 @@ export default function Login(): ReactElement {
               type="email"
               autoComplete="email"
               inputMode="email"
-              placeholder="you@example.com"
+              placeholder="ivan@example.com"
               invalid={Boolean(errors.email)}
               {...register('email')}
             />

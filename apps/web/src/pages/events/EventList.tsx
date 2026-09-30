@@ -182,7 +182,7 @@ export default function EventList(): ReactElement {
           }
         />
       ) : (
-        <div className="space-y-3">
+        <div className="stagger space-y-3">
           {events.map((event) => (
             <EventCard key={event.id} event={event} onDelete={() => onDelete(event.id)} />
           ))}

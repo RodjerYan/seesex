@@ -69,7 +69,7 @@ export default function GroupCalendarManager(): ReactElement {
         <h1 className="text-lg font-semibold tracking-tight text-slate-100">
           Групповые календари
         </h1>
-        <p className="text-xs text-slate-500">Общий доступ к событиям по invite-коду</p>
+        <p className="text-xs text-slate-500">Общий доступ к событиям по коду приглашения</p>
       </div>
 
       {actionError ? (
@@ -99,7 +99,7 @@ export default function GroupCalendarManager(): ReactElement {
       <Card className="mb-4">
         <SectionTitle>Вступить по коду</SectionTitle>
         <form onSubmit={onJoin}>
-          <Field label="Invite-код" htmlFor="gcm-code" hint="8 символов из карточки календаря">
+          <Field label="Код приглашения" htmlFor="gcm-code" hint="8 символов из карточки календаря">
             <Input
               id="gcm-code"
               value={inviteCode}
@@ -129,12 +129,12 @@ export default function GroupCalendarManager(): ReactElement {
           description="Создайте свой или вступите по коду."
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {(calendarsQuery.data ?? []).map((calendar) => (
             <li key={calendar.id}>
               <Link
                 to={`/group-calendars/${calendar.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10"
+                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>
