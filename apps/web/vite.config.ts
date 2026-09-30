@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
       manifest: {
         name: 'SeeSex — Личный дневник событий, статистика и календарь',
@@ -14,8 +15,8 @@ export default defineConfig({
         description: 'Личный дневник событий, статистика и календарь',
         start_url: '/',
         display: 'standalone',
-        background_color: '#000000',
-        theme_color: '#000000',
+        background_color: '#07040A',
+        theme_color: '#07040A',
         orientation: 'portrait',
         lang: 'ru-RU',
         categories: ['health', 'lifestyle'],

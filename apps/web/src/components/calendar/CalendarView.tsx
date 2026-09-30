@@ -148,7 +148,7 @@ export function CalendarView({
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                   inMonth ? 'text-slate-200' : 'text-slate-600',
                   isSelected
-                    ? 'bg-primary/20 ring-1 ring-primary-400'
+                    ? 'bg-primary/20 ring-1 ring-primary-400 day-selected-glow'
                     : 'hover:bg-white/[0.06]',
                 )}
               >

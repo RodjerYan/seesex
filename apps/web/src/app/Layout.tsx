@@ -23,14 +23,14 @@ const NAV_ITEMS: NavItem[] = [
 function tabLinkClassName(isActive: boolean): string {
   const base = 'flex flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-2 transition-colors';
   return isActive
-    ? `${base} text-primary`
+    ? `${base} text-primary tab-active-glow`
     : `${base} text-slate-500`;
 }
 
 function sidebarLinkClassName(isActive: boolean): string {
   const base = 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors';
   return isActive
-    ? `${base} text-primary bg-white/[0.06]`
+    ? `${base} text-primary bg-white/[0.06] tab-active-glow`
     : `${base} text-slate-400 hover:bg-white/[0.06] hover:text-slate-100`;
 }
 
@@ -55,7 +55,7 @@ export default function Layout() {
             >
               x
             </span>
-            <span className="text-base font-semibold tracking-tight">SeeSex</span>
+            <span className="text-base font-semibold tracking-tight brand-gradient">SeeSex</span>
           </div>
           <button
             type="button"

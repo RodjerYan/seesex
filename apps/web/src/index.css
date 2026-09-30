@@ -18,12 +18,20 @@ body,
   min-height: 100%;
 }
 
+/* ============================================================
+   1. AMBIENT BACKGROUND — «КИНО»
+   База #07040A + 3 radial-свечения + виньетка + медленный дрейф
+   ============================================================ */
 body {
   margin: 0;
   background-color: #07040A;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 41, 110, 0.10), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% -20%, rgba(191, 90, 242, 0.07), transparent 55%);
+    /* Rose glow — top center */
+    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(245, 41, 110, 0.12), transparent 60%),
+    /* Violet glow — top right */
+    radial-gradient(ellipse 55% 35% at 110% -10%, rgba(165, 80, 217, 0.09), transparent 60%),
+    /* Deep magenta glow — bottom left */
+    radial-gradient(ellipse 60% 40% at -10% 110%, rgba(200, 20, 90, 0.07), transparent 65%);
   color: #F2F2F7;
   font-family:
     -apple-system,
@@ -40,15 +48,52 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Vignette — fixed overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* Ambient drift animation — slow scale/translate on the background gradients */
+@keyframes ambient-drift {
+  0% {
+    background-position: 50% -15%, 110% -10%, -10% 110%;
+    background-size: 70% 45%, 55% 35%, 60% 40%;
+  }
+  50% {
+    background-position: 55% -10%, 105% -5%, -5% 105%;
+    background-size: 75% 50%, 60% 40%, 65% 45%;
+  }
+  100% {
+    background-position: 50% -15%, 110% -10%, -10% 110%;
+    background-size: 70% 45%, 55% 35%, 60% 40%;
+  }
+}
+
+body {
+  animation: ambient-drift 25s ease-in-out infinite alternate;
+}
+
+/* Respect reduced motion — reuse existing guard pattern */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}
+
 @layer components {
   /* Header: учитывает вырез экрана (top inset) и боковые safe-area. */
   .app-header {
     padding-top: var(--sat);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(30, 16, 26, 0.75);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(26, 13, 22, 0.72);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-bottom: 0.5px solid rgba(255, 107, 163, 0.12);
   }
 
@@ -65,9 +110,9 @@ body {
     padding-bottom: calc(var(--sab) + 0.25rem);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(30, 16, 26, 0.75);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(26, 13, 22, 0.72);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-top: 0.5px solid rgba(255, 107, 163, 0.12);
     min-height: 3.5rem;
   }
@@ -78,37 +123,89 @@ body {
     padding-top: calc(var(--sat) + 3.5rem);
     padding-bottom: 1rem;
     padding-left: var(--sal);
-    background: rgba(30, 16, 26, 0.75);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(26, 13, 22, 0.72);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-right: 0.5px solid rgba(255, 107, 163, 0.12);
   }
 
-  /* Glass utilities */
+  /* ============================================================
+     2. LIQUID GLASS (iOS 27) — .glass и .glass-strong
+     ============================================================ */
+
+  /* Base glass — cards, calendar, modals */
   .glass {
-    background: rgba(255, 240, 246, 0.10);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    position: relative;
+    background: rgba(255, 244, 249, 0.07);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 32px;
+    /* Mirror highlight top + bottom */
     box-shadow:
-      0 0 0 0.5px rgba(166, 166, 166, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.45),
-      0 8px 32px rgba(0, 0, 0, 0.45);
-    border-radius: 28px;
-    border: 1px solid rgba(255, 107, 163, 0.30);
+      0 24px 60px rgba(0, 0, 0, 0.55),
+      0 2px 8px rgba(0, 0, 0, 0.40),
+      0 0 44px rgba(245, 41, 110, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.50);
+    /* Hairline border — base */
+    border: 1px solid rgba(255, 255, 255, 0.10);
   }
 
+  /* Gradient hairline border via ::after (mask-composite trick) */
+  .glass::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.06) 35%,
+      rgba(245, 41, 110, 0.22) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  /* Strong glass — header, tabbar, sidebar */
   .glass-strong {
-    background: rgba(30, 16, 26, 0.75);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    position: relative;
+    background: rgba(26, 13, 22, 0.72);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border-radius: 32px;
     box-shadow:
-      0 0 0 0.5px rgba(166, 166, 166, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.45),
-      0 8px 32px rgba(0, 0, 0, 0.45);
-    border-radius: 28px;
-    border: 1px solid rgba(255, 107, 163, 0.30);
+      0 24px 60px rgba(0, 0, 0, 0.55),
+      0 2px 8px rgba(0, 0, 0, 0.40),
+      0 0 44px rgba(245, 41, 110, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.50);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .glass-strong::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.06) 35%,
+      rgba(245, 41, 110, 0.22) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
   }
 
   .press {
@@ -140,17 +237,42 @@ body {
     animation: shimmer 1.4s infinite;
   }
 
-  /* Intimate gradient CTA */
-.grad-intimate {
+  /* ============================================================
+     3. GLOW ACCENTS — «КОНФЕТА»
+     ============================================================ */
+
+  /* Intimate gradient CTA — brighter hover, consistent 1.10 */
+  .grad-intimate {
     background-image: linear-gradient(135deg, #FF2A5D 0%, #A550D9 100%);
-}
+    box-shadow:
+      0 12px 32px -8px rgba(245, 41, 110, 0.50),
+      0 4px 14px rgba(165, 80, 217, 0.35);
+  }
 
   .grad-intimate:hover {
-    filter: brightness(1.08);
+    filter: brightness(1.10);
   }
 
   .grad-intimate:active {
     filter: brightness(0.95);
+  }
+
+  /* Active tab/icon glow — applied via Layout.tsx className */
+  .tab-active-glow {
+    filter: drop-shadow(0 0 6px rgba(245, 41, 110, 0.55));
+  }
+
+  /* Brand gradient text — SeeSex in header */
+  .brand-gradient {
+    background: linear-gradient(90deg, #FF6BA3 0%, #E0B8FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Selected day glow — for CalendarView */
+  .day-selected-glow {
+    box-shadow: 0 0 16px rgba(245, 41, 110, 0.35);
   }
 
   /* Page transition animation */
@@ -239,7 +361,7 @@ body {
   }
 }
 
-/* Respect reduced motion */
+/* Respect reduced motion — existing guard */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
