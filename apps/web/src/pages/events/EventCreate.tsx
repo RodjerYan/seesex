@@ -71,7 +71,7 @@ export default function EventCreate(): ReactElement {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-semibold tracking-tight text-slate-100">Новое событие</h1>
+        <h1 className="text-lg font-bold tracking-tight text-slate-100">Новое событие</h1>
       </div>
 
       <EventForm

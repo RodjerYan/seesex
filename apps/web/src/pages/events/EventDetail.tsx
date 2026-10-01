@@ -144,10 +144,10 @@ export default function EventDetail(): ReactElement {
         <p className="text-xs uppercase tracking-wide text-slate-500">
           {STATUS_LABEL[item.status] ?? item.status}
         </p>
-<h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-100">
+        <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-100">
           {item.title || eventTypeLabel(item.eventType)}
           {item.isCustomType ? <span className="ml-2 text-sm font-normal text-slate-500">(свой тип)</span> : null}
-</h1>
+        </h1>
         <p className="mt-1 text-sm text-slate-400">
           {formatDate(item.date)} · {formatTime(date)}
         </p>

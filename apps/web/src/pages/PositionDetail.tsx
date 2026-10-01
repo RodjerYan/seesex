@@ -159,7 +159,7 @@ export default function PositionDetail(): ReactElement {
         <p className="text-xs uppercase tracking-wide text-slate-500">{position.category}</p>
         <div className="mt-1 flex items-center gap-3">
           <PositionIcon name={position.name} className="w-7 h-7 text-primary-400" />
-          <h1 className="text-xl font-semibold tracking-tight text-slate-100">{position.name}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-100">{position.name}</h1>
         </div>
         <p className="mt-1 text-xs text-slate-500">
           {position.isSystem ? 'Системная позиция' : 'Пользовательская позиция'}

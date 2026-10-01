@@ -16,7 +16,7 @@ export default function PartnerList(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <h1 className="text-lg font-semibold tracking-tight text-slate-100">Партнёры</h1>
+        <h1 className="text-lg font-bold tracking-tight text-slate-100">Партнёры</h1>
         <p className="text-xs text-slate-500">
           {partnersQuery.data ? `${partnersQuery.data.length} чел.` : '\u00A0'}
         </p>

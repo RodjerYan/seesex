@@ -119,7 +119,7 @@ export default function EventList(): ReactElement {
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-slate-100">События</h1>
+          <h1 className="text-lg font-bold tracking-tight text-slate-100">События</h1>
           {eventsQuery.data ? (
             <p className="text-xs text-slate-500">{eventsRu(total)}</p>
           ) : null}

@@ -115,7 +115,7 @@ export default function GroupCalendarView(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100">{calendar.name}</h1>
+        <h1 className="text-xl font-bold tracking-tight text-slate-100">{calendar.name}</h1>
         <p className="mt-1 text-xs text-slate-500">
           Ваша роль: {calendar.role ?? 'участник'} · создан {formatDate(calendar.createdAt)}
         </p>

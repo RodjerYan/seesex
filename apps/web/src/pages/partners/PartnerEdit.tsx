@@ -52,7 +52,7 @@ export default function PartnerEdit(): ReactElement {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-semibold tracking-tight text-slate-100">
+        <h1 className="text-lg font-bold tracking-tight text-slate-100">
           Редактирование: {partnerQuery.data.name}
         </h1>
       </div>

@@ -63,7 +63,7 @@ export default function Dashboard(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <header className="mb-4">
-        <h1 className="text-lg font-semibold tracking-tight bg-[linear-gradient(95deg,#FFC2D6_0%,#FFFFFF_45%,#E3C9FF_100%)] bg-clip-text text-transparent">
+        <h1 className="text-lg font-bold tracking-tight bg-[linear-gradient(95deg,#FFC2D6_0%,#FFFFFF_45%,#E3C9FF_100%)] bg-clip-text text-transparent">
           {greetingFor(now.getHours())}!
         </h1>
         <p className="mt-0.5 text-xs text-slate-500">

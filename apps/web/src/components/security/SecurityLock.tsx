@@ -66,7 +66,7 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
           >
             <LockKeyhole className="h-7 w-7" />
           </span>
-          <h1 className="mt-4 text-lg font-semibold text-slate-100">Приложение заблокировано</h1>
+          <h1 className="mt-4 text-lg font-bold text-slate-100">Приложение заблокировано</h1>
           <p className="mt-1 text-sm text-slate-500">
             {isPin ? 'Введите PIN, чтобы продолжить' : 'Введите пароль, чтобы продолжить'}
           </p>

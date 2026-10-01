@@ -85,7 +85,7 @@ export default function StatisticsOverview(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold tracking-tight text-slate-100">Статистика</h1>
+        <h1 className="text-lg font-bold tracking-tight text-slate-100">Статистика</h1>
         <Link
           to="/statistics/custom"
           className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary"

@@ -147,7 +147,7 @@ export default function PartnerDetail(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-100">
+        <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-100">
           {partner.name}
           {partner.isPrimary ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-300">
