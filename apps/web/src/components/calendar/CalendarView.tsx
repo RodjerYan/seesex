@@ -2,7 +2,7 @@
  * CalendarView — сетка месяца (неделя с понедельника), mobile-first.
  * Glass-редизайн (T-20261001-004/S4): день — glass-плитка rounded-xl,
  * «сегодня» — градиентная рамка pink→violet, выбранный — сплошной
- * bg-primary + glow (day-selected-glow) + scale-105; заголовок месяца —
+ * bg-primary + glow (day-selected-glow) + scale-[1.04]; заголовок месяца —
  * крупный, с subtle brand-gradient по названию месяца.
  *
  * Статусы событий — цветные pill-полоски под числом (до 3 в ряд + «+N»):
@@ -113,7 +113,7 @@ export function CalendarView({
     <div className="glass p-3">
       {/* Шапка: компактный заголовок месяца (brand-gradient) + круглые стрелки 44px. */}
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="min-w-0 truncate text-xl font-bold leading-none tracking-tight text-slate-50">
+        <h2 className="min-w-0 truncate text-xl font-bold leading-tight tracking-tight text-slate-50">
           <span className="brand-gradient">{monthName}</span>
           {yearName ? (
             <span className="ml-1.5 text-sm font-medium text-slate-400">{yearName}</span>
@@ -177,15 +177,15 @@ export function CalendarView({
                 aria-pressed={isSelected}
                 onClick={() => onSelectDate(key)}
                 className={cx(
-                  'relative flex min-h-[44px] flex-col items-center justify-start gap-0.5 rounded-xl border px-0.5 py-0.5',
+                  'relative flex min-h-[44px] flex-col items-center justify-center rounded-xl border px-0.5 py-0.5',
                   'transition-all duration-200',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                   isSelected
-                    ? 'day-selected-glow z-10 scale-105 border-transparent bg-primary'
+                    ? 'day-selected-glow z-10 scale-[1.04] border-transparent bg-primary'
                     : cx(
                         // «Сегодня»: градиентная рамка pink→violet поверх glass-подложки.
                         isToday
-                          ? 'border-pink-400/50 bg-gradient-to-br from-[#FF6BA3]/20 to-[#E0B8FF]/15 ring-1 ring-pink-400/40'
+                          ? 'border-transparent bg-gradient-to-br from-[#FF6BA3]/20 to-[#E0B8FF]/15 ring-1 ring-pink-400/40'
                           : inMonth
                             ? 'border-transparent'
                             : 'border-white/5',
@@ -208,9 +208,9 @@ export function CalendarView({
                   {date.getDate()}
                 </span>
 
-                {/* Полоски статусов: высота строки фиксирована — ритм сетки не плавает. */}
+                {/* Полоски статусов: вне потока (absolute), чтобы не сдвигали цифру от центра ячейки. */}
                 <span
-                  className="flex h-1.5 w-full items-center justify-start gap-[2px]"
+                  className="pointer-events-none absolute inset-x-0 bottom-1 flex h-1.5 items-center justify-center gap-[2px]"
                   aria-hidden="true"
                 >
                   {events.slice(0, 3).map((event) => (

@@ -27,7 +27,7 @@ import { LoadingBlock } from '../ui/states';
 import { TagInput, type TagGroup } from './TagInput';
 
 /** Пресеты типов событий; свой тип уходит как isCustomType=true. */
-const EVENT_TYPE_PRESETS = ['SEX', 'KISS', 'MASSAGE', 'ORAL', 'OTHER', 'CUSTOM'] as const;
+const EVENT_TYPE_PRESETS = ['SEX', 'KISS', 'MASSAGE', 'ORAL', 'ANAL', 'OTHER', 'CUSTOM'] as const;
 
 export type EventStatusValue = 'occurred' | 'planned' | 'turndown';
 

@@ -27,6 +27,7 @@ export const EVENT_META: Record<string, EventMeta> = {
   KISS: { label: eventTypeLabel('KISS'), Icon: Sparkles, color: '#E0B8FF' },
   MASSAGE: { label: eventTypeLabel('MASSAGE'), Icon: Hand, color: '#A78BFA' },
   ORAL: { label: eventTypeLabel('ORAL'), Icon: Flame, color: '#FB7185' },
+  ANAL: { label: eventTypeLabel('ANAL'), Icon: Flame, color: '#FB923C' },
   OTHER: { label: eventTypeLabel('OTHER'), Icon: Flame, color: '#FF6BA3' },
   TURNDOWN: { label: eventTypeLabel('TURNDOWN'), Icon: Ban, color: '#6B7280' },
 };
