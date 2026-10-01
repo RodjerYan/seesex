@@ -143,6 +143,20 @@ export default function Layout() {
         </Suspense>
       </main>
 
+      {/* Нижняя fade-маска (T-20261001-013/A2): скроллящийся контент
+          «проступал» в 16-px зазоре под плавающей пилюлей (см. nav ниже) —
+          пользователь видел «вылезающие» блоки. Градиент снизу вверх:
+          непрозрачный фон приложения (token surface — ровно тот, что рисует
+          корневой .app-dvh, body-фон #07040A закрыт им) → прозрачный сверху.
+          h-24 (96px) перекрывает зазор под nav (1rem) + запас.
+          Слои: контент < маска (z-10) < FAB (z-20) < nav (z-30);
+          pointer-events-none — клики доходят до контента/FAB/nav.
+          На sm+ скрыта — как у nav (ниже сайдбар, маска не нужна). */}
+      <div
+        aria-hidden="true"
+        className="page-bottom-fade pointer-events-none fixed inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-surface via-surface/70 to-transparent sm:hidden"
+      />
+
       {/* Mobile: плавающая таб-пилюля (T10-S1, ревизия S4) — парит над
           контентом, контент прокручивается ПОД неё; отступ снизу учитывает
           home-indicator (var(--sab)), от краёв экрана ~16px, max-width

@@ -81,10 +81,11 @@ export function StatTile({
   hint?: string;
 }): ReactElement {
   return (
-    <div className="glass p-3">
+    // !rounded-2xl — перебивает border-radius:32px из .glass (плитка не должна быть pill)
+    <div className="glass !rounded-2xl p-2.5 flex flex-col gap-1">
       <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-lg font-semibold tabular-nums text-slate-100">{value}</p>
-      {hint ? <p className="mt-0.5 text-[11px] text-slate-500">{hint}</p> : null}
+      <p className="text-lg font-semibold tabular-nums text-slate-100 -mt-0.5">{value}</p>
+      {hint ? <p className="text-[11px] text-slate-500">{hint}</p> : null}
     </div>
   );
 }

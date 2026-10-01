@@ -85,6 +85,19 @@ export function CalendarView({
   const cells = monthGrid(cursor.year, cursor.month);
   const todayKey = dayKey(new Date());
 
+  // Скрытие trailing-недели: если последняя неделя (7 ячеек) полностью вне текущего месяца
+  // И в ней нет событий — обрезаем до 35 ячеек (5 недель вместо 6, экономия ~44px).
+  // Ведущая неделя (первая) НЕ убираем — она может содержать дни текущего месяца.
+  let displayCells = cells;
+  if (cells.length === 42) {
+    const lastWeek = cells.slice(35);
+    const allOutsideMonth = lastWeek.every((d) => d.getMonth() !== cursor.month);
+    const hasEvents = lastWeek.some((d) => days.has(dayKey(d)));
+    if (allOutsideMonth && !hasEvents) {
+      displayCells = cells.slice(0, 35);
+    }
+  }
+
   const shift = (delta: number) => {
     const next = addMonths(cursor.year, cursor.month, delta);
     setCursor(next);
@@ -97,13 +110,13 @@ export function CalendarView({
   ).split(' ');
 
   return (
-    <div className="glass p-4 sm:p-5">
-      {/* Шапка: крупный заголовок месяца (brand-gradient) + круглые стрелки 44px. */}
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="min-w-0 truncate text-2xl font-bold leading-none tracking-tight text-slate-50">
+    <div className="glass p-3">
+      {/* Шапка: компактный заголовок месяца (brand-gradient) + круглые стрелки 44px. */}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h2 className="min-w-0 truncate text-xl font-bold leading-none tracking-tight text-slate-50">
           <span className="brand-gradient">{monthName}</span>
           {yearName ? (
-            <span className="ml-1.5 text-base font-medium text-slate-400">{yearName}</span>
+            <span className="ml-1.5 text-sm font-medium text-slate-400">{yearName}</span>
           ) : null}
         </h2>
         <div className="flex items-center gap-1.5">
@@ -127,11 +140,11 @@ export function CalendarView({
       </div>
 
       {/* Дни недели: чистая типографика, приглушённая, но читаемая. */}
-      <div className="mb-1 grid grid-cols-7 gap-1 px-0.5 text-center">
+      <div className="mb-0.5 grid grid-cols-7 gap-0.5 px-0.5 text-center">
         {WEEKDAYS.map((weekday) => (
           <span
             key={weekday}
-            className="py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
+            className="py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
           >
             {weekday}
           </span>
@@ -146,9 +159,9 @@ export function CalendarView({
         /* key по году-месяцу: смена месяца проигрывает fade-in сетки (pure CSS). */
         <div
           key={`${cursor.year}-${cursor.month}`}
-          className="grid grid-cols-7 gap-1 animate-[page-in_200ms_ease-out]"
+          className="grid grid-cols-7 gap-0.5 animate-[page-in_200ms_ease-out]"
         >
-          {cells.map((date) => {
+          {displayCells.map((date) => {
             const key = dayKey(date);
             const events = days.get(key) ?? [];
             const inMonth = date.getMonth() === cursor.month;
@@ -164,7 +177,7 @@ export function CalendarView({
                 aria-pressed={isSelected}
                 onClick={() => onSelectDate(key)}
                 className={cx(
-                  'relative flex min-h-[44px] flex-col items-center justify-start gap-1 rounded-xl border px-0.5 py-1',
+                  'relative flex min-h-[44px] flex-col items-center justify-start gap-0.5 rounded-xl border px-0.5 py-0.5',
                   'transition-all duration-200',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                   isSelected
@@ -173,14 +186,16 @@ export function CalendarView({
                         // «Сегодня»: градиентная рамка pink→violet поверх glass-подложки.
                         isToday
                           ? 'border-pink-400/50 bg-gradient-to-br from-[#FF6BA3]/20 to-[#E0B8FF]/15 ring-1 ring-pink-400/40'
-                          : 'border-white/10',
+                          : inMonth
+                            ? 'border-transparent'
+                            : 'border-white/5',
                         'bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12]',
                       ),
                 )}
               >
                 <span
                   className={cx(
-                    'flex h-8 w-8 items-center justify-center rounded-full text-[13px] leading-none transition-colors',
+                    'flex h-7 w-7 items-center justify-center rounded-full text-[13px] leading-none transition-colors',
                     isSelected
                       ? 'font-semibold text-white'
                       : isToday
@@ -195,7 +210,7 @@ export function CalendarView({
 
                 {/* Полоски статусов: высота строки фиксирована — ритм сетки не плавает. */}
                 <span
-                  className="flex h-2.5 w-full items-center justify-start gap-[2px]"
+                  className="flex h-1.5 w-full items-center justify-start gap-[2px]"
                   aria-hidden="true"
                 >
                   {events.slice(0, 3).map((event) => (
@@ -231,22 +246,22 @@ export function CalendarView({
         </div>
       )}
 
-      {/* Легенда: чипы-плашки; не-compact — + 4-й чип с иконкой типа. */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.08] pt-2.5 text-[11px] text-slate-400">
-        <span className="flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2 py-1">
+      {/* Легенда: компактные чипы-плашки; не-compact — + 4-й чип с иконкой типа. */}
+      <div className="mt-2 flex flex-wrap items-center gap-1 border-t border-white/[0.08] pt-2 text-[11px] text-slate-400">
+        <span className="flex items-center gap-1 rounded-full bg-white/[0.06] px-1.5 py-0.5">
           <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.occurred)} aria-hidden="true" />
           состоялось
         </span>
-        <span className="flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2 py-1">
+        <span className="flex items-center gap-1 rounded-full bg-white/[0.06] px-1.5 py-0.5">
           <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.turndown)} aria-hidden="true" />
           отказ
         </span>
-        <span className="flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2 py-1">
+        <span className="flex items-center gap-1 rounded-full bg-white/[0.06] px-1.5 py-0.5">
           <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.planned)} aria-hidden="true" />
           запланировано
         </span>
         {!compact ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2 py-1">
+          <span className="flex items-center gap-1 rounded-full bg-white/[0.06] px-1.5 py-0.5">
             <TYPE_LEGEND_ICON className="h-3 w-3 text-slate-300" aria-hidden="true" />
             тип
           </span>
