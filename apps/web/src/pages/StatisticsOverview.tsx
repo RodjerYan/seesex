@@ -14,6 +14,7 @@ import { ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { downloadExport, type ExportKind } from '../lib/download';
 import { errorMessage } from '../lib/errors';
 import { formatDate, shortMonthLabel } from '../lib/format';
+import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
 import {
   useFrequency,
   useOverview,
@@ -21,11 +22,56 @@ import {
   usePositionStats,
   useRatings,
 } from '../lib/queries';
-import { eventTypeLabel } from '../lib/eventTypeLabels';
+import { eventMeta } from '../lib/eventMeta';
 
 function numberOr(value: number | null | undefined, fallback = '—'): string {
   if (value === null || value === undefined || Number.isNaN(value)) return fallback;
   return String(value);
+}
+
+/**
+ * Строки «По типам»: слева цветной чип с иконкой типа (eventMeta),
+ * справа счётчик и бар. Локальная замена RowBars, т.к. ChartItem.label — строка.
+ */
+export function TypeBars({
+  items,
+}: {
+  items: { eventType: string; count: number }[];
+}): ReactElement {
+  const rows = items.map((item) => ({ ...item, meta: eventMeta(item.eventType) }));
+  const max = Math.max(1, ...rows.map((row) => row.count));
+  return (
+    <ul className="space-y-2">
+      {rows.map(({ eventType, count, meta: { Icon, color, label } }, index) => (
+        <li key={`${eventType}-${index}`}>
+          <div className="mb-1 flex items-center justify-between gap-2 text-xs">
+            <span
+              className="inline-flex min-w-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+              style={{
+                borderColor: `${color}55`,
+                backgroundColor: `${color}1A`,
+                color,
+              }}
+            >
+              <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="truncate">{label}</span>
+            </span>
+            <span className="shrink-0 tabular-nums text-slate-400">{count}</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+            <div
+              className="h-full rounded-full bg-primary-400/80 animate-grow-up"
+              style={{
+                width: `${Math.max(3, (count / max) * 100)}%`,
+                transformOrigin: 'left',
+                animationDelay: `${index * 40}ms`,
+              }}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /** Сводная статистика: KPI + частота (столбцы) + оценки + топы + экспорт. */
@@ -79,7 +125,7 @@ export default function StatisticsOverview(): ReactElement {
   const positionItems = (positionsQuery.data?.positions ?? []).slice(0, 8).map((item) => ({
     label: item.name,
     value: item.count,
-    hint: item.category ?? undefined,
+    hint: item.category ? tr(POSITION_CATEGORY_LABEL, item.category, item.category) : undefined,
   }));
 
   return (
@@ -169,12 +215,7 @@ export default function StatisticsOverview(): ReactElement {
             {overviewQuery.data.eventsByType.length > 0 ? (
               <div className="mt-4">
                 <SectionTitle>По типам</SectionTitle>
-                <RowBars
-                  items={overviewQuery.data.eventsByType.map((item) => ({
-                    label: eventTypeLabel(item.eventType),
-                    value: item.count,
-                  }))}
-                />
+                <TypeBars items={overviewQuery.data.eventsByType} />
               </div>
             ) : null}
           </Card>

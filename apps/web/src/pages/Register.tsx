@@ -82,7 +82,12 @@ export default function Register(): ReactElement {
           <h1 className="mt-3 text-xl font-bold tracking-tight text-slate-100">
             Регистрация
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Новый аккаунт SeeSex</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Новый аккаунт{' '}
+            <span className="font-['Great_Vibes'] text-[19px] leading-none tracking-tight brand-gradient">
+              SeeSex
+            </span>
+          </p>
         </div>
 
         <form

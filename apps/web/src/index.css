@@ -358,6 +358,13 @@ body {
     color: transparent;
   }
 
+  /* Каллиграфический логотип SeeSex (Great Vibes, T-20261001-004/S2).
+     drop-shadow glow: работает поверх background-clip:text — тень берёт
+     альфу от нарисованных глифов-градиента, а не от прозрачного color. */
+  .logo-script {
+    filter: drop-shadow(0 0 10px rgba(224, 184, 255, 0.45));
+  }
+
   /* Selected day glow — for CalendarView */
   .day-selected-glow {
     box-shadow: 0 0 16px rgba(245, 41, 110, 0.35);

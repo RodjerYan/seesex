@@ -6,6 +6,7 @@ import { Button, Fab } from '../../components/ui/controls';
 import { CardSkeleton, EmptyState } from '../../components/ui/listStates';
 import { ErrorBlock } from '../../components/ui/states';
 import { formatDate } from '../../lib/format';
+import { RELATIONSHIP_LABEL, tr } from '../../lib/labels';
 import { usePartners } from '../../lib/queries';
 
 /** Список партнёров: карточки, бейдж «основной», FAB создания. */
@@ -52,7 +53,11 @@ export default function PartnerList(): ReactElement {
                     ) : null}
                   </p>
                   <p className="mt-0.5 truncate text-xs text-slate-500">
-                    {[partner.nickname, partner.pronouns, partner.relationshipStatus]
+                    {[
+                      partner.nickname,
+                      partner.pronouns,
+                      tr(RELATIONSHIP_LABEL, partner.relationshipStatus, partner.relationshipStatus ?? ''),
+                    ]
                       .filter(Boolean)
                       .join(' · ') || 'Без дополнительных данных'}
                   </p>

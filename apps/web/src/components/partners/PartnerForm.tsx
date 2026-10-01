@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { GENDER_LABEL, ORIENTATION_LABEL, RELATIONSHIP_LABEL, tr } from '../../lib/labels';
 import type { PartnerView } from '../../types/api';
 import { Button, Card, Field, Input, SectionTitle, Select, cx } from '../ui/controls';
 
@@ -125,7 +126,7 @@ export function PartnerForm({
             <Select id="pf-gender" {...register('gender')}>
               {GENDERS.map((value) => (
                 <option key={value || 'none'} value={value}>
-                  {value || 'Не указано'}
+                  {value ? tr(GENDER_LABEL, value) : 'Не указано'}
                 </option>
               ))}
             </Select>
@@ -134,7 +135,7 @@ export function PartnerForm({
             <Select id="pf-orientation" {...register('sexualOrientation')}>
               {ORIENTATIONS.map((value) => (
                 <option key={value || 'none'} value={value}>
-                  {value || 'Не указано'}
+                  {value ? tr(ORIENTATION_LABEL, value) : 'Не указано'}
                 </option>
               ))}
             </Select>
@@ -149,7 +150,7 @@ export function PartnerForm({
             <Select id="pf-relationship" {...register('relationshipStatus')}>
               {RELATIONSHIPS.map((value) => (
                 <option key={value || 'none'} value={value}>
-                  {value || 'Не указано'}
+                  {value ? tr(RELATIONSHIP_LABEL, value) : 'Не указано'}
                 </option>
               ))}
             </Select>

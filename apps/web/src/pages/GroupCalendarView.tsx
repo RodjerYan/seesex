@@ -9,6 +9,7 @@ import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate, formatDateTime } from '../lib/format';
+import { GROUP_ROLE_LABEL, tr } from '../lib/labels';
 import {
   groupCalendarEventsQueryKey,
   groupCalendarsQueryKey,
@@ -17,7 +18,7 @@ import {
   useGroupCalendarEvents,
 } from '../lib/queries';
 import type { CalendarStatus, EventView, GroupCalendarView } from '../types/api';
-import { eventTypeLabel } from '../lib/eventTypeLabels';
+import { eventMeta } from '../lib/eventMeta';
 import { STATUS_LABEL } from '../components/events/EventCard';
 
 function DataRow({ label, value }: { label: string; value: ReactNode }): ReactElement {
@@ -117,7 +118,7 @@ export default function GroupCalendarView(): ReactElement {
       <div className="mb-4">
         <h1 className="text-xl font-bold tracking-tight text-slate-100">{calendar.name}</h1>
         <p className="mt-1 text-xs text-slate-500">
-          Ваша роль: {calendar.role ?? 'участник'} · создан {formatDate(calendar.createdAt)}
+          Ваша роль: {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} · создан {formatDate(calendar.createdAt)}
         </p>
       </div>
 
@@ -163,7 +164,7 @@ export default function GroupCalendarView(): ReactElement {
               >
                 <span className="truncate text-slate-300">{member.email ?? member.userId}</span>
                 <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
-                  {member.role}
+                  {tr(GROUP_ROLE_LABEL, member.role, 'Участник')}
                 </span>
               </li>
             ))}
@@ -206,26 +207,42 @@ export default function GroupCalendarView(): ReactElement {
         />
       ) : (
         <ul className="stagger space-y-2">
-          {(eventsQuery.data ?? []).map((event) => (
-            <li key={event.id}>
-              <Link
-                to={`/events/${event.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-100">
-                    {event.title || eventTypeLabel(event.eventType)}
-                  </p>
-                  <p className="mt-0.5 truncate text-[11px] text-slate-500">
-                    {formatDateTime(event.date)}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
-                  {STATUS_LABEL[event.status as CalendarStatus] ?? event.status}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {(eventsQuery.data ?? []).map((event) => {
+            const { Icon, color, label } = eventMeta(event.eventType);
+            return (
+              <li key={event.id}>
+                <Link
+                  to={`/events/${event.id}`}
+                  className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      {event.title ? (
+                        <p className="truncate text-sm font-medium text-slate-100">{event.title}</p>
+                      ) : null}
+                      <span
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                        style={{
+                          borderColor: `${color}55`,
+                          backgroundColor: `${color}1A`,
+                          color,
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                        {label}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                      {formatDateTime(event.date)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
+                    {STATUS_LABEL[event.status as CalendarStatus] ?? event.status}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

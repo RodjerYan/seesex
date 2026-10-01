@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { formatDate, formatDuration, formatTime } from '../../lib/format';
 import type { CalendarStatus, EventView } from '../../types/api';
 import { cx } from '../ui/controls';
-import { eventTypeLabel } from '../../lib/eventTypeLabels';
+import { eventMeta } from '../../lib/eventMeta';
 import { Stars } from '../ui/Stars';
 
 export const STATUS_LABEL: Record<CalendarStatus, string> = {
@@ -30,6 +30,7 @@ interface EventCardProps {
 
 export function EventCard({ event, onDelete, showGroupName }: EventCardProps): ReactElement {
   const date = new Date(event.date);
+  const { Icon, color, label } = eventMeta(event.eventType);
   const partnerNames = event.partners.map((partner) => partner.name);
   const positionNames = event.positions.map((position) => position.name);
 
@@ -37,15 +38,26 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
     <div className={cx('glass transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20')}>
       <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
         <div className="flex items-start justify-between gap-2">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-slate-100">
               {formatDate(event.date)}
               <span className="ml-2 text-xs font-normal text-slate-500">{formatTime(date)}</span>
             </p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              {event.title || eventTypeLabel(event.eventType)}
-              {event.isCustomType ? ' · свой тип' : ''}
-            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {event.title ? <p className="truncate text-xs text-slate-400">{event.title}</p> : null}
+              <span
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                style={{
+                  borderColor: `${color}55`,
+                  backgroundColor: `${color}1A`,
+                  color,
+                }}
+              >
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                {label}
+              </span>
+              {event.isCustomType ? <span className="text-[11px] text-slate-500">свой тип</span> : null}
+            </div>
           </div>
           <span
             className={cx(

@@ -10,6 +10,7 @@ import { EmptyBlock, ErrorBlock, LoadingBlock } from '../../components/ui/states
 import { api, uploadForm } from '../../lib/api';
 import { formatDate } from '../../lib/format';
 import { errorMessage } from '../../lib/errors';
+import { GENDER_LABEL, ORIENTATION_LABEL, RELATIONSHIP_LABEL, tr } from '../../lib/labels';
 import {
   partnerQueryKey,
   partnersQueryKey,
@@ -169,10 +170,16 @@ export default function PartnerDetail(): ReactElement {
         <SectionTitle>Данные</SectionTitle>
         <dl>
           <DataRow label="Прозвище" value={partner.nickname} />
-          <DataRow label="Пол" value={partner.gender} />
-          <DataRow label="Ориентация" value={partner.sexualOrientation} />
+          <DataRow label="Пол" value={tr(GENDER_LABEL, partner.gender, partner.gender ?? '')} />
+          <DataRow
+            label="Ориентация"
+            value={tr(ORIENTATION_LABEL, partner.sexualOrientation, partner.sexualOrientation ?? '')}
+          />
           <DataRow label="Местоимения" value={partner.pronouns} />
-          <DataRow label="Отношения" value={partner.relationshipStatus} />
+          <DataRow
+            label="Отношения"
+            value={tr(RELATIONSHIP_LABEL, partner.relationshipStatus, partner.relationshipStatus ?? '')}
+          />
         </dl>
         {partner.customFields && Object.keys(partner.customFields).length > 0 ? (
           <dl className="mt-2">

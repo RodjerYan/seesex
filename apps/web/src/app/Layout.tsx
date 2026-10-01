@@ -97,7 +97,9 @@ export default function Layout() {
         {/* Логотип по центру шапки (T10-S2): кнопка блокировки вынесена в
             absolute справа, чтобы не сдвигать/перекрывать надпись. */}
         <div className="relative mx-auto flex h-14 max-w-5xl items-center justify-center px-4">
-          <span className="text-xl font-semibold italic tracking-tight brand-gradient">SeeSex</span>
+          <span className="logo-script font-['Great_Vibes'] text-[26px] leading-none tracking-tight brand-gradient">
+            SeeSex
+          </span>
           <button
             type="button"
             aria-label="Заблокировать приложение"

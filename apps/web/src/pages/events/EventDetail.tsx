@@ -18,7 +18,7 @@ import { formatDate, formatDateTime, formatDuration, formatTime } from '../../li
 import { errorMessage } from '../../lib/errors';
 import { eventQueryKey, overviewQueryKey, useEvent } from '../../lib/queries';
 import type { PhotoView } from '../../types/api';
-import { eventTypeLabel } from '../../lib/eventTypeLabels';
+import { eventMeta } from '../../lib/eventMeta';
 
 const STATUS_LABEL: Record<string, string> = {
   occurred: 'Состоялось',
@@ -114,6 +114,7 @@ export default function EventDetail(): ReactElement {
 
   const item = eventQuery.data;
   const date = new Date(item.date);
+  const { Icon, color, label } = eventMeta(item.eventType);
 
   return (
     <section className="px-4 py-6 sm:px-6">
@@ -145,7 +146,7 @@ export default function EventDetail(): ReactElement {
           {STATUS_LABEL[item.status] ?? item.status}
         </p>
         <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-100">
-          {item.title || eventTypeLabel(item.eventType)}
+          {item.title || label}
           {item.isCustomType ? <span className="ml-2 text-sm font-normal text-slate-500">(свой тип)</span> : null}
         </h1>
         <p className="mt-1 text-sm text-slate-400">
@@ -169,7 +170,24 @@ export default function EventDetail(): ReactElement {
           <Row label="Калории">{item.calories === null ? '—' : `${item.calories} ккал`}</Row>
           <Row label="Пульс">{item.heartRate === null ? '—' : `${item.heartRate} уд/мин`}</Row>
           <Row label="Инициатор">{item.initiatedBy || '—'}</Row>
-          <Row label="Тип">{eventTypeLabel(item.eventType)}</Row>
+          <Row label="Тип">
+            <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+              <span
+                className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                style={{
+                  borderColor: `${color}55`,
+                  backgroundColor: `${color}1A`,
+                  color,
+                }}
+              >
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                {label}
+              </span>
+              {item.isCustomType && item.eventType.trim() !== label ? (
+                <span className="text-xs text-slate-500">{item.eventType}</span>
+              ) : null}
+            </span>
+          </Row>
           <Row label="Создано">{item.createdAt ? formatDateTime(item.createdAt) : '—'}</Row>
         </dl>
       </Card>

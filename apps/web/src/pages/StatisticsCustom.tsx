@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 
-import { RowBars, StatTile } from '../components/statistics/Charts';
+import { StatTile } from '../components/statistics/Charts';
 import {
   DEFAULT_RANGE,
   RangePicker,
@@ -13,7 +13,7 @@ import { Card, SectionTitle } from '../components/ui/controls';
 import { ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { formatDate } from '../lib/format';
 import { useCustomStats, useGroupCalendars } from '../lib/queries';
-import { eventTypeLabel } from '../lib/eventTypeLabels';
+import { TypeBars } from './StatisticsOverview';
 
 /** Расширенная статистика: произвольный период + фильтр по групповым календарям. */
 export default function StatisticsCustom(): ReactElement {
@@ -120,12 +120,7 @@ export default function StatisticsCustom(): ReactElement {
           {statsQuery.data.eventsByType.length > 0 ? (
             <div className="mt-4">
               <SectionTitle>По типам</SectionTitle>
-<RowBars
-                  items={statsQuery.data.eventsByType.map((item) => ({
-                    label: eventTypeLabel(item.eventType),
-                    value: item.count,
-                  }))}
-              />
+              <TypeBars items={statsQuery.data.eventsByType} />
             </div>
           ) : (
             <p className="mt-3 text-xs text-slate-500">За выбранный период событий нет.</p>

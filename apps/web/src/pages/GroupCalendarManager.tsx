@@ -9,6 +9,7 @@ import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
+import { GROUP_ROLE_LABEL, tr } from '../lib/labels';
 import { groupCalendarsQueryKey, useGroupCalendars } from '../lib/queries';
 import type { GroupCalendarView } from '../types/api';
 
@@ -148,7 +149,7 @@ export default function GroupCalendarManager(): ReactElement {
                   <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>
                   <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-slate-500">
                     <Users className="h-3 w-3" aria-hidden="true" />
-                    {calendar.memberCount} участник(ов) · {calendar.role ?? 'участник'} ·{' '}
+                    {calendar.memberCount} участник(ов) · {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} ·{' '}
                     {formatDate(calendar.createdAt)}
                   </p>
                 </div>

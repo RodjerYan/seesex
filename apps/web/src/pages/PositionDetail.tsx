@@ -8,6 +8,7 @@ import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
+import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
 import { PositionIcon } from '../lib/positionIcons';
 import {
   allPositionsQueryKey,
@@ -156,7 +157,9 @@ export default function PositionDetail(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <p className="text-xs uppercase tracking-wide text-slate-500">{position.category}</p>
+        <p className="text-xs uppercase tracking-wide text-slate-500">
+          {tr(POSITION_CATEGORY_LABEL, position.category, position.category)}
+        </p>
         <div className="mt-1 flex items-center gap-3">
           <PositionIcon name={position.name} className="w-7 h-7 text-primary-400" />
           <h1 className="text-xl font-bold tracking-tight text-slate-100">{position.name}</h1>

@@ -9,6 +9,7 @@ import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
+import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
 import {
   useAllPositions,
   useWishlist,
@@ -18,6 +19,13 @@ import type { WishlistView } from '../types/api';
 
 function entryLabel(entry: WishlistView): string {
   return entry.position?.name ?? entry.customName ?? 'Без названия';
+}
+
+/** Подпись категории записи: переводим известные, свои оставляем как есть. */
+function entryCategory(entry: WishlistView): string {
+  const raw = entry.position?.category ?? entry.customCategory ?? '';
+  if (!raw) return 'без категории';
+  return tr(POSITION_CATEGORY_LABEL, raw, raw);
 }
 
 /** Вишлист: список пожеланий, добавление (из каталога или своим текстом), отметка, удаление. */
@@ -234,7 +242,7 @@ export default function Wishlist(): ReactElement {
                   </p>
                 )}
                 <p className="mt-0.5 truncate text-[11px] text-slate-500">
-                  {entry.position?.category ?? entry.customCategory ?? 'без категории'} · добавлено{' '}
+                  {entryCategory(entry)} · добавлено{' '}
                   {formatDate(entry.createdAt)}
                   {entry.isCompleted && entry.completedAt
                     ? ` · выполнено ${formatDate(entry.completedAt)}`

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 import '@fontsource-variable/inter';
+import '@fontsource/great-vibes/400.css';
 import AppRouter from './app/router';
 import { queryClient } from './lib/queryClient';
 import './index.css';

@@ -11,16 +11,16 @@
  * а planned/occurred сверяются с датой (валидация в схеме).
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Search } from 'lucide-react';
+import { ChevronDown, Plus, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { dayKey, formatTime } from '../../lib/format';
+import { eventMeta } from '../../lib/eventMeta';
 import { PositionIcon } from '../../lib/positionIcons';
 import { useAllPositions, usePartners } from '../../lib/queries';
 import type { EventView } from '../../types/api';
-import { eventTypeLabel } from '../../lib/eventTypeLabels';
 import { Stars } from '../ui/Stars';
 import { Button, Card, ErrorText, Field, Input, MutedText, SectionTitle, Select, TextArea, cx } from '../ui/controls';
 import { LoadingBlock } from '../ui/states';
@@ -192,6 +192,7 @@ export function EventForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -215,14 +216,24 @@ export function EventForm({
   const partnersQuery = usePartners();
   const positionsQuery = useAllPositions();
 
-  const filteredPositions = useMemo(() => {
+  const positionNeedle = positionSearch.trim().toLowerCase();
+  /** Пустой поиск → топ-12 каталога; с поиском — до 60 как раньше. */
+  const positionLimit = positionNeedle ? 60 : 12;
+
+  const matchedPositions = useMemo(() => {
     const all = positionsQuery.data ?? [];
-    const needle = positionSearch.trim().toLowerCase();
-    const matched = needle
-      ? all.filter((position) => position.name.toLowerCase().includes(needle))
-      : all;
-    return matched.slice(0, 60);
-  }, [positionsQuery.data, positionSearch]);
+    if (!positionNeedle) return all;
+    return all.filter((position) => position.name.toLowerCase().includes(positionNeedle));
+  }, [positionsQuery.data, positionNeedle]);
+
+  const filteredPositions = useMemo(
+    () => matchedPositions.slice(0, positionLimit),
+    [matchedPositions, positionLimit],
+  );
+
+  /** Пустой поиск скрывает часть каталога — подсказываем, что есть ещё. */
+  const truncatedByEmptySearch =
+    !positionNeedle && matchedPositions.length > filteredPositions.length;
 
   const toggle = (id: string, current: string[], setter: (value: string[]) => void): void => {
     setter(current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
@@ -283,11 +294,14 @@ export function EventForm({
       <Card className="mb-4">
         <SectionTitle>Когда и что</SectionTitle>
 
-        {/* overflow-hidden: на реальном iOS Safari внутренний datetime-edit рисуется
-            шире бокса инпута (~180px при ячейке 156px) и заезжает под соседнее поле.
-            Обрезаем любую внутреннюю отрисовку; кольца фокуса/ring (box-shadow самого
-            элемента) своим overflow не режутся — режутся только потомки. */}
-        <div className="grid grid-cols-2 gap-3 min-w-0">
+        {/* Дата и Время — каждое поле на всю ширину (grid-cols-1).
+            Основной фикс наезда — геометрия: на реальном iOS Safari внутренний
+            datetime-edit рисуется шире бокса инпута (~180px при ячейке 156px) и
+            заезжает под соседнее поле; при полной ширине соседа просто нет.
+            overflow-hidden оставляем как страховку от внутренней отрисовки;
+            кольца фокуса/ring (box-shadow самого элемента) своим overflow не
+            режутся — режутся только потомки. */}
+        <div className="grid grid-cols-1 gap-3 min-w-0">
           <Field label="Дата" htmlFor="ev-date" error={errors.date?.message}>
             <Input
               id="ev-date"
@@ -308,13 +322,33 @@ export function EventForm({
           </Field>
         </div>
 
+        {/* Статус/Длительность остаются в 2 колонки: нативного bleed у этих
+            контролов нет. min-w-0 у ячеек — чтобы ошибка (p.mt-1) переносилась
+            внутри своей ячейки и не распирала соседнюю: у grid по умолчанию
+            align-items:stretch, ячейки растут по высоте строки, контент — сверху,
+            наездов строк быть не может. */}
         <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Статус" htmlFor="ev-status">
-            <Select id="ev-status" {...register('status')}>
-              <option value="occurred">Состоялось</option>
-              <option value="planned">Запланировано</option>
-              <option value="turndown">Отказ</option>
-            </Select>
+            <div className="relative min-w-0">
+              {/* «Запланировано» (≈117px) + шеврон: расширяем текстовую зону —
+                  padLeft 10 вместо 12, padRight 26 (было 32) и шеврон 14px:
+                  тексту остаётся 120px, до шеврона ≈3px. tracking-tight —
+                  запас, если letter-spacing применится к нативному select. */}
+              <Select
+                id="ev-status"
+                className="appearance-none min-h-[44px] tracking-tight"
+                style={{ paddingLeft: 10, paddingRight: 26 }}
+                {...register('status')}
+              >
+                <option value="occurred">Состоялось</option>
+                <option value="planned">Запланировано</option>
+                <option value="turndown">Отказ</option>
+              </Select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+            </div>
           </Field>
           <Field label="Длительность, мин" htmlFor="ev-duration" error={errors.duration?.message}>
             <Input
@@ -327,15 +361,49 @@ export function EventForm({
           </Field>
         </div>
 
-        <Field label="Тип события" htmlFor="ev-type" error={errors.customType?.message}>
-          <Select id="ev-type" disabled={typeFieldDisabled} {...register('eventType')}>
-            {EVENT_TYPE_PRESETS.filter((item) => item !== 'CUSTOM').map((item) => (
-              <option key={item} value={item}>
-                {eventTypeLabel(item)}
-              </option>
-            ))}
-            <option value="CUSTOM">Свой тип…</option>
-          </Select>
+        {/* Тип события — чипы вместо нативного select (на iOS нативный select
+            перекрывает соседей и его стили почти не управляются).
+            Значение формы не меняется: поле по-прежнему в схеме/zod и в submit,
+            переключаем его через setValue('eventType', …, {shouldDirty:true})
+            + watch — как раньше register('eventType'). */}
+        <Field label="Тип события" error={errors.customType?.message}>
+          <div
+            role="group"
+            aria-label="Тип события"
+            data-testid="event-type-chips"
+            className="flex flex-wrap gap-2"
+          >
+            {EVENT_TYPE_PRESETS.map((item) => {
+              const meta = eventMeta(item);
+              const active = eventType === item;
+              const isCustom = item === 'CUSTOM';
+              const Icon = isCustom ? Plus : meta.Icon;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  aria-pressed={active}
+                  disabled={typeFieldDisabled}
+                  onClick={() => setValue('eventType', item, { shouldDirty: true })}
+                  className={cx(
+                    'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                    active
+                      ? 'border-primary-400 bg-primary/20 text-primary-400'
+                      : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',
+                    typeFieldDisabled && 'cursor-not-allowed opacity-50',
+                  )}
+                >
+                  <Icon
+                    aria-hidden="true"
+                    className="h-4 w-4 shrink-0"
+                    style={active ? undefined : { color: meta.color }}
+                  />
+                  {isCustom ? 'Свой тип…' : meta.label}
+                </button>
+              );
+            })}
+          </div>
           {typeFieldDisabled ? (
             <MutedText>При статусе «Отказ» событие сохранится как отказ.</MutedText>
           ) : null}
@@ -414,7 +482,10 @@ export function EventForm({
               />
             </div>
 
-            <div className="max-h-56 overflow-y-auto rounded-lg border border-white/10">
+            <div
+              data-testid="positions-list"
+              className="max-h-56 overflow-y-auto rounded-lg border border-white/10"
+            >
               {filteredPositions.length === 0 ? (
                 <p className="px-3 py-4 text-center text-xs text-slate-500">Ничего не найдено</p>
               ) : (
@@ -445,7 +516,8 @@ export function EventForm({
             </div>
             <MutedText>
               Выбрано: {positionIds.length}. Показано {filteredPositions.length} из{' '}
-              {(positionsQuery.data ?? []).length}.
+              {matchedPositions.length}
+              {truncatedByEmptySearch ? ' — введите поиск' : ''}.
             </MutedText>
           </>
         )}

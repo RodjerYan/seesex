@@ -8,6 +8,7 @@ import { CardSkeleton, EmptyState } from '../components/ui/listStates';
 import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
+import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
 import { PositionIcon } from '../lib/positionIcons';
 import {
   allPositionsQueryKey,
@@ -44,7 +45,7 @@ function PositionRow({
           </Link>
           <p className="mt-0.5 flex items-center gap-2 truncate text-[11px] text-slate-500">
             <span className="rounded border border-white/10 bg-white/[0.06] px-1.5 py-0.5 uppercase tracking-wide">
-              {position.category}
+              {tr(POSITION_CATEGORY_LABEL, position.category, position.category)}
             </span>
             {position.isSystem ? 'системная' : 'своя'}
           </p>
@@ -82,6 +83,7 @@ export default function PositionCatalog(): ReactElement {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [showAll, setShowAll] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('STANDARD');
@@ -107,6 +109,12 @@ export default function PositionCatalog(): ReactElement {
       return true;
     });
   }, [positionsQuery.data, category, search]);
+
+  // По умолчанию — топ-12; при активном поиске лимит повышается до 60 (как в EventForm).
+  const searchActive = search.trim().length > 0;
+  const limit = searchActive ? 60 : showAll ? Number.POSITIVE_INFINITY : 12;
+  const visible = filtered.slice(0, limit);
+  const hiddenCount = filtered.length - visible.length;
 
   const addToWishlist = useMutation({
     mutationFn: (positionId: string) =>
@@ -201,7 +209,7 @@ export default function PositionCatalog(): ReactElement {
                 : 'shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-slate-400'
             }
           >
-            {item}
+            {tr(POSITION_CATEGORY_LABEL, item, item)}
           </button>
         ))}
       </div>
@@ -272,25 +280,51 @@ export default function PositionCatalog(): ReactElement {
           }
         />
       ) : (
-        <ul className="stagger space-y-2">
-          {filtered.map((position) => (
-            <PositionRow
-              key={position.id}
-              position={position}
-              inWishlist={wishlistPositionIds.has(position.id)}
-              onAddToWishlist={() => addToWishlist.mutate(position.id)}
-              onDelete={
-                position.isSystem
-                  ? undefined
-                  : () => {
-                      if (window.confirm(`Удалить позицию «${position.name}»?`)) {
-                        removePosition.mutate(position.id);
+        <>
+          <ul className="stagger space-y-2">
+            {visible.map((position) => (
+              <PositionRow
+                key={position.id}
+                position={position}
+                inWishlist={wishlistPositionIds.has(position.id)}
+                onAddToWishlist={() => addToWishlist.mutate(position.id)}
+                onDelete={
+                  position.isSystem
+                    ? undefined
+                    : () => {
+                        if (window.confirm(`Удалить позицию «${position.name}»?`)) {
+                          removePosition.mutate(position.id);
+                        }
                       }
-                    }
-              }
-            />
-          ))}
-        </ul>
+                }
+              />
+            ))}
+          </ul>
+
+          <p className="mt-3 text-center text-xs text-slate-500">
+            Показано {visible.length} из {filtered.length}
+          </p>
+
+          {!searchActive && hiddenCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="press mt-2 w-full min-h-[44px] rounded-full border border-white/15 bg-white/[0.06] text-sm text-slate-200 transition-colors hover:bg-white/[0.1]"
+            >
+              Показать все ({filtered.length})
+            </button>
+          ) : null}
+
+          {!searchActive && showAll && filtered.length > 12 ? (
+            <button
+              type="button"
+              onClick={() => setShowAll(false)}
+              className="press mt-2 w-full min-h-[44px] rounded-full border border-white/15 bg-white/[0.06] text-sm text-slate-200 transition-colors hover:bg-white/[0.1]"
+            >
+              Показать меньше
+            </button>
+          ) : null}
+        </>
       )}
 
       <Fab label="Создать позицию" onClick={() => setCreating(true)}>
