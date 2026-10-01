@@ -37,6 +37,22 @@ export class ApiError extends Error {
 }
 
 /**
+ * Проверяет, истекает ли JWT-токен в ближайшие 60 секунд.
+ * Возвращает true, если токен невалиден, отсутствует или exp < now + 60s.
+ */
+export function isTokenExpiring(jwt: string | null): boolean {
+  if (!jwt) return true;
+  try {
+    const payload = JSON.parse(atob(jwt.split('.')[1] ?? '')) as { exp?: number };
+    if (!payload.exp) return true;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return payload.exp - nowSec < 60;
+  } catch {
+    return true;
+  }
+}
+
+/**
  * Адаптер токенов: реализуется auth-store, чтобы api.ts не зависел от store
  * (иначе циклический импорт store <-> api).
  */
@@ -201,6 +217,11 @@ async function sendWithRefresh(
   send: (token: string | null) => Promise<Response>,
   auth: boolean,
 ): Promise<Response> {
+  // Проактивный refresh ДО первого send, если access-токен протухает (< 60с).
+  if (auth && authAdapter && isTokenExpiring(authAdapter.getAccessToken())) {
+    await refreshSession();
+  }
+
   let response = await send(auth ? authAdapter?.getAccessToken() ?? null : null);
 
   if (response.status === 401 && auth) {

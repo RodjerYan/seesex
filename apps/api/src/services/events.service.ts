@@ -84,6 +84,7 @@ export function eventView(event: EventRow): Record<string, unknown> {
     heartRate: event.heartRate,
     initiatedBy: event.initiatedBy,
     groupCalendarId: event.groupCalendarId,
+    userId: event.userId,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
     partners: namedView(event.partners),
@@ -357,10 +358,14 @@ export async function updateEvent(
 
 export async function deleteEvent(userId: string, eventId: string): Promise<void> {
   const event = await assertOwnEvent(userId, eventId);
-  for (const photo of event.photos ?? []) {
-    unlinkUpload(photo.filePath);
-  }
   await prisma.event.delete({ where: { id: eventId } });
+  for (const photo of event.photos ?? []) {
+    try {
+      unlinkUpload(photo.filePath);
+    } catch {
+      // Файл уже отсутствует — не блокируем удаление.
+    }
+  }
 }
 
 export interface CalendarDay {

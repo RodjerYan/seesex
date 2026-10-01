@@ -34,9 +34,11 @@ export function relativeUploadPath(kind: 'events' | 'partners', filename: string
 export function unlinkUpload(relativePath: string): void {
   const absolute = resolveUploadPath(relativePath);
   if (!absolute) return;
-  fs.rm(absolute, { force: true }, (err) => {
-    if (err) logger.warn(`Failed to remove upload ${relativePath}: ${err.message}`);
-  });
+  try {
+    fs.rmSync(absolute, { force: true });
+  } catch (err) {
+    logger.warn(`Failed to remove upload ${relativePath}: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 /**

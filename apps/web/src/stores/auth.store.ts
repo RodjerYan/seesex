@@ -14,7 +14,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { api, refreshAccessToken, setAuthAdapter } from '../lib/api';
+import { api, refreshAccessToken, setAuthAdapter, isTokenExpiring } from '../lib/api';
 import type { SessionUser } from '../types';
 
 export interface AuthTokens {
@@ -172,6 +172,15 @@ export const useAuthStore = create<AuthState>()(
       // Refresh хранится отдельно в localStorage (ключ xtracker.refresh),
       // не в zustand persist — чтобы не дублировать и контролировать миграцию.
       partialize: (state) => ({ accessToken: state.accessToken, user: state.user }),
+      // При гидрации: если access-токен протухает (< 60с) — проактивно рефрешим
+      // ДО того, как react-query запросы начнут уходить (избегаем 401+retry).
+      onRehydrateStorage: () => (state) => {
+        if (state?.accessToken && isTokenExpiring(state.accessToken)) {
+          // Запускаем refresh асинхронно, не блокируя рендер.
+          // api.ts.sendWithRefresh тоже проверит isTokenExpiring перед первым запросом.
+          void refreshAccessToken();
+        }
+      },
     },
   ),
 );

@@ -51,12 +51,12 @@ beforeEach(() => {
 });
 
 describe('GET /api/health', () => {
-  it('returns ok and rate-limit headers', async () => {
+  it('returns ok without rate-limit headers (health is outside /api limiter)', async () => {
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ status: 'ok', service: 'xtracker-api' });
-    // draft-7 заголовки общего rate-limiter
-    expect(res.headers['ratelimit']).toBeDefined();
+    // health endpoint is outside the /api rate limiter — no ratelimit headers
+    expect(res.headers['ratelimit']).toBeUndefined();
   });
 });
 

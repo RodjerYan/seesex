@@ -59,11 +59,13 @@ export function createApp(): Express {
   );
   app.use(corsMiddleware);
   app.use(express.json({ limit: '100kb' }));
-  app.use(generalLimiter);
 
   // Health для render.yaml healthCheckPath (/health) + /api/health по спеке.
   app.get('/health', healthHandler);
   app.get('/api/health', healthHandler);
+
+  // Limiter — только на API, статику и health не считаем.
+  app.use('/api', generalLimiter);
 
   app.use('/api/auth', authRouter);
   app.use('/api/events', eventsRouter);

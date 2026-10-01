@@ -7,10 +7,13 @@ import { EventCard } from '../../components/events/EventCard';
 import { Button, ErrorText, Fab, Field, Select } from '../../components/ui/controls';
 import { EmptyState, CardSkeleton } from '../../components/ui/listStates';
 import { ErrorBlock } from '../../components/ui/states';
+import { Toast } from '../../components/ui/Toast';
 import { api } from '../../lib/api';
 import { MS_PER_DAY, eventsRu, formatDate, isValidDayKey } from '../../lib/format';
 import { errorMessage } from '../../lib/errors';
 import { overviewQueryKey, useEvents, usePartners, type EventsFilter } from '../../lib/queries';
+import type { ListEventsResult } from '../../types/api';
+import { useAuthStore } from '../../stores/auth.store';
 
 type PeriodKey = 'all' | 'day' | 'today' | '7' | '30' | '90';
 
@@ -62,6 +65,7 @@ export default function EventList(): ReactElement {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
+  const myUserId = useAuthStore((state) => state.user?.id ?? null);
 
   const [day, setDay] = useState<string | null>(() => readDateParam(searchParams));
   const [period, setPeriod] = useState<PeriodKey>(() => (readDateParam(searchParams) ? 'day' : 'all'));
@@ -97,11 +101,29 @@ export default function EventList(): ReactElement {
 
   const remove = useMutation({
     mutationFn: (id: string) => api.delete(`/api/events/${id}`),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['events', 'list', filter] });
+      const prev = queryClient.getQueryData<ListEventsResult>(['events', 'list', filter]);
+      queryClient.setQueryData<ListEventsResult>(['events', 'list', filter], (old: ListEventsResult | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          events: old.events.filter((e) => e.id !== id),
+          total: old.total - 1,
+        };
+      });
+      return { prev };
+    },
+    onError: (error: Error, _id: string, ctx: { prev: ListEventsResult | undefined } | undefined) => {
+      if (ctx?.prev) {
+        queryClient.setQueryData(['events', 'list', filter], ctx.prev);
+      }
+      setListError(errorMessage(error));
+    },
+    onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ['events'] });
       void queryClient.invalidateQueries({ queryKey: overviewQueryKey });
     },
-    onError: (error) => setListError(errorMessage(error)),
   });
 
   const onDelete = (id: string): void => {
@@ -169,6 +191,10 @@ export default function EventList(): ReactElement {
         </div>
       ) : null}
 
+      {remove.isError && (
+        <Toast message={errorMessage(remove.error)} tone="error" durationMs={4000} />
+      )}
+
       {eventsQuery.isLoading ? (
         <CardSkeleton label="Загрузка событий…" />
       ) : eventsQuery.isError ? (
@@ -192,7 +218,12 @@ export default function EventList(): ReactElement {
       ) : (
         <div className="stagger space-y-3">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} onDelete={() => onDelete(event.id)} />
+            <EventCard
+              key={event.id}
+              event={event}
+              onDelete={event.userId === myUserId ? () => onDelete(event.id) : undefined}
+              isDeleting={remove.isPending && remove.variables === event.id}
+            />
           ))}
 
           {total > events.length ? (

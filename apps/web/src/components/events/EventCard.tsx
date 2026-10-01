@@ -26,9 +26,11 @@ interface EventCardProps {
   onDelete?: () => void;
   /** Показывать имя группового календаря (список группы). */
   showGroupName?: boolean;
+  /** Карточка в процессе удаления (optimistic) — показывать спиннер/дизейбл. */
+  isDeleting?: boolean;
 }
 
-export function EventCard({ event, onDelete, showGroupName }: EventCardProps): ReactElement {
+export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventCardProps): ReactElement {
   const date = new Date(event.date);
   const { Icon, color, label } = eventMeta(event.eventType);
   const partnerNames = event.partners.map((partner) => partner.name);
@@ -95,11 +97,27 @@ export function EventCard({ event, onDelete, showGroupName }: EventCardProps): R
           <button
             type="button"
             onClick={onDelete}
+            disabled={isDeleting}
             aria-label="Удалить событие"
-            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.12] active:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.12] active:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-            Удалить
+            {isDeleting ? (
+              <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeDasharray="31.4 31.4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {isDeleting ? 'Удаление…' : 'Удалить'}
           </button>
         </div>
       ) : null}

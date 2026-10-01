@@ -51,6 +51,7 @@ export default function EventCreate(): ReactElement {
       api.post<{ event: EventView }>('/api/events', payload),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: ['events'] });
+      void queryClient.invalidateQueries({ queryKey: ['calendar'] });
       void queryClient.invalidateQueries({ queryKey: overviewQueryKey });
       // Сначала — заметное подтверждение, потом переход (см. Toast).
       setCreated(true);

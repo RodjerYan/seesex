@@ -545,3 +545,71 @@ body {
     opacity: 0.7;
   }
 }
+
+/* ============================================================
+   7. CALENDAR SLIDE ANIMATIONS (CAL-004)
+   Направленные анимации смены месяца + prefers-reduced-motion
+   ============================================================ */
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-left {
+  animation: slide-left 200ms ease-out;
+}
+.animate-slide-right {
+  animation: slide-right 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-left,
+  .animate-slide-right {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   EventForm (EF-001/EF-002/EF-003/EF-006)
+   ============================================================ */
+/* iOS Safari: нативный date/time-контрол имеет intrinsic-width от
+   datetime-edit сегментов — ломает ширину карточки. Снимаем нативный
+   рендер (тип input остаётся date/time — picker нативный). */
+input[type='date'],
+input[type='time'] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 3rem; /* EF-003: единая высота 48px со всеми контролами */
+}
+input[type='date']::-webkit-date-and-time-value,
+input[type='time']::-webkit-date-and-time-value {
+  text-align: left; /* EF-002: значение прижато влево как у остальных полей */
+}
+
+/* EF-006: при фокусе/тапе контрол доводится выше плавающего таб-бара,
+   а не остаётся под плавающей пилюлей. */
+form [role='group'],
+form button,
+form input,
+form select,
+form textarea {
+  scroll-margin-bottom: calc(var(--tabbar-height) + var(--tabbar-bottom) + 1rem);
+}

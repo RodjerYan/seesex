@@ -24,6 +24,7 @@ export default function EventEdit(): ReactElement {
       api.put<{ event: EventView }>(`/api/events/${id}`, payload),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: ['events'] });
+      void queryClient.invalidateQueries({ queryKey: ['calendar'] });
       void queryClient.invalidateQueries({ queryKey: overviewQueryKey });
       navigate(`/events/${data.event.id}`, { replace: true });
     },

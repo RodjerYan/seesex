@@ -8,22 +8,22 @@ function limitedHandler(message: string) {
   };
 }
 
-/** Общий лимит: RATE_LIMIT_MAX запросов за RATE_LIMIT_WINDOW_MS на IP. */
+/** Общий лимит: 1000 запросов за 15 минут на IP. */
 export const generalLimiter: RateLimitRequestHandler = rateLimit({
-  windowMs: config.RATE_LIMIT_WINDOW_MS,
-  limit: config.RATE_LIMIT_MAX,
+  windowMs: 15 * 60 * 1000,
+  limit: 1000,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler: limitedHandler('Too many requests, please try again later.'),
 });
 
 /**
- * Жёсткий лимит на POST /api/auth/login и POST /api/auth/register:
- * 10 попыток / 15 минут / IP (переопределяется env AUTH_RATE_LIMIT_MAX / AUTH_RATE_LIMIT_WINDOW_MS).
+ * Жёсткий лимит на /api/auth (login, register, refresh): ~30 запросов / 15 минут / IP.
+ * Защита от brute-force.
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
-  windowMs: config.AUTH_RATE_LIMIT_WINDOW_MS,
-  limit: config.AUTH_RATE_LIMIT_MAX,
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler: limitedHandler('Too many authentication attempts, please try again later.'),

@@ -44,6 +44,7 @@ export interface EventView {
   heartRate: number | null;
   initiatedBy: string | null;
   groupCalendarId: string | null;
+  userId: string;
   createdAt?: string;
   updatedAt?: string;
   partners: NamedRef[];

@@ -8,7 +8,7 @@ export const authRouter: Router = Router();
 // Публичные (без requireAuth): register, login, refresh — на них жёсткий rate-limit.
 authRouter.post('/register', authLimiter, authController.register);
 authRouter.post('/login', authLimiter, authController.login);
-authRouter.post('/refresh', authController.refresh);
+authRouter.post('/refresh', authLimiter, authController.refresh);
 
 // Защищённые requireAuth (Bearer access JWT).
 authRouter.post('/logout', requireAuth, authController.logout);

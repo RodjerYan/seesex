@@ -13,7 +13,7 @@ import type {
 } from 'react';
 
 export const inputClass =
-  'w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2.5 text-[16px] leading-5 text-slate-100 ' +
+  'w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-white/[0.08] h-12 px-3 py-2.5 text-left text-[16px] leading-5 text-slate-100 ' +
   'placeholder:text-slate-500 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ' +
   'disabled:opacity-50';
 

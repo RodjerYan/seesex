@@ -21,7 +21,8 @@ export function useEvents(filter: EventsFilter = {}): UseQueryResult<ListEventsR
     queryKey: eventsQueryKey(filter),
     queryFn: ({ signal }) =>
       api.get<ListEventsResult>('/api/events', { query: { ...filter }, signal }),
-    staleTime: 15_000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 
