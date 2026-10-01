@@ -13,6 +13,10 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         if (error instanceof ApiError && error.status >= 400 && error.status < 500) return false;
+        // Таймаут/отмена — не ретраим: иначе «вечная Загрузка…» до n×12с.
+        if (error instanceof DOMException && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+          return false;
+        }
         return failureCount < 2;
       },
     },

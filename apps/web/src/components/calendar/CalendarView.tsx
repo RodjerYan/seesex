@@ -1,5 +1,8 @@
 /**
  * CalendarView — сетка месяца (неделя с понедельника), mobile-first.
+ * Редизайн в духе Apple Calendar внутри тёмной glass-темы: крупный заголовок
+ * месяца, круглые кнопки-стрелки (44px), акцентный выбранный день с glow,
+ * контурной «сегодня», приглушённые дни чужих месяцев.
  *
  * Точки статуса: 🔴 occurred (красная), ⚪ turndown (серая), 🟣 planned (фиолетовая).
  * Иконки типов событий — под датами. Клик по дню -> onSelectDate.
@@ -35,6 +38,14 @@ const STATUS_DOT: Record<CalendarStatus, string> = {
   turndown: 'bg-slate-400',
   planned: 'bg-violet-500',
 };
+
+/** Круглая кнопка-стрелка навигации: тач-зона 44×44, hover/active/focus. */
+const NAV_BTN =
+  'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 ' +
+  'bg-white/[0.06] text-slate-300 transition-all ' +
+  'hover:border-white/20 hover:bg-white/[0.12] hover:text-slate-50 ' +
+  'active:scale-95 active:bg-white/[0.16] ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400';
 
 /** Иконка типа события под датой. */
 export function eventIcon(eventType: string): LucideIcon {
@@ -90,33 +101,49 @@ export function CalendarView({
     setCursor(next);
   };
 
+  // «Сентябрь 2026» -> крупное «Сентябрь» + приглушённый «2026».
+  const [monthName = monthLabel(cursor.year, cursor.month), yearName] = monthLabel(
+    cursor.year,
+    cursor.month,
+  ).split(' ');
+
   return (
-    <div className="glass p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <button
-          type="button"
-          aria-label="Предыдущий месяц"
-          onClick={() => shift(-1)}
-          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-        >
-          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <p className="text-sm font-semibold text-slate-100">
-          {monthLabel(cursor.year, cursor.month)}
-        </p>
-        <button
-          type="button"
-          aria-label="Следующий месяц"
-          onClick={() => shift(1)}
-          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-        >
-          <ChevronRight className="h-5 w-5" aria-hidden="true" />
-        </button>
+    <div className="glass p-4 sm:p-5">
+      {/* Шапка: крупный заголовок месяца + круглые стрелки 44px. */}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="min-w-0 truncate text-2xl font-bold leading-none tracking-tight text-slate-50">
+          {monthName}
+          {yearName ? (
+            <span className="ml-1.5 text-base font-medium text-slate-400">{yearName}</span>
+          ) : null}
+        </h2>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Предыдущий месяц"
+            onClick={() => shift(-1)}
+            className={NAV_BTN}
+          >
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Следующий месяц"
+            onClick={() => shift(1)}
+            className={NAV_BTN}
+          >
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-7 text-center text-[10px] font-medium uppercase text-slate-500">
+      {/* Дни недели: чистая типографика, приглушённая, но читаемая. */}
+      <div className="mb-1 grid grid-cols-7 gap-1 px-0.5 text-center">
         {WEEKDAYS.map((weekday) => (
-          <span key={weekday} className="py-1">
+          <span
+            key={weekday}
+            className="py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
+          >
             {weekday}
           </span>
         ))}
@@ -144,34 +171,42 @@ export function CalendarView({
                 aria-pressed={isSelected}
                 onClick={() => onSelectDate(key)}
                 className={cx(
-                  'flex min-h-[3rem] flex-col items-center justify-start rounded-lg px-0.5 py-1 transition-colors',
+                  'flex min-h-[44px] flex-col items-center justify-start gap-1 rounded-2xl px-0.5 py-1',
+                  'transition-colors duration-150',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
-                  inMonth ? 'text-slate-200' : 'text-slate-600',
                   isSelected
-                    ? 'bg-primary/20 ring-1 ring-primary-400 day-selected-glow'
-                    : 'hover:bg-white/[0.06]',
+                    ? 'day-selected-glow bg-primary/[0.10]'
+                    : inMonth
+                      ? 'hover:bg-white/[0.07] active:bg-white/[0.12]'
+                      : 'hover:bg-white/[0.04] active:bg-white/[0.07]',
                 )}
               >
                 <span
                   className={cx(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-xs',
-                    isToday && !isSelected ? 'bg-slate-700 font-semibold' : '',
+                    'flex h-8 w-8 items-center justify-center rounded-full text-[13px] leading-none',
+                    isSelected
+                      ? 'bg-primary font-semibold text-white shadow-[0_0_14px_rgba(245,41,110,0.6)]'
+                      : isToday
+                        ? 'font-semibold text-primary-400 ring-1 ring-primary-400/50'
+                        : inMonth
+                          ? 'font-medium text-slate-100'
+                          : 'font-normal text-slate-600',
                   )}
                 >
                   {date.getDate()}
                 </span>
 
-                <span className="mt-0.5 flex min-h-[4px] items-center justify-center gap-0.5">
+                <span className="flex h-1.5 items-center justify-center gap-[3px]">
                   {events.slice(0, 3).map((event) => (
                     <span
                       key={event.id}
-                      className={cx('h-2 w-2 rounded-full', STATUS_DOT[event.status])}
+                      className={cx('h-1.5 w-1.5 rounded-full', STATUS_DOT[event.status])}
                     />
                   ))}
                 </span>
 
                 {!compact && inMonth && types.length > 0 ? (
-                  <span className="mt-0.5 flex items-center justify-center gap-0.5 text-slate-500">
+                  <span className="flex h-3.5 items-center justify-center gap-1 text-slate-400">
                     {types.map((type) => {
                       const Icon = eventIcon(type);
                       return <Icon key={type} className="h-3 w-3" aria-hidden="true" />;
@@ -184,15 +219,16 @@ export function CalendarView({
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-2 text-[10px] text-slate-500">
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" /> состоялось
+      {/* Легенда: та же информация, аккуратнее. */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.08] pt-2.5 text-[11px] text-slate-500">
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" /> состоялось
         </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-slate-400" aria-hidden="true" /> отказ
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" /> отказ
         </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-violet-500" aria-hidden="true" /> запланировано
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-violet-500" aria-hidden="true" /> запланировано
         </span>
       </div>
     </div>

@@ -38,6 +38,9 @@ export function errorMessage(error: unknown): string {
     if (error.status >= 500) return 'Сервер недоступен — попробуйте позже';
     return error.message;
   }
+  if (error instanceof DOMException && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+    return 'Сервер не отвечает — проверьте соединение и повторите';
+  }
   if (error instanceof Error && error.message) return error.message;
   return 'Что-то пошло не так';
 }

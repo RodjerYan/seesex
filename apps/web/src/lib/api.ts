@@ -56,6 +56,34 @@ export function setAuthAdapter(adapter: AuthAdapter): void {
   authAdapter = adapter;
 }
 
+/**
+ * Таймаут запроса: без него fetch может висеть ВЕЧНО (мёртвый API/сеть) и
+ * UI навсегда остаётся в скелетонах «Загрузка…» (баг T-20261001-001).
+ */
+const DEFAULT_TIMEOUT_MS = 12_000;
+
+function withTimeout(
+  external: AbortSignal | undefined,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): { signal: AbortSignal; cleanup: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(new DOMException('Сервер не отвечает — таймаут запроса', 'TimeoutError'));
+  }, timeoutMs);
+  const onAbort = () => controller.abort(external?.reason);
+  if (external) {
+    if (external.aborted) onAbort();
+    else external.addEventListener('abort', onAbort, { once: true });
+  }
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      clearTimeout(timer);
+      external?.removeEventListener('abort', onAbort);
+    },
+  };
+}
+
 /** Очередь: все параллельные 401 ждут ОДИН refresh. */
 let refreshInFlight: Promise<boolean> | null = null;
 
@@ -66,11 +94,13 @@ async function refreshSession(): Promise<boolean> {
 
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
+      const timeout = withTimeout(undefined, 10_000);
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({ refreshToken }),
+          signal: timeout.signal,
         });
         if (!response.ok) return false;
         const data = (await response.json()) as { accessToken?: string; refreshToken?: string };
@@ -83,6 +113,7 @@ async function refreshSession(): Promise<boolean> {
       } catch {
         return false;
       } finally {
+        timeout.cleanup();
         refreshInFlight = null;
       }
     })();
@@ -138,24 +169,28 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     signal,
   } = options;
   const url = buildUrl(path, query);
+  const timeout = withTimeout(signal);
+  try {
+    const send = (token: string | null): Promise<Response> => {
+      const finalHeaders = new Headers(headers);
+      finalHeaders.set('Accept', 'application/json');
+      if (body !== undefined) finalHeaders.set('Content-Type', 'application/json');
+      if (auth && token) finalHeaders.set('Authorization', `Bearer ${token}`);
+      return fetch(url, {
+        method,
+        headers: finalHeaders,
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal: timeout.signal,
+      });
+    };
 
-  const send = (token: string | null): Promise<Response> => {
-    const finalHeaders = new Headers(headers);
-    finalHeaders.set('Accept', 'application/json');
-    if (body !== undefined) finalHeaders.set('Content-Type', 'application/json');
-    if (auth && token) finalHeaders.set('Authorization', `Bearer ${token}`);
-    return fetch(url, {
-      method,
-      headers: finalHeaders,
-      body: body === undefined ? undefined : JSON.stringify(body),
-      signal,
-    });
-  };
-
-  const response = await sendWithRefresh(send, auth);
-  if (!response.ok) throw await toApiError(response);
-  if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+    const response = await sendWithRefresh(send, auth);
+    if (!response.ok) throw await toApiError(response);
+    if (response.status === 204) return undefined as T;
+    return (await response.json()) as T;
+  } finally {
+    timeout.cleanup();
+  }
 }
 
 /**
@@ -187,22 +222,28 @@ async function sendWithRefresh(
  */
 export async function uploadForm<T>(path: string, formData: FormData): Promise<T> {
   const url = buildUrl(path);
+  const timeout = withTimeout(undefined, 60_000); // загрузка фото может быть медленной
   const send = (token: string | null): Promise<Response> => {
     const headers = new Headers();
     headers.set('Accept', 'application/json');
     if (token) headers.set('Authorization', `Bearer ${token}`);
-    return fetch(url, { method: 'POST', headers, body: formData });
+    return fetch(url, { method: 'POST', headers, body: formData, signal: timeout.signal });
   };
 
-  const response = await sendWithRefresh(send, true);
-  if (!response.ok) throw await toApiError(response);
-  return (await response.json()) as T;
+  try {
+    const response = await sendWithRefresh(send, true);
+    if (!response.ok) throw await toApiError(response);
+    return (await response.json()) as T;
+  } finally {
+    timeout.cleanup();
+  }
 }
 
 /** Сырой запрос (экспорт json/csv): нужен Blob + Content-Disposition. */
 export async function rawRequest(path: string, options: RequestOptions = {}): Promise<Response> {
   const { method = 'GET', body, query, auth = true, headers, signal } = options;
   const url = buildUrl(path, query);
+  const timeout = withTimeout(signal, 30_000); // экспорт может готовиться дольше
   const send = (token: string | null): Promise<Response> => {
     const finalHeaders = new Headers(headers);
     finalHeaders.set('Accept', 'application/json, text/csv, */*');
@@ -212,10 +253,14 @@ export async function rawRequest(path: string, options: RequestOptions = {}): Pr
       method,
       headers: finalHeaders,
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal,
+      signal: timeout.signal,
     });
   };
-  return sendWithRefresh(send, auth);
+  try {
+    return await sendWithRefresh(send, auth);
+  } finally {
+    timeout.cleanup();
+  }
 }
 
 /** Короткие обёртки HTTP-методов. */

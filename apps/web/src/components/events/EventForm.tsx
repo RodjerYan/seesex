@@ -283,12 +283,28 @@ export function EventForm({
       <Card className="mb-4">
         <SectionTitle>Когда и что</SectionTitle>
 
+        {/* overflow-hidden: на реальном iOS Safari внутренний datetime-edit рисуется
+            шире бокса инпута (~180px при ячейке 156px) и заезжает под соседнее поле.
+            Обрезаем любую внутреннюю отрисовку; кольца фокуса/ring (box-shadow самого
+            элемента) своим overflow не режутся — режутся только потомки. */}
         <div className="grid grid-cols-2 gap-3 min-w-0">
           <Field label="Дата" htmlFor="ev-date" error={errors.date?.message}>
-            <Input id="ev-date" type="date" invalid={Boolean(errors.date)} {...register('date')} />
+            <Input
+              id="ev-date"
+              type="date"
+              invalid={Boolean(errors.date)}
+              className="overflow-hidden"
+              {...register('date')}
+            />
           </Field>
           <Field label="Время" htmlFor="ev-time" error={errors.time?.message}>
-            <Input id="ev-time" type="time" invalid={Boolean(errors.time)} {...register('time')} />
+            <Input
+              id="ev-time"
+              type="time"
+              invalid={Boolean(errors.time)}
+              className="overflow-hidden"
+              {...register('time')}
+            />
           </Field>
         </div>
 
