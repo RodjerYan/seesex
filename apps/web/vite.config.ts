@@ -11,7 +11,7 @@ export default defineConfig({
       // 'virtual:pwa-register' в src/main.tsx (workbox-window). 'auto' генерировал
       // бы dist/registerSW.js с второй navigator.serviceWorker.register() в проде.
       injectRegister: false,
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       manifest: {
         name: 'SeeSex — Личный дневник событий, статистика и календарь',
         short_name: 'SeeSex',
