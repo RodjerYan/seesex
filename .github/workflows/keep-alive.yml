@@ -18,7 +18,7 @@ jobs:
           set +e
           for i in 1 2 3; do
             echo "Attempt $i/3"
-            body=$(curl --max-time 30 -s -o /tmp/health_body -w '%{http_code}' https://xtracker-web.onrender.com/health)
+            body=$(curl --max-time 30 -s -o /tmp/health_body -w '%{http_code}' https://xtracker-web-2xn8.onrender.com/health)
             rc=$?
             echo "http_code=$body (curl exit $rc)"
             head -c 300 /tmp/health_body; echo
