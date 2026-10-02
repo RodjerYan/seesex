@@ -84,6 +84,7 @@ model Event {
   userId          String
   title           String?
   eventType       String    @default("SEX")
+  eventTypes      String[]  @default([])
   isCustomType    Boolean   @default(false)
   date            DateTime
   duration        Int?

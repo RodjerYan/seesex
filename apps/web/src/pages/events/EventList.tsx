@@ -71,6 +71,7 @@ export default function EventList(): ReactElement {
   const [period, setPeriod] = useState<PeriodKey>(() => (readDateParam(searchParams) ? 'day' : 'all'));
   const [partnerId, setPartnerId] = useState('');
   const [limit, setLimit] = useState(PAGE_SIZE);
+  const [eventTypesStr, setEventTypesStr] = useState<string | null>(() => searchParams.get('eventTypes') || null);
   const [listError, setListError] = useState<string | null>(null);
 
   // ?date= мог прийти/смениться после монтирования (например, из календаря).
@@ -92,8 +93,13 @@ export default function EventList(): ReactElement {
   }, [day]);
 
   const filter = useMemo<EventsFilter>(
-    () => ({ ...periodRange(period, day), partnerId: partnerId || undefined, limit }),
-    [period, day, partnerId, limit],
+    () => ({ 
+      ...periodRange(period, day), 
+      partnerId: partnerId || undefined, 
+      limit,
+      ...(eventTypesStr ? { eventTypes: eventTypesStr } : {}),
+    }),
+    [period, day, partnerId, limit, eventTypesStr],
   );
 
   const eventsQuery = useEvents(filter);

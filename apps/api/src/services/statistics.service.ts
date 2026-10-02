@@ -49,7 +49,17 @@ export async function overview(userId: string): Promise<Record<string, unknown>>
       _min: { date: true },
       _max: { date: true },
     }),
-    prisma.event.groupBy({ by: ['eventType'], where, _count: true }),
+    (async () => {
+      const typeRows = await prisma.event.findMany({ where, select: { eventTypes: true, eventType: true } });
+      const typeCounts = new Map<string, number>();
+      for (const r of typeRows) {
+        const types = r.eventTypes?.length ? r.eventTypes : [r.eventType];
+        for (const t of new Set(types)) {
+          typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
+        }
+      }
+      return Array.from(typeCounts.entries()).map(([eventType, _count]) => ({ eventType, _count }));
+    })(),
     prisma.partner.count({ where: { userId } }),
     prisma.position.count({ where: { OR: [{ userId }, { isSystem: true }] } }),
     prisma.wishlist.groupBy({ by: ['isCompleted'], where: { userId }, _count: true }),
@@ -357,7 +367,17 @@ export async function custom(
       _avg: { rating: true, duration: true },
       _sum: { calories: true },
     }),
-    prisma.event.groupBy({ by: ['eventType'], where, _count: true }),
+    (async () => {
+      const typeRows = await prisma.event.findMany({ where, select: { eventTypes: true, eventType: true } });
+      const typeCounts = new Map<string, number>();
+      for (const r of typeRows) {
+        const types = r.eventTypes?.length ? r.eventTypes : [r.eventType];
+        for (const t of new Set(types)) {
+          typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
+        }
+      }
+      return Array.from(typeCounts.entries()).map(([eventType, _count]) => ({ eventType, _count }));
+    })(),
   ]);
 
   return {

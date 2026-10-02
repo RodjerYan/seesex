@@ -7,6 +7,7 @@ export const listEventsQuerySchema = paginationSchema.extend({
   dateTo: z.coerce.date().optional(),
   partnerId: idParamSchema.optional(),
   eventType: z.string().trim().min(1).max(64).optional(),
+  eventTypes: z.string().trim().min(1).max(200).optional(),
   groupCalendarId: idParamSchema.optional(),
 });
 
@@ -15,6 +16,7 @@ const idsArray = z.array(idParamSchema).max(50);
 const eventBodyBase = z.object({
   title: z.string().trim().max(200).optional(),
   eventType: z.string().trim().min(1).max(64).default('SEX'),
+  eventTypes: z.array(z.string().trim().min(1).max(64)).min(1).max(20).optional(),
   isCustomType: z.boolean().default(false),
   date: z.coerce.date(),
   duration: nullableInt(0, 43_200),

@@ -240,6 +240,7 @@ const MODELS: Record<ModelKey, ModelSpec> = {
     defaults: (now) => ({
       title: null,
       eventType: 'SEX',
+      eventTypes: ['SEX'],
       isCustomType: false,
       duration: null,
       rating: null,
@@ -479,7 +480,7 @@ const M2M_SIDES: Partial<Record<ModelKey, { join: JoinKey; side: 'a' | 'b' }[]>>
 // where-матчинг
 // ---------------------------------------------------------------------------
 
-const OPERATOR_KEYS = ['in', 'notIn', 'gte', 'lte', 'gt', 'lt', 'not', 'contains', 'startsWith', 'endsWith', 'equals'];
+const OPERATOR_KEYS = ['in', 'notIn', 'gte', 'lte', 'gt', 'lt', 'not', 'contains', 'startsWith', 'endsWith', 'equals', 'has'];
 
 function toComparable(value: unknown): unknown {
   return value instanceof Date ? value.getTime() : value;
@@ -548,6 +549,8 @@ function matchScalar(actual: unknown, expected: unknown): boolean {
           return typeof actual === 'string' && typeof value === 'string' && actual.startsWith(value);
         case 'endsWith':
           return typeof actual === 'string' && typeof value === 'string' && actual.endsWith(value);
+        case 'has':
+          return Array.isArray(actual) && actual.some((item) => matchScalar(item, value));
         default:
           return false;
       }

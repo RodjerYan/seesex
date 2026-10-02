@@ -16,6 +16,22 @@ import { ApiError } from '../middleware/error';
 import { relativeUploadPath, unlinkUpload } from '../middleware/upload';
 import type { CreateEventInput, ListEventsQuery, UpdateEventInput } from '../schemas/events.schema';
 
+/** Известные типы событий (для определения isCustomType). */
+const KNOWN_EVENT_TYPES = [
+  'SEX',
+  'KISS',
+  'MASSAGE',
+  'ORAL',
+  'ANAL',
+  'OTHER',
+  'CUSTOM',
+  'TURNDOWN',
+  'REFUSED',
+  'TURN DOWN',
+  'PLANNED',
+  'OCCURRED',
+] as const;
+
 /** include-дерево для событий (один уровень вложенности). */
 export const eventInclude = {
   partners: true,
@@ -70,10 +86,12 @@ function namedView(rows: { id: string; name: string | null }[] | undefined) {
 }
 
 export function eventView(event: EventRow): Record<string, unknown> {
+  const types = Array.isArray(event.eventTypes) && event.eventTypes.length ? event.eventTypes : [event.eventType];
   return {
     id: event.id,
     title: event.title,
-    eventType: event.eventType,
+    eventType: types[0],
+    eventTypes: types,
     isCustomType: event.isCustomType,
     status: eventStatus(event),
     date: event.date,
@@ -225,11 +243,15 @@ type EventUpdateData = Prisma.EventUncheckedUpdateInput;
 
 function buildCreateData(userId: string, input: CreateEventInput): EventCreateData {
   const notes = notesToStorage(input.notes);
+  const types = unique(input.eventTypes?.length ? input.eventTypes : [input.eventType ?? 'SEX']);
+  const primaryType = types[0];
+  const isCustomType = types.some((t: string) => !KNOWN_EVENT_TYPES.includes(t as (typeof KNOWN_EVENT_TYPES)[number]));
   return {
     userId,
     title: input.title ?? null,
-    eventType: input.eventType,
-    isCustomType: input.isCustomType,
+    eventType: primaryType,
+    eventTypes: types,
+    isCustomType,
     date: input.date,
     duration: input.duration ?? null,
     rating: input.rating ?? null,
@@ -252,10 +274,8 @@ function buildCreateData(userId: string, input: CreateEventInput): EventCreateDa
 
 function buildUpdateData(input: UpdateEventInput): EventUpdateData {
   const notes = notesToStorage(input.notes);
-  return {
+  const data: EventUpdateData = {
     ...(input.title !== undefined ? { title: input.title } : {}),
-    ...(input.eventType !== undefined ? { eventType: input.eventType } : {}),
-    ...(input.isCustomType !== undefined ? { isCustomType: input.isCustomType } : {}),
     ...(input.date !== undefined ? { date: input.date } : {}),
     ...(input.duration !== undefined ? { duration: input.duration } : {}),
     ...(input.rating !== undefined ? { rating: input.rating } : {}),
@@ -272,6 +292,28 @@ function buildUpdateData(input: UpdateEventInput): EventUpdateData {
       ? { accessories: { set: input.accessoryIds.map((id) => ({ id })) } }
       : {}),
   };
+
+  // Handle eventTypes / eventType / isCustomType
+  if (input.eventTypes !== undefined) {
+    const types = unique(input.eventTypes);
+    data.eventType = types[0];
+    data.eventTypes = types;
+    data.isCustomType = types.some((t: string) => !KNOWN_EVENT_TYPES.includes(t as (typeof KNOWN_EVENT_TYPES)[number]));
+  } else if (input.eventType !== undefined) {
+    // Legacy: single eventType provided
+    data.eventType = input.eventType;
+    data.eventTypes = [input.eventType];
+    if (input.isCustomType !== undefined) {
+      data.isCustomType = input.isCustomType;
+    } else {
+      data.isCustomType = !KNOWN_EVENT_TYPES.includes(input.eventType as (typeof KNOWN_EVENT_TYPES)[number]);
+    }
+  } else if (input.isCustomType !== undefined) {
+    // Only isCustomType provided (legacy)
+    data.isCustomType = input.isCustomType;
+  }
+
+  return data;
 }
 
 export interface ListEventsResult {
@@ -287,7 +329,15 @@ export async function listEvents(
 ): Promise<ListEventsResult> {
   const sharedIds = await myCalendarIds(userId);
   const filters: Prisma.EventWhereInput[] = [];
-  if (query.eventType) filters.push({ eventType: query.eventType });
+  if (query.eventTypes) {
+    const types = query.eventTypes.split(',').map((t) => t.trim()).filter(Boolean);
+    if (types.length > 0) {
+      filters.push({ OR: types.map((t) => ({ eventTypes: { has: t } })) });
+    }
+  } else if (query.eventType) {
+    // Legacy: filter by single eventType using eventTypes array
+    filters.push({ eventTypes: { has: query.eventType } });
+  }
   if (query.groupCalendarId) filters.push({ groupCalendarId: query.groupCalendarId });
   if (query.dateFrom || query.dateTo) {
     const date: Prisma.DateTimeFilter = {};
@@ -370,7 +420,7 @@ export async function deleteEvent(userId: string, eventId: string): Promise<void
 
 export interface CalendarDay {
   date: string;
-  events: { id: string; eventType: string; status: CalendarStatus; title: string | null }[];
+  events: { id: string; eventType: string; eventTypes: string[]; status: CalendarStatus; title: string | null }[];
 }
 
 export interface CalendarResult {
@@ -388,6 +438,13 @@ export async function calendar(userId: string, from?: Date, to?: Date): Promise<
   const rows = await prisma.event.findMany({
     where: { AND: [scopeWhere(userId, sharedIds), { date: { gte: fromD, lte: toD } }] },
     orderBy: { date: 'asc' },
+    select: {
+      id: true,
+      eventType: true,
+      eventTypes: true,
+      date: true,
+      title: true,
+    },
   });
 
   const byDay = new Map<string, CalendarDay>();
@@ -398,9 +455,11 @@ export async function calendar(userId: string, from?: Date, to?: Date): Promise<
       day = { date: key, events: [] };
       byDay.set(key, day);
     }
+    const types = Array.isArray(row.eventTypes) && row.eventTypes.length ? row.eventTypes : [row.eventType];
     day.events.push({
       id: row.id,
-      eventType: row.eventType,
+      eventType: types[0],
+      eventTypes: types,
       status: eventStatus(row),
       title: row.title,
     });

@@ -34,6 +34,7 @@ export interface EventView {
   id: string;
   title: string | null;
   eventType: string;
+  eventTypes: string[];
   isCustomType: boolean;
   status: CalendarStatus;
   date: string;
@@ -67,6 +68,7 @@ export interface ListEventsResult {
 export interface CalendarDayEvent {
   id: string;
   eventType: string;
+  eventTypes: string[];
   status: CalendarStatus;
   title: string | null;
 }

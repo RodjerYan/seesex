@@ -8,6 +8,7 @@ export interface EventsFilter {
   dateTo?: string;
   partnerId?: string;
   eventType?: string;
+  eventTypes?: string; // comma-separated list of event types
   limit?: number;
   offset?: number;
 }

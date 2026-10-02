@@ -237,7 +237,7 @@ export function CalendarView({
             const inMonth = date.getMonth() === cursor.month;
             const isSelected = key === selectedDate;
             const isToday = key === todayKey;
-            const types = [...new Set(events.map((event) => event.eventType))].slice(0, 2);
+            const types = [...new Set(events.flatMap((event) => event.eventTypes?.length ? event.eventTypes : [event.eventType]))].slice(0, 3);
 
             // CAL-009: Человекочитаемый aria-label
             const ariaLabel = `${date.getDate()} ${MONTHS_GEN[date.getMonth()]} ${date.getFullYear()}${

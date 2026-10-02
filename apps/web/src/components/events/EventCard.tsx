@@ -32,7 +32,7 @@ interface EventCardProps {
 
 export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventCardProps): ReactElement {
   const date = new Date(event.date);
-  const { Icon, color, label } = eventMeta(event.eventType);
+  const types = event.eventTypes?.length ? event.eventTypes : [event.eventType];
   const partnerNames = event.partners.map((partner) => partner.name);
   const positionNames = event.positions.map((position) => position.name);
 
@@ -47,17 +47,24 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
             </p>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
               {event.title ? <p className="truncate text-xs text-slate-400">{event.title}</p> : null}
-              <span
-                className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
-                style={{
-                  borderColor: `${color}55`,
-                  backgroundColor: `${color}1A`,
-                  color,
-                }}
-              >
-                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                {label}
-              </span>
+              {types.map((type) => {
+                const { Icon, color, label } = eventMeta(type);
+                return (
+                  <span
+                    key={type}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                    style={{
+                      borderColor: `${color}55`,
+                      backgroundColor: `${color}1A`,
+                      color,
+                    }}
+                  >
+                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                    {label}
+                  </span>
+                );
+              })}
+              {types.length > 3 && <span className="text-[11px] text-slate-500">+{types.length - 3}</span>}
               {event.isCustomType ? <span className="text-[11px] text-slate-500">свой тип</span> : null}
             </div>
           </div>

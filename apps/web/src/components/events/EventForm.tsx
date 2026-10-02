@@ -29,11 +29,14 @@ import { TagInput, type TagGroup } from './TagInput';
 /** Пресеты типов событий; свой тип уходит как isCustomType=true. */
 const EVENT_TYPE_PRESETS = ['SEX', 'KISS', 'MASSAGE', 'ORAL', 'ANAL', 'OTHER', 'CUSTOM'] as const;
 
+const PRESET_SET = new Set(EVENT_TYPE_PRESETS);
+
 export type EventStatusValue = 'occurred' | 'planned' | 'turndown';
 
 export interface EventPayload {
   title?: string;
-  eventType: string;
+  eventType?: string; // legacy: first element of eventTypes for backward compatibility
+  eventTypes: string[];
   isCustomType: boolean;
   date: string;
   duration: number | null;
@@ -54,7 +57,7 @@ interface EventFormValues {
   time: string;
   duration: string;
   status: EventStatusValue;
-  eventType: string;
+  selectedTypes: string[];
   customType: string;
   title: string;
   calories: string;
@@ -90,7 +93,7 @@ const eventFormSchema = z
     time: z.string().regex(/^\d{2}:\d{2}$/, 'Укажите время'),
     duration: z.string().superRefine((value, ctx) => checkDigits(ctx, value, 43_200, 'Длительность')),
     status: z.enum(['occurred', 'planned', 'turndown']),
-    eventType: z.string().min(1, 'Укажите тип события'),
+    selectedTypes: z.array(z.string()).min(1, 'Выберите хотя бы один тип события'),
     customType: z.string().max(64, 'Свой тип: не больше 64 символов'),
     title: z.string().max(200, 'Название: не больше 200 символов'),
     calories: z.string().superRefine((value, ctx) => checkDigits(ctx, value, 100_000, 'Калории')),
@@ -118,13 +121,8 @@ const eventFormSchema = z
         message: 'Состоявшееся событие должно быть в прошлом — измените дату или статус',
       });
     }
-    if (values.status !== 'turndown' && values.eventType === 'CUSTOM' && !values.customType.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['customType'],
-        message: 'Укажите название типа события',
-      });
-    }
+    // Note: selectedTypes and customType validation is done manually in submit handler
+    // because zod doesn't have access to the selectedTypes state for conditional validation
   });
 
 interface EventFormProps {
@@ -167,19 +165,32 @@ export function EventForm({
 }: EventFormProps): ReactElement {
   const now = new Date();
   const initialParts = initial ? toLocalParts(initial.date) : { date: dayKey(now), time: formatTime(now) };
-  const initialType = initial?.eventType ?? 'SEX';
-  const initialPreset: string =
-    !initial || (EVENT_TYPE_PRESETS as readonly string[]).includes(initialType)
-      ? initialType
-      : 'CUSTOM';
+
+  // Initialize selectedTypes from initial.eventTypes (new) or fall back to initial.eventType (legacy)
+  // Split into preset types (known in EVENT_TYPE_PRESETS) and unknown types (custom from DB)
+  const rawInitialTypes = initial?.eventTypes?.length
+    ? initial.eventTypes
+    : initial?.eventType
+      ? [initial.eventType]
+      : ['SEX'];
+
+  const isPreset = (t: string): t is (typeof EVENT_TYPE_PRESETS)[number] => PRESET_SET.has(t as (typeof EVENT_TYPE_PRESETS)[number]);
+  const presetTypes = rawInitialTypes.filter(isPreset);
+  const unknownTypes = rawInitialTypes.filter((t) => !isPreset(t));
+  const initialSelectedTypes = [...presetTypes, ...unknownTypes];
 
   const defaultValues: EventFormValues = {
     date: initialParts.date,
     time: initialParts.time,
     duration: initial?.duration === null || initial?.duration === undefined ? '' : String(initial.duration),
     status: initial?.status ?? 'occurred',
-    eventType: initialPreset,
-    customType: initial && initialPreset === 'CUSTOM' ? initialType : '',
+    selectedTypes: initialSelectedTypes,
+    customType:
+      initial &&
+      initialSelectedTypes.includes('CUSTOM') &&
+      !isPreset(initial.eventType)
+        ? initial.eventType
+        : '',
     title: initial?.title ?? '',
     calories: initial?.calories === null || initial?.calories === undefined ? '' : String(initial.calories),
     heartRate:
@@ -193,6 +204,7 @@ export function EventForm({
     handleSubmit,
     watch,
     setValue,
+    setError,
     formState: { errors, isDirty },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -201,7 +213,7 @@ export function EventForm({
   });
 
   const status = watch('status');
-  const eventType = watch('eventType');
+  const selectedTypes = watch('selectedTypes');
 
   const [rating, setRating] = useState<number | null>(initial?.rating ?? null);
   const [partnerIds, setPartnerIds] = useState<string[]>(initial?.partners.map((item) => item.id) ?? []);
@@ -241,13 +253,38 @@ export function EventForm({
 
   const submit = handleSubmit((values) => {
     const isTurndown = values.status === 'turndown';
-    const useCustomType = !isTurndown && values.eventType === 'CUSTOM';
-    const eventTypeValue = isTurndown ? 'TURNDOWN' : useCustomType ? values.customType.trim() : values.eventType;
+    const currentSelectedTypes = values.selectedTypes ?? [];
+
+    // Manual validation for multi-select
+    if (currentSelectedTypes.length === 0) {
+      setError('selectedTypes', { type: 'manual', message: 'Выберите хотя бы один тип события' });
+      return;
+    }
+
+    // Check if CUSTOM is selected but no custom type name provided
+    const hasCustom = currentSelectedTypes.includes('CUSTOM');
+    const customTypeName = values.customType?.trim() ?? '';
+    if (!isTurndown && hasCustom && !customTypeName) {
+      setError('customType', { type: 'manual', message: 'Укажите название своего типа' });
+      return;
+    }
+
+    // Build final eventTypes array
+    let finalTypes: string[];
+    if (isTurndown) {
+      finalTypes = ['TURNDOWN'];
+    } else {
+      finalTypes = currentSelectedTypes.map((t: string) => (t === 'CUSTOM' ? customTypeName : t));
+    }
+
+    // Determine isCustomType: true if any custom type was used (CUSTOM in selection and has name)
+    const useCustomType = !isTurndown && hasCustom && Boolean(customTypeName);
 
     onSubmit({
       // При редактировании пустой заголовок шлём как '' (очистка), при создании — опускаем.
       title: initial ? values.title.trim() : values.title.trim() || undefined,
-      eventType: eventTypeValue,
+      eventType: finalTypes[0], // legacy: first type for backward compatibility
+      eventTypes: finalTypes,
       isCustomType: useCustomType,
       date: new Date(`${values.date}T${values.time}`).toISOString(),
       duration: toNumber(values.duration),
@@ -265,6 +302,13 @@ export function EventForm({
   });
 
   const typeFieldDisabled = status === 'turndown';
+
+  /** Toggle a type in the multi-select selection. */
+  const toggleType = (type: string): void => {
+    const current = selectedTypes;
+    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
+    setValue('selectedTypes', next, { shouldDirty: true, shouldValidate: true });
+  };
 
   /** Явный отказ от сохранения: при изменённой форме — подтверждение ухода. */
   const handleCancel = (): void => {
@@ -356,12 +400,9 @@ export function EventForm({
           </Field>
         </div>
 
-        {/* Тип события — чипы вместо нативного select (на iOS нативный select
-            перекрывает соседей и его стили почти не управляются).
-            Значение формы не меняется: поле по-прежнему в схеме/zod и в submit,
-            переключаем его через setValue('eventType', …, {shouldDirty:true})
-            + watch — как раньше register('eventType'). */}
-        <Field label="Тип события" error={errors.customType?.message}>
+        {/* Тип события — чипы с мультивыбором (multi-select).
+            Значение хранится в selectedTypes (string[]), переключаем через toggleType. */}
+        <Field label="Тип события" error={errors.selectedTypes?.message ?? errors.customType?.message}>
           <div
             role="group"
             aria-label="Тип события"
@@ -370,7 +411,7 @@ export function EventForm({
           >
             {EVENT_TYPE_PRESETS.map((item) => {
               const meta = eventMeta(item);
-              const active = eventType === item;
+              const active = selectedTypes.includes(item);
               const isCustom = item === 'CUSTOM';
               const Icon = isCustom ? Plus : meta.Icon;
               return (
@@ -378,8 +419,7 @@ export function EventForm({
                   key={item}
                   type="button"
                   aria-pressed={active}
-                  disabled={typeFieldDisabled}
-                  onClick={() => setValue('eventType', item, { shouldDirty: true })}
+                  onClick={() => toggleType(item)}
                   className={cx(
                     'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
@@ -398,13 +438,39 @@ export function EventForm({
                 </button>
               );
             })}
+            {/* Unknown types from DB (custom types not in presets, excluding CUSTOM) */}
+            {selectedTypes
+              .filter((t) => !isPreset(t))
+              .map((type) => {
+                const meta = eventMeta(type);
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    aria-pressed={true}
+                    onClick={() => toggleType(type)}
+                    className={cx(
+                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                      'border-primary-400 bg-primary/20 text-primary-400',
+                      typeFieldDisabled && 'cursor-not-allowed opacity-50',
+                    )}
+                  >
+                    <meta.Icon
+                      aria-hidden="true"
+                      className="h-4 w-4 shrink-0"
+                    />
+                    {meta.label}
+                  </button>
+                );
+              })}
           </div>
           {typeFieldDisabled ? (
             <MutedText>При статусе «Отказ» событие сохранится как отказ.</MutedText>
           ) : null}
         </Field>
 
-        {!typeFieldDisabled && eventType === 'CUSTOM' ? (
+        {!typeFieldDisabled && selectedTypes.includes('CUSTOM') ? (
           <Field label="Свой тип" htmlFor="ev-custom-type" error={errors.customType?.message}>
             <Input
               id="ev-custom-type"
