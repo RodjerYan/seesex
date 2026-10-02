@@ -1073,6 +1073,10 @@ function createFakePrismaInner(): Record<string, unknown> {
       }
       return Promise.all(arg as Promise<unknown>[]);
     },
+    async $queryRaw(_strings: TemplateStringsArray, ..._args: unknown[]): Promise<unknown[]> {
+      // Health check query: SELECT 1
+      return [{ '?column?': 1 }];
+    },
   };
   for (const [delegate, model] of Object.entries(DELEGATES)) {
     client[delegate] = buildDelegate(model);

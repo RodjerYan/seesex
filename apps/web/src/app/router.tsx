@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import Layout from './Layout';
 import { RequireAuth } from './RequireAuth';
+import { UpdatePrompt } from '../components/common/UpdatePrompt';
 
 /** Все страницы — lazy-чанки (спека: Lazy loading для всех маршрутов). */
 const Login = lazy(() => import('../pages/Login'));
@@ -97,6 +98,9 @@ export default function AppRouter(): ReactElement {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      {/* UpdatePrompt — escape-hatch для «вечной загрузки» от старого SW.
+          Рендерится на всех маршрутах (включая публичные /login, /register, /2fa). */}
+      <UpdatePrompt />
     </BrowserRouter>
   );
 }

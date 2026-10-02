@@ -17,9 +17,15 @@ import { positionsRouter } from './routes/positions.routes';
 import { settingsRouter } from './routes/settings.routes';
 import { statisticsRouter } from './routes/statistics.routes';
 import { wishlistRouter } from './routes/wishlist.routes';
+import { prisma } from './lib/prisma';
 
-function healthHandler(_req: Request, res: Response): void {
-  res.json({ status: 'ok', service: 'xtracker-api', uptime: process.uptime() });
+async function healthHandler(_req: Request, res: Response): Promise<void> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', service: 'xtracker-api', db: 'up', uptime: process.uptime() });
+  } catch {
+    res.status(503).json({ status: 'degraded', service: 'xtracker-api', db: 'down', uptime: process.uptime() });
+  }
 }
 
 /** Фабрика express-приложения (используется и в index.ts, и в тестах). */

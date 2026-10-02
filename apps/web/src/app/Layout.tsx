@@ -205,6 +205,7 @@ export default function Layout() {
           ))}
         </ul>
       </nav>
-    </div>
+
+      </div>
   );
 }
