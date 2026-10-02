@@ -18,16 +18,20 @@ jobs:
           set +e
           for i in 1 2 3; do
             echo "Attempt $i/3"
-            curl --max-time 30 -s https://xtracker-web.onrender.com/health
+            body=$(curl --max-time 30 -s -o /tmp/health_body -w '%{http_code}' https://xtracker-web.onrender.com/health)
             rc=$?
+            echo "http_code=$body (curl exit $rc)"
+            head -c 300 /tmp/health_body; echo
+            # ответ получен (в т.ч. 503-suspended) = трафик дошёл, дальше не ретраим
             if [ $rc -eq 0 ]; then
-              echo "Success on attempt $i"
+              echo "Ping delivered on attempt $i"
               break
             else
-              echo "Attempt $i failed with exit code $rc"
+              echo "Attempt $i network failure (exit $rc)"
               if [ $i -lt 3 ]; then
                 echo "Waiting 20 seconds before next attempt..."
                 sleep 20
               fi
             fi
           done
+          exit 0
