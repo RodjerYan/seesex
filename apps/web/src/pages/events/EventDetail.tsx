@@ -198,9 +198,6 @@ export default function EventDetail(): ReactElement {
           <Row label="Партнёры">
             <NamedList items={item.partners} to={(partnerId) => `/partners/${partnerId}`} />
           </Row>
-          <Row label="Позиции">
-            <NamedList items={item.positions} to={(positionId) => `/positions/${positionId}`} />
-          </Row>
           <Row label="Настроения">
             <NamedList items={item.moods} />
           </Row>

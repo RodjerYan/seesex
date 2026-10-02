@@ -1,5 +1,5 @@
 // xTracker — Prisma schema (PostgreSQL 15)
-// Поля User/Event/Partner/Position/Wishlist/GroupCalendar — точно по request.md;
+// Поля User/Event/Partner/Wishlist/GroupCalendar — точно по request.md;
 // Profile/Session/RefreshToken/PartnerPhoto/EventPhoto/Mood/Place/Accessory/
 // PeriodTracking/PeriodEntry/GroupCalendarMember — вспомогательные модели связей.
 
@@ -26,7 +26,6 @@ model User {
   profile              Profile?
   events               Event[]
   partners             Partner[]
-  positions            Position[]
   wishlists            Wishlist[]
   groupCalendars       GroupCalendar[]        @relation("CreatedGroupCalendars")
   calendarMemberships  GroupCalendarMember[]
@@ -101,7 +100,6 @@ model Event {
   groupCalendar GroupCalendar? @relation(fields: [groupCalendarId], references: [id], onDelete: SetNull)
 
   partners     Partner[]
-  positions    Position[]
   moods        Mood[]       @relation("EventMoods")
   places       Place[]      @relation("EventPlaces")
   accessories  Accessory[]  @relation("EventAccessories")
@@ -157,34 +155,16 @@ model EventPhoto {
   @@index([eventId])
 }
 
-model Position {
-  id       String  @id @default(uuid())
-  userId   String
-  name     String
-  category String  @default("STANDARD")
-  iconName String?
-  isCustom Boolean @default(false)
-  isSystem Boolean @default(false)
-
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events          Event[]
-  wishlistEntries Wishlist[]
-
-  @@index([userId, category])
-}
-
 model Wishlist {
   id             String    @id @default(uuid())
   userId         String
-  positionId     String?
   customName     String?
   customCategory String?
   isCompleted    Boolean   @default(false)
   completedAt    DateTime?
   createdAt      DateTime  @default(now())
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  position Position? @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

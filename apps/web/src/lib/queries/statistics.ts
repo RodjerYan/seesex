@@ -8,11 +8,10 @@ import type {
   OverviewResult,
   PartnerStatsResult,
   PeriodsStatsResult,
-  PositionStatsResult,
   RatingsResult,
 } from '../../types/api';
 
-/** Диапазон дат для /statistics/frequency|ratings|positions|partners. */
+/** Диапазон дат для /statistics/frequency|ratings|partners. */
 export interface StatsRange {
   from?: string;
   to?: string;
@@ -43,15 +42,6 @@ export function useRatings(range: StatsRange): UseQueryResult<RatingsResult> {
     queryKey: [...statisticsRangeKey(range), 'ratings'],
     queryFn: ({ signal }) =>
       api.get<RatingsResult>('/api/statistics/ratings', { query: { ...range }, signal }),
-    staleTime: 30_000,
-  });
-}
-
-export function usePositionStats(range: StatsRange): UseQueryResult<PositionStatsResult> {
-  return useQuery<PositionStatsResult>({
-    queryKey: [...statisticsRangeKey(range), 'positions'],
-    queryFn: ({ signal }) =>
-      api.get<PositionStatsResult>('/api/statistics/positions', { query: { ...range }, signal }),
     staleTime: 30_000,
   });
 }

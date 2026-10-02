@@ -54,7 +54,6 @@ describe('Statistics', () => {
     expect(res.body.eventsByType).toHaveLength(2);
     expect(res.body.eventsByType[0]).toMatchObject({ eventType: 'SEX', count: 1 });
     expect(res.body.partnersCount).toBe(1);
-    expect(res.body.positionsCount).toBeGreaterThanOrEqual(0);
     expect(res.body.wishlist).toEqual({ total: 0, completed: 0 });
   });
 
@@ -91,31 +90,19 @@ describe('Statistics', () => {
     expect(two).toMatchObject({ rating: 2, count: 1, avgDurationMinutes: 10 });
   });
 
-  it('partners/positions/custom aggregate relations and date range', async () => {
+  it('partners/custom aggregate relations and date range', async () => {
     const partner = await request(app).post('/api/partners').set(auth(user)).send({ name: 'Alex' });
-    const position = await request(app)
-      .post('/api/positions')
-      .set(auth(user))
-      .send({ name: 'My pose', category: 'ADVANCED' });
 
     await createEvent({
       date: '2020-08-01T12:00:00.000Z',
       rating: 4,
       partnerIds: [partner.body.partner.id],
-      positionIds: [position.body.position.id],
     });
 
     const byPartner = await request(app).get('/api/statistics/partners').set(auth(user));
     expect(byPartner.status).toBe(200);
     expect(byPartner.body.totalEvents).toBe(1);
     expect(byPartner.body.partners[0]).toMatchObject({ name: 'Alex', count: 1, avgRating: 4 });
-
-    const byPosition = await request(app).get('/api/statistics/positions').set(auth(user));
-    expect(byPosition.body.positions[0]).toMatchObject({
-      name: 'My pose',
-      category: 'ADVANCED',
-      count: 1,
-    });
 
     const customInRange = await request(app)
       .get('/api/statistics/custom')

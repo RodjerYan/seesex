@@ -3,7 +3,6 @@ import { prisma } from '../lib/prisma';
 import * as calendarsService from './group-calendars.service';
 import * as eventsService from './events.service';
 import * as partnersService from './partners.service';
-import * as positionsService from './positions.service';
 import * as wishlistService from './wishlist.service';
 
 /** GDPR-экспорт: полный JSON-дамп и CSV c секцией событий. */
@@ -32,7 +31,6 @@ export async function exportJson(userId: string): Promise<Record<string, unknown
     profile,
     events,
     partners,
-    positions,
     wishlist,
     groupCalendars,
     moods,
@@ -43,7 +41,6 @@ export async function exportJson(userId: string): Promise<Record<string, unknown
     prisma.profile.findUnique({ where: { userId } }),
     allEvents(userId),
     partnersService.listPartners(userId),
-    positionsService.listPositions(userId),
     wishlistService.listWishlist(userId),
     calendarsService.listCalendars(userId),
     prisma.mood.findMany({ where: { userId }, orderBy: { name: 'asc' } }),
@@ -71,7 +68,6 @@ export async function exportJson(userId: string): Promise<Record<string, unknown
     profile,
     events,
     partners,
-    positions,
     wishlist,
     groupCalendars,
     moods,
@@ -86,7 +82,7 @@ function csvCell(value: unknown): string {
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-/** Имена связанных сущностей события через ";" (для колонок partners/positions). */
+/** Имена связанных с событием сущностей через ";" (для колонки partners). */
 function namesOf(value: unknown): string {
   if (!Array.isArray(value)) return '';
   return value
@@ -111,7 +107,6 @@ const CSV_HEADER = [
   'initiatedBy',
   'notes',
   'partners',
-  'positions',
 ] as const;
 
 export interface CsvExport {
@@ -137,7 +132,6 @@ export async function exportEventsCsv(userId: string): Promise<CsvExport> {
         event.initiatedBy,
         event.notes,
         namesOf(event.partners),
-        namesOf(event.positions),
       ]
         .map(csvCell)
         .join(','),

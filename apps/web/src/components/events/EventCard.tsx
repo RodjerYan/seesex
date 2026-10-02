@@ -1,4 +1,4 @@
-/** Карточка события: дата, тип, статус, рейтинг, партнёры/позиции. */
+/** Карточка события: дата, тип, статус, рейтинг, партнёры. */
 import { Clock, Trash2 } from 'lucide-react';
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -34,7 +34,6 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
   const date = new Date(event.date);
   const types = event.eventTypes?.length ? event.eventTypes : [event.eventType];
   const partnerNames = event.partners.map((partner) => partner.name);
-  const positionNames = event.positions.map((position) => position.name);
 
   return (
     <div className={cx('glass transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20')}>
@@ -90,9 +89,6 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
 
         {partnerNames.length > 0 ? (
           <p className="mt-2 truncate text-xs text-slate-400">Партнёры: {partnerNames.join(', ')}</p>
-        ) : null}
-        {positionNames.length > 0 ? (
-          <p className="mt-1 truncate text-xs text-slate-500">{positionNames.join(', ')}</p>
         ) : null}
         {showGroupName && event.groupCalendar ? (
           <p className="mt-1 text-xs text-primary-400">Групповой календарь: {event.groupCalendar.name}</p>

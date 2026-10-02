@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Heart, Plus, Trash2, X } from 'lucide-react';
 import { useMemo, useState, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
 
 import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
 import { CardSkeleton, EmptyState } from '../components/ui/listStates';
@@ -9,37 +8,28 @@ import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
-import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
-import {
-  useAllPositions,
-  useWishlist,
-  wishlistQueryKey,
-} from '../lib/queries';
+import { useWishlist, wishlistQueryKey } from '../lib/queries';
 import type { WishlistView } from '../types/api';
 
 function entryLabel(entry: WishlistView): string {
-  return entry.position?.name ?? entry.customName ?? 'Без названия';
+  return entry.customName ?? 'Без названия';
 }
 
-/** Подпись категории записи: переводим известные, свои оставляем как есть. */
+/** Подпись категории записи: свои оставляем как есть. */
 function entryCategory(entry: WishlistView): string {
-  const raw = entry.position?.category ?? entry.customCategory ?? '';
-  if (!raw) return 'без категории';
-  return tr(POSITION_CATEGORY_LABEL, raw, raw);
+  return entry.customCategory || 'без категории';
 }
 
-/** Вишлист: список пожеланий, добавление (из каталога или своим текстом), отметка, удаление. */
+/** Вишлист: список пожеланий, добавление своим текстом, отметка, удаление. */
 export default function Wishlist(): ReactElement {
   const queryClient = useQueryClient();
   const [adding, setAdding] = useState(false);
-  const [positionId, setPositionId] = useState('');
   const [customName, setCustomName] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [showCompleted, setShowCompleted] = useState(true);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const wishlistQuery = useWishlist();
-  const positionsQuery = useAllPositions();
 
   const invalidate = (): void => {
     void queryClient.invalidateQueries({ queryKey: wishlistQueryKey });
@@ -49,14 +39,12 @@ export default function Wishlist(): ReactElement {
   const create = useMutation({
     mutationFn: () =>
       api.post<{ entry: WishlistView }>('/api/wishlist', {
-        positionId: positionId || undefined,
-        customName: positionId ? undefined : customName.trim() || undefined,
-        customCategory: positionId ? undefined : customCategory.trim() || undefined,
+        customName: customName.trim() || undefined,
+        customCategory: customCategory.trim() || undefined,
       }),
     onSuccess: () => {
       setActionError(null);
       setAdding(false);
-      setPositionId('');
       setCustomName('');
       setCustomCategory('');
       invalidate();
@@ -128,66 +116,29 @@ export default function Wishlist(): ReactElement {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              if (!positionId && !customName.trim()) return;
+              if (!customName.trim()) return;
               create.mutate();
             }}
           >
-            <Field
-              label="Позиция из каталога"
-              htmlFor="wl-position"
-              hint="Или оставьте пустым и впишите своё название."
-            >
+            <Field label="Своё название *" htmlFor="wl-name">
               <Input
-                id="wl-position"
-                list="wl-positions"
-                value={
-                  positionId
-                    ? (positionsQuery.data ?? []).find((item) => item.id === positionId)?.name ?? ''
-                    : ''
-                }
-                placeholder="Начните вводить название…"
-                onChange={(event) => {
-                  const value = event.target.value;
-                  const match = (positionsQuery.data ?? []).find(
-                    (item) => item.name.toLowerCase() === value.trim().toLowerCase(),
-                  );
-                  setPositionId(match ? match.id : '');
-                  if (!match) setCustomName(value);
-                }}
+                id="wl-name"
+                value={customName}
+                maxLength={120}
+                onChange={(event) => setCustomName(event.target.value)}
               />
-              <datalist id="wl-positions">
-                {(positionsQuery.data ?? []).map((item) => (
-                  <option key={item.id} value={item.name} />
-                ))}
-              </datalist>
+            </Field>
+            <Field label="Категория" htmlFor="wl-category">
+              <Input
+                id="wl-category"
+                value={customCategory}
+                maxLength={60}
+                onChange={(event) => setCustomCategory(event.target.value)}
+              />
             </Field>
 
-            {!positionId ? (
-              <>
-                <Field label="Своё название *" htmlFor="wl-name">
-                  <Input
-                    id="wl-name"
-                    value={customName}
-                    maxLength={120}
-                    onChange={(event) => setCustomName(event.target.value)}
-                  />
-                </Field>
-                <Field label="Категория" htmlFor="wl-category">
-                  <Input
-                    id="wl-category"
-                    value={customCategory}
-                    maxLength={60}
-                    onChange={(event) => setCustomCategory(event.target.value)}
-                  />
-                </Field>
-              </>
-            ) : null}
-
             <div className="flex gap-2">
-              <Button
-                type="submit"
-                disabled={create.isPending || (!positionId && !customName.trim())}
-              >
+              <Button type="submit" disabled={create.isPending || !customName.trim()}>
                 {create.isPending ? 'Добавляем…' : 'Добавить'}
               </Button>
               <Button variant="ghost" onClick={() => setAdding(false)}>
@@ -203,7 +154,7 @@ export default function Wishlist(): ReactElement {
         <EmptyState
           icon={Heart}
           title="Вишлист пуст"
-          description="Запишите позиции, которые хочется попробовать."
+          description="Запишите, что хочется попробовать."
           action={
             <Button onClick={() => setAdding(true)}>
               <Plus className="h-4 w-4" aria-hidden="true" />
@@ -219,28 +170,15 @@ export default function Wishlist(): ReactElement {
               className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20"
             >
               <div className="min-w-0">
-                {entry.positionId ? (
-                  <Link
-                    to={`/positions/${entry.positionId}`}
-                    className={
-                      entry.isCompleted
-                        ? 'block truncate text-sm font-medium text-slate-500 line-through hover:text-slate-300'
-                        : 'block truncate text-sm font-medium text-slate-100 hover:text-primary-400'
-                    }
-                  >
-                    {entryLabel(entry)}
-                  </Link>
-                ) : (
-                  <p
-                    className={
-                      entry.isCompleted
-                        ? 'truncate text-sm font-medium text-slate-500 line-through'
-                        : 'truncate text-sm font-medium text-slate-100'
-                    }
-                  >
-                    {entryLabel(entry)}
-                  </p>
-                )}
+                <p
+                  className={
+                    entry.isCompleted
+                      ? 'truncate text-sm font-medium text-slate-500 line-through'
+                      : 'truncate text-sm font-medium text-slate-100'
+                  }
+                >
+                  {entryLabel(entry)}
+                </p>
                 <p className="mt-0.5 truncate text-[11px] text-slate-500">
                   {entryCategory(entry)} · добавлено{' '}
                   {formatDate(entry.createdAt)}

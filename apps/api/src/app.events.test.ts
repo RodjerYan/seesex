@@ -132,13 +132,6 @@ describe('Events CRUD', () => {
       .send({ date: '2020-01-01T00:00:00.000Z', partnerIds: ['no-such-partner'] });
     expect(badPartner.status).toBe(400);
     expect(badPartner.body.error.code).toBe('PARTNER_NOT_FOUND');
-
-    const badPosition = await request(app)
-      .post('/api/events')
-      .set(auth(user))
-      .send({ date: '2020-01-01T00:00:00.000Z', positionIds: ['no-such-position'] });
-    expect(badPosition.status).toBe(400);
-    expect(badPosition.body.error.code).toBe('POSITION_NOT_FOUND');
   });
 });
 

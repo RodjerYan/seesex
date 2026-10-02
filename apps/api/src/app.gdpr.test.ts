@@ -18,12 +18,6 @@ async function seedUserData(): Promise<void> {
   const partner = await request(app).post('/api/partners').set(auth(user)).send({ name: 'Alex' });
   expect(partner.status).toBe(201);
 
-  const position = await request(app)
-    .post('/api/positions')
-    .set(auth(user))
-    .send({ name: 'My pose', category: 'ADVANCED' });
-  expect(position.status).toBe(201);
-
   const event = await request(app)
     .post('/api/events')
     .set(auth(user))
@@ -32,7 +26,6 @@ async function seedUserData(): Promise<void> {
       date: '2020-10-10T12:00:00.000Z',
       rating: 4,
       partnerIds: [partner.body.partner.id],
-      positionIds: [position.body.position.id],
     });
   expect(event.status).toBe(201);
 
@@ -64,7 +57,6 @@ describe('POST /api/export/json', () => {
     expect(res.body.events[0].title).toBe('Экспортное событие');
     expect(res.body.events[0].rating).toBe(4);
     expect(res.body.partners).toHaveLength(1);
-    expect(res.body.positions).toHaveLength(1);
     expect(res.body.wishlist).toHaveLength(1);
 
     const raw = JSON.stringify(res.body);
@@ -123,7 +115,6 @@ describe('DELETE /api/settings/data (GDPR)', () => {
     expect(ok.body.deleted).toMatchObject({
       events: 1,
       partners: 1,
-      positions: 1,
       wishlists: 1,
       profile: 1,
     });
@@ -132,7 +123,6 @@ describe('DELETE /api/settings/data (GDPR)', () => {
     const db = getFakeDb();
     expect(db.events).toHaveLength(0);
     expect(db.partners).toHaveLength(0);
-    expect(db.positions).toHaveLength(0);
     expect(db.wishlists).toHaveLength(0);
     expect(db.profiles).toHaveLength(0);
     expect(db.users).toHaveLength(1);

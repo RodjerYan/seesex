@@ -12,13 +12,6 @@ export interface NamedRef {
   name: string;
 }
 
-export interface PositionRef {
-  id: string;
-  name: string;
-  category: string;
-  iconName: string | null;
-}
-
 /** Фото: url всегда относительный (`/api/files?path=...`) — требует Bearer. */
 export interface PhotoView {
   id: string;
@@ -49,7 +42,6 @@ export interface EventView {
   createdAt?: string;
   updatedAt?: string;
   partners: NamedRef[];
-  positions: PositionRef[];
   moods: NamedRef[];
   places: NamedRef[];
   accessories: NamedRef[];
@@ -113,34 +105,14 @@ export interface PartnerView {
   } | null;
 }
 
-/** GET /api/positions, GET /api/positions/system. */
-export interface PositionView {
-  id: string;
-  name: string;
-  category: string;
-  iconName: string | null;
-  isCustom: boolean;
-  isSystem: boolean;
-  userId: string | null;
-}
-
-export interface SystemPositionsResult {
-  positions: PositionView[];
-  total: number;
-  limit: number;
-  offset: number;
-}
-
 /** GET /api/wishlist. */
 export interface WishlistView {
   id: string;
-  positionId: string | null;
   customName: string | null;
   customCategory: string | null;
   isCompleted: boolean;
   completedAt: string | null;
   createdAt: string;
-  position: PositionRef | null;
 }
 
 /** GET /api/statistics/overview. */
@@ -154,7 +126,6 @@ export interface OverviewResult {
   lastEventDate: string | null;
   eventsByType: { eventType: string; count: number }[];
   partnersCount: number;
-  positionsCount: number;
   wishlist: { total: number; completed: number };
 }
 
@@ -180,12 +151,6 @@ export interface NamedStatItem {
 /** GET /api/statistics/partners — контракт: { partners: [...], totalEvents }. */
 export interface PartnerStatsResult {
   partners: NamedStatItem[];
-  totalEvents: number;
-}
-
-/** GET /api/statistics/positions — контракт: { positions: [...], totalEvents }. */
-export interface PositionStatsResult {
-  positions: NamedStatItem[];
   totalEvents: number;
 }
 

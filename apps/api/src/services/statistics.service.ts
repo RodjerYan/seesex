@@ -40,7 +40,7 @@ function byTypeView(
 /** GET /api/statistics/overview — сводка по всем данным юзера. */
 export async function overview(userId: string): Promise<Record<string, unknown>> {
   const where = eventWhere(userId);
-  const [agg, byType, partnersCount, positionsCount, wishlistGroups] = await Promise.all([
+  const [agg, byType, partnersCount, wishlistGroups] = await Promise.all([
     prisma.event.aggregate({
       where,
       _count: true,
@@ -61,7 +61,6 @@ export async function overview(userId: string): Promise<Record<string, unknown>>
       return Array.from(typeCounts.entries()).map(([eventType, _count]) => ({ eventType, _count }));
     })(),
     prisma.partner.count({ where: { userId } }),
-    prisma.position.count({ where: { OR: [{ userId }, { isSystem: true }] } }),
     prisma.wishlist.groupBy({ by: ['isCompleted'], where: { userId }, _count: true }),
   ]);
 
@@ -78,7 +77,6 @@ export async function overview(userId: string): Promise<Record<string, unknown>>
     lastEventDate: agg._max.date,
     eventsByType: byTypeView(byType),
     partnersCount,
-    positionsCount,
     wishlist: { total: wishlistTotal, completed: wishlistCompleted },
   };
 }
@@ -136,11 +134,11 @@ export interface NamedStat {
   avgRating: number | null;
 }
 
-/** Общий агрегатор «связь события со справочником» (partners/positions). */
+/** Общий агрегатор «связь события со справочником» (только partners). */
 async function relatedStats(
   userId: string,
   query: FrequencyQuery,
-  field: 'partners' | 'positions',
+  field: 'partners',
 ): Promise<{ items: NamedStat[]; totalEvents: number }> {
   const where = eventWhere(userId, query);
 
@@ -170,24 +168,6 @@ async function relatedStats(
           id: item.id,
           name: item.name,
           category: null,
-          rating: row.rating,
-          date: row.date,
-        });
-      }
-    }
-  } else {
-    const positionRows = await prisma.event.findMany({
-      where,
-      include: { positions: { select: { id: true, name: true, category: true } } },
-      orderBy: { date: 'desc' },
-    });
-    totalEvents = positionRows.length;
-    for (const row of positionRows) {
-      for (const item of row.positions) {
-        links.push({
-          id: item.id,
-          name: item.name,
-          category: item.category,
           rating: row.rating,
           date: row.date,
         });
@@ -245,15 +225,6 @@ export async function partners(
 ): Promise<Record<string, unknown>> {
   const { items, totalEvents } = await relatedStats(userId, query, 'partners');
   return { partners: items, totalEvents };
-}
-
-/** GET /api/statistics/positions. */
-export async function positions(
-  userId: string,
-  query: FrequencyQuery,
-): Promise<Record<string, unknown>> {
-  const { items, totalEvents } = await relatedStats(userId, query, 'positions');
-  return { positions: items, totalEvents };
 }
 
 /** GET /api/statistics/ratings — распределение оценок (groupBy rating). */

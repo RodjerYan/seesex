@@ -9,7 +9,6 @@ statisticsRouter.use(requireAuth);
 statisticsRouter.get('/overview', statisticsController.overview);
 statisticsRouter.get('/frequency', statisticsController.frequency);
 statisticsRouter.get('/partners', statisticsController.partners);
-statisticsRouter.get('/positions', statisticsController.positions);
 statisticsRouter.get('/ratings', statisticsController.ratings);
 statisticsRouter.get('/periods', statisticsController.periods);
 statisticsRouter.get('/custom', statisticsController.custom);

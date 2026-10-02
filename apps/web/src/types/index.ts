@@ -2,12 +2,11 @@
  * Доменные типы фронтенда (см. спеку: architecture.structure.apps.web.src.types
  * и database_schema). Даты — ISO-8601 строки, как приходят из JSON API.
  *
- * Базовые общие типы (позиции, категории, события-виды) реэкспортятся из
+ * Базовые общие типы (события-виды) реэкспортятся из
  * @xtracker/shared — там живёт канон для api + web.
  */
 
-export { POSITION_CATEGORIES } from '@xtracker/shared';
-export type { ApiError, EventKind, PositionCategory } from '@xtracker/shared';
+export type { ApiError, EventKind } from '@xtracker/shared';
 
 /** Публичный профиль пользователя (ответ login/refresh/verify: PublicUser). */
 export interface SessionUser {
@@ -38,7 +37,6 @@ export interface Event {
   createdAt?: string;
   updatedAt?: string;
   partners?: Partner[];
-  positions?: Position[];
 }
 
 /** Фото партнёра. */
@@ -69,28 +67,15 @@ export interface Partner {
   periodTracking?: PeriodTracking | null;
 }
 
-/** Позиция секса (системная или пользовательская). */
-export interface Position {
-  id: string;
-  userId?: string;
-  name: string;
-  category: string;
-  iconName?: string | null;
-  isCustom?: boolean;
-  isSystem?: boolean;
-}
-
 /** Элемент вишлиста. */
 export interface WishlistItem {
   id: string;
   userId?: string;
-  positionId?: string | null;
   customName?: string | null;
   customCategory?: string | null;
   isCompleted?: boolean;
   completedAt?: string | null;
   createdAt?: string;
-  position?: Position | null;
 }
 
 /** Трекер цикла партнёра (модель PeriodTracking). */

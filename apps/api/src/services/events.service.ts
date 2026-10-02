@@ -6,7 +6,6 @@ import type {
   Mood,
   Partner,
   Place,
-  Position,
   Prisma,
 } from '@prisma/client';
 import { decrypt, encrypt } from '../lib/crypto';
@@ -35,7 +34,6 @@ const KNOWN_EVENT_TYPES = [
 /** include-дерево для событий (один уровень вложенности). */
 export const eventInclude = {
   partners: true,
-  positions: true,
   moods: true,
   places: true,
   accessories: true,
@@ -46,7 +44,6 @@ export const eventInclude = {
 /** Результат prisma.event.* с eventInclude (relations опциональны — напр., после delete). */
 export interface EventRow extends Event {
   partners?: Partner[];
-  positions?: Position[];
   moods?: Mood[];
   places?: Place[];
   accessories?: Accessory[];
@@ -106,12 +103,6 @@ export function eventView(event: EventRow): Record<string, unknown> {
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
     partners: namedView(event.partners),
-    positions: (event.positions ?? []).map((position) => ({
-      id: position.id,
-      name: position.name,
-      category: position.category,
-      iconName: position.iconName,
-    })),
     moods: namedView(event.moods),
     places: namedView(event.places),
     accessories: namedView(event.accessories),
@@ -153,17 +144,6 @@ async function assertPartners(userId: string, ids: string[]): Promise<void> {
   const found = await prisma.partner.findMany({ where: { id: { in: list }, userId } });
   if (found.length !== list.length) {
     throw ApiError.badRequest('PARTNER_NOT_FOUND', 'One or more partner ids are unknown');
-  }
-}
-
-async function assertPositions(userId: string, ids: string[]): Promise<void> {
-  const list = unique(ids);
-  if (list.length === 0) return;
-  const found = await prisma.position.findMany({
-    where: { id: { in: list }, OR: [{ userId }, { isSystem: true }] },
-  });
-  if (found.length !== list.length) {
-    throw ApiError.badRequest('POSITION_NOT_FOUND', 'One or more position ids are unknown');
   }
 }
 
@@ -222,7 +202,6 @@ function scopeWhere(userId: string, sharedIds: string[]): Prisma.EventWhereInput
 
 async function validateRelations(userId: string, input: CreateEventInput | UpdateEventInput) {
   if (input.partnerIds) await assertPartners(userId, input.partnerIds);
-  if (input.positionIds) await assertPositions(userId, input.positionIds);
   if (input.moodIds) await assertMoods(userId, input.moodIds);
   if (input.placeIds) await assertPlaces(userId, input.placeIds);
   if (input.accessoryIds) await assertAccessories(userId, input.accessoryIds);
@@ -261,9 +240,6 @@ function buildCreateData(userId: string, input: CreateEventInput): EventCreateDa
     initiatedBy: input.initiatedBy ?? null,
     groupCalendarId: input.groupCalendarId ?? null,
     ...(input.partnerIds ? { partners: { connect: input.partnerIds.map((id) => ({ id })) } } : {}),
-    ...(input.positionIds
-      ? { positions: { connect: input.positionIds.map((id) => ({ id })) } }
-      : {}),
     ...(input.moodIds ? { moods: { connect: input.moodIds.map((id) => ({ id })) } } : {}),
     ...(input.placeIds ? { places: { connect: input.placeIds.map((id) => ({ id })) } } : {}),
     ...(input.accessoryIds
@@ -285,7 +261,6 @@ function buildUpdateData(input: UpdateEventInput): EventUpdateData {
     ...(input.initiatedBy !== undefined ? { initiatedBy: input.initiatedBy } : {}),
     ...(input.groupCalendarId !== undefined ? { groupCalendarId: input.groupCalendarId } : {}),
     ...(input.partnerIds ? { partners: { set: input.partnerIds.map((id) => ({ id })) } } : {}),
-    ...(input.positionIds ? { positions: { set: input.positionIds.map((id) => ({ id })) } } : {}),
     ...(input.moodIds ? { moods: { set: input.moodIds.map((id) => ({ id })) } } : {}),
     ...(input.placeIds ? { places: { set: input.placeIds.map((id) => ({ id })) } } : {}),
     ...(input.accessoryIds

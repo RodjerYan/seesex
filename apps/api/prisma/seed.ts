@@ -1,11 +1,10 @@
-// Seed: системный пользователь + каталог системных позиций (>= 400 записей).
+// Seed: системный пользователь.
 // Запуск: npx prisma db seed  (см. "prisma.seed" в package.json)
 // Если БД недоступна — падает с понятной инструкцией (код выхода 1).
 
 import { randomBytes } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { buildSystemPositions, MIN_SYSTEM_POSITIONS } from './positions-catalog';
 
 const SEED_EMAIL = 'seed@xtracker.local';
 // Случайный одноразовый пароль: хэш сохраняется, сам пароль — нет,
@@ -13,17 +12,10 @@ const SEED_EMAIL = 'seed@xtracker.local';
 const SEED_PASSWORD_HASH = bcrypt.hashSync(randomBytes(32).toString('hex'), 12);
 
 async function main(): Promise<void> {
-  const positions = buildSystemPositions();
-  if (positions.length < MIN_SYSTEM_POSITIONS) {
-    throw new Error(
-      `Seed-каталог позиций слишком мал: ${positions.length} < ${MIN_SYSTEM_POSITIONS}`,
-    );
-  }
-
   const prisma = new PrismaClient();
 
   try {
-    // 1. Seed-пользователь — владельцем системных позиций (schema требует userId).
+    // Seed-пользователь (идемпотентный upsert).
     const seedUser = await prisma.user.upsert({
       where: { email: SEED_EMAIL },
       update: {},
@@ -34,36 +26,8 @@ async function main(): Promise<void> {
       },
     });
 
-    // 2. Идемпотентность: при повторном запуске не дублируем записи.
-    const existing = await prisma.position.count({
-      where: { userId: seedUser.id, isSystem: true },
-    });
-
-    if (existing >= positions.length) {
-      // eslint-disable-next-line no-console
-      console.log(`[seed] Уже загружено ${existing} системных позиций — пропускаем.`);
-      return;
-    }
-
-    // Частично залитые состояния (0 < existing < total) чистим и заливаем заново.
-    if (existing > 0) {
-      await prisma.position.deleteMany({
-        where: { userId: seedUser.id, isSystem: true },
-      });
-    }
-
-    const created = await prisma.position.createMany({
-      data: positions.map((p) => ({
-        ...p,
-        userId: seedUser.id,
-        isSystem: true,
-        isCustom: false,
-      })),
-      skipDuplicates: true,
-    });
-
     // eslint-disable-next-line no-console
-    console.log(`[seed] OK: пользователь ${seedUser.email}, системных позиций: ${created.count}.`);
+    console.log(`[seed] OK: пользователь ${seedUser.email}.`);
   } finally {
     await prisma.$disconnect();
   }

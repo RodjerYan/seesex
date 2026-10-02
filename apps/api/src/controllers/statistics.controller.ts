@@ -19,11 +19,6 @@ export const partners = asyncHandler<AuthedRequest>(async (req: AuthedRequest, r
   res.status(200).json(await statisticsService.partners(req.user.id, query));
 });
 
-export const positions = asyncHandler<AuthedRequest>(async (req: AuthedRequest, res: Response) => {
-  const query = parseInput(frequencyQuerySchema, req.query);
-  res.status(200).json(await statisticsService.positions(req.user.id, query));
-});
-
 export const ratings = asyncHandler<AuthedRequest>(async (req: AuthedRequest, res: Response) => {
   const query = parseInput(frequencyQuerySchema, req.query);
   res.status(200).json(await statisticsService.ratings(req.user.id, query));

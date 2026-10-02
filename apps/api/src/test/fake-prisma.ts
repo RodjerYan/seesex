@@ -28,7 +28,6 @@ type ModelKey =
   | 'partners'
   | 'partnerPhotos'
   | 'eventPhotos'
-  | 'positions'
   | 'wishlists'
   | 'groupCalendars'
   | 'groupCalendarMembers'
@@ -40,7 +39,6 @@ type ModelKey =
 
 type JoinKey =
   | 'eventPartners'
-  | 'eventPositions'
   | 'eventMoods'
   | 'eventPlaces'
   | 'eventAccessories';
@@ -59,7 +57,6 @@ export interface FakeDb {
   partners: Row[];
   partnerPhotos: Row[];
   eventPhotos: Row[];
-  positions: Row[];
   wishlists: Row[];
   groupCalendars: Row[];
   groupCalendarMembers: Row[];
@@ -80,7 +77,6 @@ const db: FakeDb = {
   partners: [],
   partnerPhotos: [],
   eventPhotos: [],
-  positions: [],
   wishlists: [],
   groupCalendars: [],
   groupCalendarMembers: [],
@@ -91,7 +87,6 @@ const db: FakeDb = {
   periodEntries: [],
   joins: {
     eventPartners: [],
-    eventPositions: [],
     eventMoods: [],
     eventPlaces: [],
     eventAccessories: [],
@@ -111,7 +106,6 @@ export function resetFakeDb(): void {
   db.partners.length = 0;
   db.partnerPhotos.length = 0;
   db.eventPhotos.length = 0;
-  db.positions.length = 0;
   db.wishlists.length = 0;
   db.groupCalendars.length = 0;
   db.groupCalendarMembers.length = 0;
@@ -121,7 +115,6 @@ export function resetFakeDb(): void {
   db.periodTrackings.length = 0;
   db.periodEntries.length = 0;
   db.joins.eventPartners.length = 0;
-  db.joins.eventPositions.length = 0;
   db.joins.eventMoods.length = 0;
   db.joins.eventPlaces.length = 0;
   db.joins.eventAccessories.length = 0;
@@ -154,7 +147,6 @@ const MODELS: Record<ModelKey, ModelSpec> = {
       profile: { kind: 'oneToOne', target: 'profiles', fk: 'userId' },
       events: { kind: 'oneToMany', target: 'events', fk: 'userId' },
       partners: { kind: 'oneToMany', target: 'partners', fk: 'userId' },
-      positions: { kind: 'oneToMany', target: 'positions', fk: 'userId' },
       wishlists: { kind: 'oneToMany', target: 'wishlists', fk: 'userId' },
       groupCalendars: { kind: 'oneToMany', target: 'groupCalendars', fk: 'createdBy' },
       calendarMemberships: { kind: 'oneToMany', target: 'groupCalendarMembers', fk: 'userId' },
@@ -212,13 +204,6 @@ const MODELS: Record<ModelKey, ModelSpec> = {
         join: 'eventPartners',
         left: 'events',
         right: 'partners',
-      },
-      positions: {
-        kind: 'm2m',
-        target: 'positions',
-        join: 'eventPositions',
-        left: 'events',
-        right: 'positions',
       },
       moods: { kind: 'm2m', target: 'moods', join: 'eventMoods', left: 'events', right: 'moods' },
       places: {
@@ -287,29 +272,12 @@ const MODELS: Record<ModelKey, ModelSpec> = {
     relations: { event: { kind: 'manyToOne', target: 'events', fk: 'eventId' } },
     defaults: (now) => ({ caption: null, createdAt: now }),
   },
-  positions: {
-    updatedAt: false,
-    relations: {
-      user: { kind: 'manyToOne', target: 'users', fk: 'userId' },
-      events: {
-        kind: 'm2m',
-        target: 'events',
-        join: 'eventPositions',
-        left: 'events',
-        right: 'positions',
-      },
-      wishlistEntries: { kind: 'oneToMany', target: 'wishlists', fk: 'positionId' },
-    },
-    defaults: () => ({ category: 'STANDARD', iconName: null, isCustom: false, isSystem: false }),
-  },
   wishlists: {
     updatedAt: false,
     relations: {
       user: { kind: 'manyToOne', target: 'users', fk: 'userId' },
-      position: { kind: 'manyToOne', target: 'positions', fk: 'positionId' },
     },
     defaults: (now) => ({
-      positionId: null,
       customName: null,
       customCategory: null,
       isCompleted: false,
@@ -409,7 +377,6 @@ const DELEGATES: Record<string, ModelKey> = {
   partner: 'partners',
   partnerPhoto: 'partnerPhotos',
   eventPhoto: 'eventPhotos',
-  position: 'positions',
   wishlist: 'wishlists',
   groupCalendar: 'groupCalendars',
   groupCalendarMember: 'groupCalendarMembers',
@@ -434,7 +401,6 @@ const REF_RULES: RefRule[] = [
   { child: 'refreshTokens', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'events', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'partners', fk: 'userId', parent: 'users', action: 'cascade' },
-  { child: 'positions', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'wishlists', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'groupCalendars', fk: 'createdBy', parent: 'users', action: 'cascade' },
   { child: 'groupCalendarMembers', fk: 'userId', parent: 'users', action: 'cascade' },
@@ -457,20 +423,17 @@ const REF_RULES: RefRule[] = [
     action: 'cascade',
   },
   { child: 'events', fk: 'groupCalendarId', parent: 'groupCalendars', action: 'setNull' },
-  { child: 'wishlists', fk: 'positionId', parent: 'positions', action: 'setNull' },
 ];
 
 /** m2m: участие модели в join-таблице (side: 'a' | 'b'). */
 const M2M_SIDES: Partial<Record<ModelKey, { join: JoinKey; side: 'a' | 'b' }[]>> = {
   events: [
     { join: 'eventPartners', side: 'a' },
-    { join: 'eventPositions', side: 'a' },
     { join: 'eventMoods', side: 'a' },
     { join: 'eventPlaces', side: 'a' },
     { join: 'eventAccessories', side: 'a' },
   ],
   partners: [{ join: 'eventPartners', side: 'b' }],
-  positions: [{ join: 'eventPositions', side: 'b' }],
   moods: [{ join: 'eventMoods', side: 'b' }],
   places: [{ join: 'eventPlaces', side: 'b' }],
   accessories: [{ join: 'eventAccessories', side: 'b' }],

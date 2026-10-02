@@ -31,18 +31,6 @@ export const RELATIONSHIP_LABEL: Record<string, string> = {
   other: 'Другое',
 };
 
-/** Категории позиций каталога (packages/shared POSITION_CATEGORIES). */
-export const POSITION_CATEGORY_LABEL: Record<string, string> = {
-  STANDARD: 'Базовые',
-  ORAL: 'Оральные',
-  ANAL: 'Анальные',
-  KINKY: 'Кинк',
-  BDSM: 'BDSM',
-  ROLEPLAY: 'Ролевые',
-  FANTASY: 'Фантазии',
-  EXOTIC: 'Экзотика',
-};
-
 /** Роль участника группового календаря (API: OWNER | MEMBER). */
 export const GROUP_ROLE_LABEL: Record<string, string> = {
   OWNER: 'Владелец',

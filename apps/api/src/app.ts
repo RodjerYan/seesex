@@ -13,7 +13,6 @@ import { exportRouter } from './routes/export.routes';
 import { filesRouter } from './routes/files.routes';
 import { groupCalendarsRouter } from './routes/group-calendars.routes';
 import { partnersRouter } from './routes/partners.routes';
-import { positionsRouter } from './routes/positions.routes';
 import { settingsRouter } from './routes/settings.routes';
 import { statisticsRouter } from './routes/statistics.routes';
 import { wishlistRouter } from './routes/wishlist.routes';
@@ -76,7 +75,6 @@ export function createApp(): Express {
   app.use('/api/auth', authRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/partners', partnersRouter);
-  app.use('/api/positions', positionsRouter);
   app.use('/api/wishlist', wishlistRouter);
   app.use('/api/statistics', statisticsRouter);
   app.use('/api/group-calendars', groupCalendarsRouter);

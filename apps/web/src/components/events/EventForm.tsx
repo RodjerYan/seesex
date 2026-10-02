@@ -2,7 +2,7 @@
  * EventForm — создание/редактирование события (RHF + zod).
  *
  * Поля по спеке: дата/время, длительность, eventType (+свой тип), партнёры
- * (мультивыбор), позиции (мультивыбор с поиском), настроения/места/аксессуары
+ * (мультивыбор), настроения/места/аксессуары
  * (free-text чипы — см. TagInput), оценка 1–5, калории, пульс, инициатор,
  * заметки, статус (occurred/planned/turndown).
  *
@@ -11,15 +11,14 @@
  * а planned/occurred сверяются с датой (валидация в схеме).
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDown, Plus, Search } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { ChevronDown, Plus } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { dayKey, formatTime } from '../../lib/format';
 import { eventMeta } from '../../lib/eventMeta';
-import { PositionIcon } from '../../lib/positionIcons';
-import { useAllPositions, usePartners } from '../../lib/queries';
+import { usePartners } from '../../lib/queries';
 import type { EventView } from '../../types/api';
 import { Stars } from '../ui/Stars';
 import { Button, Card, ErrorText, Field, Input, MutedText, SectionTitle, Select, TextArea, cx } from '../ui/controls';
@@ -46,7 +45,6 @@ export interface EventPayload {
   heartRate: number | null;
   initiatedBy: string | null;
   partnerIds: string[];
-  positionIds: string[];
   moodIds: string[];
   placeIds: string[];
   accessoryIds: string[];
@@ -217,35 +215,11 @@ export function EventForm({
 
   const [rating, setRating] = useState<number | null>(initial?.rating ?? null);
   const [partnerIds, setPartnerIds] = useState<string[]>(initial?.partners.map((item) => item.id) ?? []);
-  const [positionIds, setPositionIds] = useState<string[]>(
-    initial?.positions.map((item) => item.id) ?? [],
-  );
   const [moods, setMoods] = useState<TagGroup>(emptyGroup(initial?.moods));
   const [places, setPlaces] = useState<TagGroup>(emptyGroup(initial?.places));
   const [accessories, setAccessories] = useState<TagGroup>(emptyGroup(initial?.accessories));
-  const [positionSearch, setPositionSearch] = useState('');
 
   const partnersQuery = usePartners();
-  const positionsQuery = useAllPositions();
-
-  const positionNeedle = positionSearch.trim().toLowerCase();
-  /** Пустой поиск → топ-12 каталога; с поиском — до 60 как раньше. */
-  const positionLimit = positionNeedle ? 60 : 12;
-
-  const matchedPositions = useMemo(() => {
-    const all = positionsQuery.data ?? [];
-    if (!positionNeedle) return all;
-    return all.filter((position) => position.name.toLowerCase().includes(positionNeedle));
-  }, [positionsQuery.data, positionNeedle]);
-
-  const filteredPositions = useMemo(
-    () => matchedPositions.slice(0, positionLimit),
-    [matchedPositions, positionLimit],
-  );
-
-  /** Пустой поиск скрывает часть каталога — подсказываем, что есть ещё. */
-  const truncatedByEmptySearch =
-    !positionNeedle && matchedPositions.length > filteredPositions.length;
 
   const toggle = (id: string, current: string[], setter: (value: string[]) => void): void => {
     setter(current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
@@ -294,7 +268,6 @@ export function EventForm({
       heartRate: toNumber(values.heartRate),
       initiatedBy: values.initiatedBy.trim() ? values.initiatedBy.trim() : null,
       partnerIds,
-      positionIds,
       moodIds: moods.saved.map((item) => item.id),
       placeIds: places.saved.map((item) => item.id),
       accessoryIds: accessories.saved.map((item) => item.id),
@@ -518,69 +491,6 @@ export function EventForm({
               );
             })}
           </div>
-        )}
-      </Card>
-
-      <Card className="mb-4">
-        <SectionTitle>Позиции</SectionTitle>
-        {positionsQuery.isLoading ? (
-          <LoadingBlock label="Загрузка каталога…" />
-        ) : positionsQuery.isError ? (
-          <ErrorText>Не удалось загрузить позиции</ErrorText>
-        ) : (
-          <>
-            <div className="relative mb-3">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
-                aria-hidden="true"
-              />
-              <Input
-                aria-label="Поиск позиции"
-                placeholder="Поиск по названию…"
-                className="pl-9"
-                value={positionSearch}
-                onChange={(event) => setPositionSearch(event.target.value)}
-              />
-            </div>
-
-            <div
-              data-testid="positions-list"
-              className="max-h-56 overflow-y-auto rounded-lg border border-white/10"
-            >
-              {filteredPositions.length === 0 ? (
-                <p className="px-3 py-4 text-center text-xs text-slate-500">Ничего не найдено</p>
-              ) : (
-                filteredPositions.map((position) => {
-                  const active = positionIds.includes(position.id);
-                  return (
-                    <button
-                      key={position.id}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => toggle(position.id, positionIds, setPositionIds)}
-                      className={cx(
-                        'flex w-full items-center justify-between gap-2 border-b border-white/10 px-3 py-2 text-left text-xs transition-colors last:border-b-0',
-                        active ? 'bg-primary/15 text-primary-400' : 'text-slate-300 hover:bg-white/[0.06]',
-                      )}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <PositionIcon name={position.name} className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="truncate">{position.name}</span>
-                      </div>
-                      <span className="shrink-0 text-[10px] uppercase text-slate-500">
-                        {position.category}
-                      </span>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-            <MutedText>
-              Выбрано: {positionIds.length}. Показано {filteredPositions.length} из{' '}
-              {matchedPositions.length}
-              {truncatedByEmptySearch ? ' — введите поиск' : ''}.
-            </MutedText>
-          </>
         )}
       </Card>
 

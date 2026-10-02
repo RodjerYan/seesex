@@ -27,7 +27,6 @@ const eventBodyBase = z.object({
   initiatedBy: z.string().trim().max(100).nullable().optional(),
   groupCalendarId: idParamSchema.nullable().optional(),
   partnerIds: idsArray.default([]),
-  positionIds: idsArray.default([]),
   moodIds: idsArray.default([]),
   placeIds: idsArray.default([]),
   accessoryIds: idsArray.default([]),

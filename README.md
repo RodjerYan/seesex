@@ -11,8 +11,7 @@ React 18 + Vite PWA frontend, деплой всего на **Render** (web servi
 │   ├── api/                # Express + TypeScript + Prisma
 │   │   ├── prisma/
 │   │   │   ├── schema.prisma        # все модели + связи + индексы
-│   │   │   ├── seed.ts              # системный каталог позиций (455 записей)
-│   │   │   ├── positions-catalog.ts # генератор каталога
+│   │   │   ├── seed.ts              # сид-данные
 │   │   │   └── migrations/          # SQL-миграции
 │   │   └── src/            # controllers/services/middleware/routes (S2/S3)
 │   └── web/                # React 18 + Vite PWA (S4/S5 наполнят экранами)
@@ -36,7 +35,7 @@ cp .env.example apps/api/.env        # заполните JWT_SECRET / ENCRYPTIO
 # 3. Зависимости (workspaces ставят всё из корня)
 npm install
 
-# 4. Миграции + сид каталога позиций (455 записей, 8 категорий)
+# 4. Миграции + сид-данные
 npm run db:deploy -w apps/api        # применить migrations/
 npm run db:seed -w apps/api          # либо: npx prisma db seed (в apps/api)
 
@@ -57,7 +56,7 @@ npm run typecheck    # tsc --noEmit во всех пакетах
 
 ## Схема данных (Prisma / PostgreSQL 15)
 
-Основные модели из ТЗ: `User` (lock/2FA-настройки), `Event`, `Partner`, `Position`,
+Основные модели из ТЗ: `User` (lock/2FA-настройки), `Event`, `Partner`,
 `Wishlist`, `GroupCalendar` — плюс связи: `Profile`, `Session`, `RefreshToken`,
 `PartnerPhoto`, `EventPhoto`, `Mood`, `Place`, `Accessory`, `PeriodTracking`,
 `PeriodEntry`, `GroupCalendarMember`.

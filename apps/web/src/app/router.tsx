@@ -18,8 +18,6 @@ const PartnerList = lazy(() => import('../pages/partners/PartnerList'));
 const PartnerCreate = lazy(() => import('../pages/partners/PartnerCreate'));
 const PartnerDetail = lazy(() => import('../pages/partners/PartnerDetail'));
 const PartnerEdit = lazy(() => import('../pages/partners/PartnerEdit'));
-const PositionCatalog = lazy(() => import('../pages/PositionCatalog'));
-const PositionDetail = lazy(() => import('../pages/PositionDetail'));
 const Wishlist = lazy(() => import('../pages/Wishlist'));
 const StatisticsOverview = lazy(() => import('../pages/StatisticsOverview'));
 const StatisticsCustom = lazy(() => import('../pages/StatisticsCustom'));
@@ -83,8 +81,6 @@ export default function AppRouter(): ReactElement {
               <Route path="partners/new" element={<PartnerCreate />} />
               <Route path="partners/:id" element={<PartnerDetail />} />
               <Route path="partners/:id/edit" element={<PartnerEdit />} />
-              <Route path="positions" element={<PositionCatalog />} />
-              <Route path="positions/:id" element={<PositionDetail />} />
               <Route path="wishlist" element={<Wishlist />} />
               <Route path="statistics" element={<StatisticsOverview />} />
               <Route path="statistics/custom" element={<StatisticsCustom />} />

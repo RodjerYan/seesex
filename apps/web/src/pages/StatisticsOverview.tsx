@@ -14,12 +14,10 @@ import { ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { downloadExport, type ExportKind } from '../lib/download';
 import { errorMessage } from '../lib/errors';
 import { formatDate, shortMonthLabel } from '../lib/format';
-import { POSITION_CATEGORY_LABEL, tr } from '../lib/labels';
 import {
   useFrequency,
   useOverview,
   usePartnerStats,
-  usePositionStats,
   useRatings,
 } from '../lib/queries';
 import { eventMeta } from '../lib/eventMeta';
@@ -86,7 +84,6 @@ export default function StatisticsOverview(): ReactElement {
   const frequencyQuery = useFrequency(statsRange);
   const ratingsQuery = useRatings(statsRange);
   const partnersQuery = usePartnerStats(statsRange);
-  const positionsQuery = usePositionStats(statsRange);
 
   const onExport = async (kind: ExportKind): Promise<void> => {
     setExportError(null);
@@ -120,12 +117,6 @@ export default function StatisticsOverview(): ReactElement {
     label: item.name,
     value: item.count,
     hint: item.lastDate ? `последнее: ${formatDate(item.lastDate)}` : undefined,
-  }));
-
-  const positionItems = (positionsQuery.data?.positions ?? []).slice(0, 8).map((item) => ({
-    label: item.name,
-    value: item.count,
-    hint: item.category ? tr(POSITION_CATEGORY_LABEL, item.category, item.category) : undefined,
   }));
 
   return (
@@ -201,7 +192,6 @@ export default function StatisticsOverview(): ReactElement {
                 value={`${overviewQuery.data.wishlist.completed}/${overviewQuery.data.wishlist.total}`}
               />
               <StatTile label="Партнёров" value={numberOr(overviewQuery.data.partnersCount, '0')} />
-              <StatTile label="Позиций" value={numberOr(overviewQuery.data.positionsCount, '0')} />
               <StatTile
                 label="Период"
                 value={
@@ -290,29 +280,16 @@ export default function StatisticsOverview(): ReactElement {
             ) : null}
           </Card>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <SectionTitle>Топ партнёров</SectionTitle>
-              {partnersQuery.isLoading ? (
-                <LoadingBlock label="Загрузка…" />
-              ) : partnerItems.length > 0 ? (
-                <RowBars items={partnerItems} suffix=" шт." />
-              ) : (
-                <p className="text-xs text-slate-500">Нет данных за период.</p>
-              )}
-            </Card>
-
-            <Card>
-              <SectionTitle>Топ позиций</SectionTitle>
-              {positionsQuery.isLoading ? (
-                <LoadingBlock label="Загрузка…" />
-              ) : positionItems.length > 0 ? (
-                <RowBars items={positionItems} suffix=" шт." />
-              ) : (
-                <p className="text-xs text-slate-500">Нет данных за период.</p>
-              )}
-            </Card>
-          </div>
+          <Card>
+            <SectionTitle>Топ партнёров</SectionTitle>
+            {partnersQuery.isLoading ? (
+              <LoadingBlock label="Загрузка…" />
+            ) : partnerItems.length > 0 ? (
+              <RowBars items={partnerItems} suffix=" шт." />
+            ) : (
+              <p className="text-xs text-slate-500">Нет данных за период.</p>
+            )}
+          </Card>
         </>
       ) : null}
     </section>

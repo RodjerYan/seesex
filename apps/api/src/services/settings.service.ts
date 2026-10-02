@@ -2,7 +2,7 @@ import { prisma } from '../lib/prisma';
 import { unlinkUpload } from '../middleware/upload';
 
 /**
- * GDPR: полная очистка данных пользователя (события, партнёры, позиции,
+ * GDPR: полная очистка данных пользователя (события, партнёры,
  * вишлист, групповые календари, словари) + файлы фото на диске.
  * Сам User (аккаунт, сессии, refresh-токены) остаётся — юзер может продолжать входить.
  */
@@ -12,7 +12,6 @@ export interface DeleteSummary {
   eventPhotos: number;
   partners: number;
   partnerPhotos: number;
-  positions: number;
   wishlists: number;
   groupCalendars: number;
   calendarMemberships: number;
@@ -52,7 +51,6 @@ export async function deleteAllUserData(userId: string): Promise<DeleteResult> {
   const [
     events,
     partners,
-    positions,
     wishlists,
     calendars,
     memberships,
@@ -63,7 +61,6 @@ export async function deleteAllUserData(userId: string): Promise<DeleteResult> {
   ] = await Promise.all([
     prisma.event.deleteMany({ where: { userId } }),
     prisma.partner.deleteMany({ where: { userId } }),
-    prisma.position.deleteMany({ where: { userId } }),
     prisma.wishlist.deleteMany({ where: { userId } }),
     prisma.groupCalendar.deleteMany({ where: { createdBy: userId } }),
     prisma.groupCalendarMember.deleteMany({ where: { userId } }),
@@ -79,7 +76,6 @@ export async function deleteAllUserData(userId: string): Promise<DeleteResult> {
       eventPhotos,
       partners: partners.count,
       partnerPhotos,
-      positions: positions.count,
       wishlists: wishlists.count,
       groupCalendars: calendars.count,
       calendarMemberships: memberships.count,
