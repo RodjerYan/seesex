@@ -97,6 +97,7 @@ export function eventView(event: EventRow): Record<string, unknown> {
     notes: decrypt(event.notes),
     calories: event.calories,
     heartRate: event.heartRate,
+    heartRateMax: event.heartRateMax,
     initiatedBy: event.initiatedBy,
     groupCalendarId: event.groupCalendarId,
     userId: event.userId,

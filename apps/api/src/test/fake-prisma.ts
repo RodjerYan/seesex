@@ -24,6 +24,7 @@ type ModelKey =
   | 'profiles'
   | 'sessions'
   | 'refreshTokens'
+  | 'deviceTokens'
   | 'events'
   | 'partners'
   | 'partnerPhotos'
@@ -53,6 +54,7 @@ export interface FakeDb {
   profiles: Row[];
   sessions: Row[];
   refreshTokens: Row[];
+  deviceTokens: Row[];
   events: Row[];
   partners: Row[];
   partnerPhotos: Row[];
@@ -73,6 +75,7 @@ const db: FakeDb = {
   profiles: [],
   sessions: [],
   refreshTokens: [],
+  deviceTokens: [],
   events: [],
   partners: [],
   partnerPhotos: [],
@@ -102,6 +105,7 @@ export function resetFakeDb(): void {
   db.profiles.length = 0;
   db.sessions.length = 0;
   db.refreshTokens.length = 0;
+  db.deviceTokens.length = 0;
   db.events.length = 0;
   db.partners.length = 0;
   db.partnerPhotos.length = 0;
@@ -152,6 +156,7 @@ const MODELS: Record<ModelKey, ModelSpec> = {
       calendarMemberships: { kind: 'oneToMany', target: 'groupCalendarMembers', fk: 'userId' },
       sessions: { kind: 'oneToMany', target: 'sessions', fk: 'userId' },
       refreshTokens: { kind: 'oneToMany', target: 'refreshTokens', fk: 'userId' },
+      deviceTokens: { kind: 'oneToMany', target: 'deviceTokens', fk: 'userId' },
       moods: { kind: 'oneToMany', target: 'moods', fk: 'userId' },
       places: { kind: 'oneToMany', target: 'places', fk: 'userId' },
       accessories: { kind: 'oneToMany', target: 'accessories', fk: 'userId' },
@@ -193,6 +198,11 @@ const MODELS: Record<ModelKey, ModelSpec> = {
     relations: { user: { kind: 'manyToOne', target: 'users', fk: 'userId' } },
     defaults: (now) => ({ revokedAt: null, createdAt: now }),
   },
+  deviceTokens: {
+    updatedAt: false,
+    relations: { user: { kind: 'manyToOne', target: 'users', fk: 'userId' } },
+    defaults: (now) => ({ lastSyncAt: null, createdAt: now }),
+  },
   events: {
     updatedAt: true,
     relations: {
@@ -232,6 +242,7 @@ const MODELS: Record<ModelKey, ModelSpec> = {
       notes: null,
       calories: null,
       heartRate: null,
+      heartRateMax: null,
       initiatedBy: null,
       groupCalendarId: null,
       ...baseTimestamps(now),
@@ -373,6 +384,7 @@ const DELEGATES: Record<string, ModelKey> = {
   profile: 'profiles',
   session: 'sessions',
   refreshToken: 'refreshTokens',
+  deviceToken: 'deviceTokens',
   event: 'events',
   partner: 'partners',
   partnerPhoto: 'partnerPhotos',
@@ -399,6 +411,7 @@ const REF_RULES: RefRule[] = [
   { child: 'profiles', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'sessions', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'refreshTokens', fk: 'userId', parent: 'users', action: 'cascade' },
+  { child: 'deviceTokens', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'events', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'partners', fk: 'userId', parent: 'users', action: 'cascade' },
   { child: 'wishlists', fk: 'userId', parent: 'users', action: 'cascade' },

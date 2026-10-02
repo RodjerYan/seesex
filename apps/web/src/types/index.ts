@@ -32,6 +32,8 @@ export interface Event {
   notes?: string | null;
   calories?: number | null;
   heartRate?: number | null;
+  /** Максимальный пульс за событие (Apple Health, см. types/api EventView). */
+  heartRateMax?: number | null;
   initiatedBy?: string | null;
   groupCalendarId?: string | null;
   createdAt?: string;

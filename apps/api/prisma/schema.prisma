@@ -25,6 +25,7 @@ model User {
 
   profile              Profile?
   events               Event[]
+  deviceTokens         DeviceToken[]
   partners             Partner[]
   wishlists            Wishlist[]
   groupCalendars       GroupCalendar[]        @relation("CreatedGroupCalendars")
@@ -49,6 +50,23 @@ model Profile {
   updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Device-токены для шортката Apple Health (T-20261002-019 / H1).
+// Токен хранится открытым (как API-ключ): он показывается в UI один раз
+// и подставляется шорткатом в Authorization: Bearer <token> — не JWT.
+// Threat model: device-token хранится открытым (API-key модель, 192-bit энтропия,
+// показывается пользователю один раз) — осознанный компромисс; доступ к БД = компрометация токенов.
+model DeviceToken {
+  id         String    @id @default(uuid())
+  userId     String
+  token      String    @unique
+  createdAt  DateTime  @default(now())
+  lastSyncAt DateTime? // последний успешный приём проб /api/health/apple
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {
@@ -91,6 +109,7 @@ model Event {
   notes           String?
   calories        Int?
   heartRate       Int?
+  heartRateMax    Int? // максимум пульса из проб Apple Health (обогащение H1)
   initiatedBy     String?
   groupCalendarId String?
   createdAt       DateTime  @default(now())

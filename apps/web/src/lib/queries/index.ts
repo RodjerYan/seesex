@@ -1,4 +1,4 @@
-export { healthQueryKey, useHealth } from './health';
+export { healthQueryKey, healthTokenStatusQueryKey, useCreateHealthToken, useHealth, useHealthTokenStatus, useRevokeHealthToken } from './health';
 export type { HealthResponse } from './health';
 export { meQueryKey, useMe } from './me';
 export { calendarQueryKey, useCalendar } from './calendar';

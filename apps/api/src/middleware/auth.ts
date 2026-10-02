@@ -1,5 +1,7 @@
+import type { DeviceToken } from '@prisma/client';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { verifyAccessToken, verifyTwoFaToken, type TokenPurpose } from '../lib/jwt';
+import { prisma } from '../lib/prisma';
 import { ApiError } from './error';
 
 /** Пользователь, прикреплённый requireAuth-ом к запросу. */
@@ -11,6 +13,9 @@ export interface AuthUser {
 
 /** Request с гарантированно заполненным user (типобезопасный каст без any). */
 export type AuthedRequest = Request & { user: AuthUser };
+
+/** Request с device-токеном Apple Health (POST /api/health/apple). */
+export type DeviceTokenRequest = Request & { deviceToken: DeviceToken };
 
 function extractBearer(req: Request): string {
   const header = req.headers.authorization;
@@ -63,4 +68,26 @@ export const requireAuthOrTmpToken: RequestHandler = (
   } catch (err) {
     next(err);
   }
+};
+
+/**
+ * Bearer device-token (НЕ JWT) для POST /api/health/apple:
+ * ищем DeviceToken по token, иначе 401 INVALID_DEVICE_TOKEN.
+ * Успех → req.deviceToken (владелец — deviceToken.userId).
+ */
+export const requireDeviceToken: RequestHandler = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
+  void (async () => {
+    const token = extractBearer(req);
+    const deviceToken = await prisma.deviceToken.findUnique({ where: { token } });
+    if (!deviceToken) {
+      throw ApiError.unauthorized('INVALID_DEVICE_TOKEN', 'Unknown device token');
+    }
+    const target = req as DeviceTokenRequest;
+    target.deviceToken = deviceToken;
+    next();
+  })().catch(next);
 };

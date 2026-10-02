@@ -12,6 +12,7 @@ import { eventsRouter } from './routes/events.routes';
 import { exportRouter } from './routes/export.routes';
 import { filesRouter } from './routes/files.routes';
 import { groupCalendarsRouter } from './routes/group-calendars.routes';
+import { healthRouter } from './routes/health.routes';
 import { partnersRouter } from './routes/partners.routes';
 import { settingsRouter } from './routes/settings.routes';
 import { statisticsRouter } from './routes/statistics.routes';
@@ -81,6 +82,10 @@ export function createApp(): Express {
   app.use('/api/settings', settingsRouter);
   app.use('/api/export', exportRouter);
   app.use('/api/files', filesRouter);
+  // Apple Health (T-20261002-019): device-token приём проб + токены для UI.
+  // ВАЖНО: после app.get('/api/health') — тот зарегистрирован раньше и
+  // GET /api/health остаётся health-check'ом, а не роутом healthRouter.
+  app.use('/api/health', healthRouter);
 
   // Статика собранного SPA (render.yaml: build копирует web/dist -> apps/api/public).
   // В dev её нет — SPA отдаёт vite dev-сервер, поэтому ветка условная.

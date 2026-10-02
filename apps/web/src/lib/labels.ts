@@ -37,6 +37,12 @@ export const GROUP_ROLE_LABEL: Record<string, string> = {
   MEMBER: 'Участник',
 };
 
+/** Статус подключения Apple Health (Settings → AppleHealthPanel). */
+export const HEALTH_STATUS_LABEL: Record<string, string> = {
+  connected: 'Подключено',
+  disconnected: 'Не подключено',
+};
+
 /** Подпись значения из словаря; неизвестное/null — fallback (по умолчанию «—»). */
 export function tr<T extends Record<string, string>>(
   dict: T,

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ImagePlus, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, ImagePlus, Pencil, Trash2 } from 'lucide-react';
 import {
   useRef,
   useState,
@@ -116,6 +116,17 @@ export default function EventDetail(): ReactElement {
   const date = new Date(item.date);
   const { Icon, color, label } = eventMeta(item.eventType);
 
+  // Пульс/калории одной строкой (обогащение Apple Health добавляет heartRateMax):
+  // «♥ 88/105 уд/мин · 181 ккал»; без max — просто средний пульс.
+  const heartRatePart =
+    item.heartRate === null
+      ? null
+      : item.heartRateMax === null || item.heartRateMax === undefined
+        ? `${item.heartRate} уд/мин`
+        : `${item.heartRate}/${item.heartRateMax} уд/мин`;
+  const caloriesPart = item.calories === null ? null : `${item.calories} ккал`;
+  const healthPart = [heartRatePart, caloriesPart].filter(Boolean).join(' · ');
+
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -167,8 +178,16 @@ export default function EventDetail(): ReactElement {
             <Stars value={item.rating} />
           </Row>
           <Row label="Длительность">{formatDuration(item.duration)}</Row>
-          <Row label="Калории">{item.calories === null ? '—' : `${item.calories} ккал`}</Row>
-          <Row label="Пульс">{item.heartRate === null ? '—' : `${item.heartRate} уд/мин`}</Row>
+          <Row label="Пульс и калории">
+            {healthPart ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 text-red-400" aria-hidden="true" />
+                {healthPart}
+              </span>
+            ) : (
+              '—'
+            )}
+          </Row>
           <Row label="Инициатор">{item.initiatedBy || '—'}</Row>
           <Row label="Тип">
             <span className="inline-flex flex-wrap items-center justify-end gap-1.5">

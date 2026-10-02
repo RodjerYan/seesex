@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { EventForm, type EventPayload } from '../../components/events/EventForm';
 import { Button } from '../../components/ui/controls';
 import { ErrorBlock, LoadingBlock } from '../../components/ui/states';
+import { HEALTH_SHORTCUT_DELAY_MS, openHealthShortcut } from '../../lib/appleHealth';
 import { api } from '../../lib/api';
 import { errorMessage } from '../../lib/errors';
 import { overviewQueryKey, useEvent } from '../../lib/queries';
@@ -17,16 +18,38 @@ export default function EventEdit(): ReactElement {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
+  // Apple Health: отложенный запуск шортката ПОСЛЕ редиректа (см. ниже).
+  const healthTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (healthTimer.current !== null) window.clearTimeout(healthTimer.current);
+    },
+    [],
+  );
 
   const eventQuery = useEvent(id);
   const mutation = useMutation({
     mutationFn: (payload: EventPayload) =>
       api.put<{ event: EventView }>(`/api/events/${id}`, payload),
-    onSuccess: (data) => {
+    onSuccess: (data, payload) => {
       void queryClient.invalidateQueries({ queryKey: ['events'] });
       void queryClient.invalidateQueries({ queryKey: ['calendar'] });
       void queryClient.invalidateQueries({ queryKey: overviewQueryKey });
       navigate(`/events/${data.event.id}`, { replace: true });
+      // Apple Health: открываем шорткат на iOS (один тап подтверждения —
+      // ограничение платформы). Сначала редирект приложения, и только затем —
+      // shortcuts:// (иначе либо уйдём в Шорткаты, либо потеряется результат
+      // сохранения); задержка HEALTH_SHORTCUT_DELAY_MS даёт SPA дорисоваться
+      // (см. lib/appleHealth.ts).
+      healthTimer.current = window.setTimeout(() => {
+        openHealthShortcut({
+          eventId: data.event.id,
+          startedAt: payload.date,
+          durationMin: payload.duration,
+          eventType: payload.eventType,
+        });
+      }, HEALTH_SHORTCUT_DELAY_MS);
     },
     onError: (error) => setFormError(errorMessage(error)),
   });

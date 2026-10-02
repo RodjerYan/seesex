@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Card, ErrorText, SectionTitle } from '../components/ui/controls';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
+import { AppleHealthPanel } from '../components/settings/AppleHealthPanel';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
 import { useMe } from '../lib/queries';
@@ -97,6 +98,9 @@ export default function Settings(): ReactElement {
           </li>
         ))}
       </ul>
+
+      {/* Apple Health: device-токен + инструкция подключения шортката (H3). */}
+      <AppleHealthPanel />
 
       {onLogout.isError ? (
         <div className="mb-4">
