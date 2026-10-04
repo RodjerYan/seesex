@@ -5,35 +5,43 @@
  * здесь — только источник иконки/цвета. Значения полей (eventType) не меняем,
  * модуль только для отображения (EventForm-чипы, карточки, легенды, статистика).
  */
-import {
-  Ban,
-  Flame,
-  Hand,
-  Heart,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react';
-
 import { eventTypeLabel } from './eventTypeLabels';
+
+/**
+ * EmojiIcon — компонент, рендерирующий эмодзи внутри span.
+ * Принимает className и распределяет его, fontSize: '1em' (под h-3.5/w-3.5 и h-4/w-4).
+ */
+const emojiIcon = (emoji: string) =>
+  function EmojiIcon({ className = '' }: { className?: string }) {
+    return (
+      <span
+        aria-hidden="true"
+        className={`inline-flex items-center justify-center leading-none ${className}`}
+        style={{ fontSize: '1em' }}
+      >
+        {emoji}
+      </span>
+    );
+  };
 
 export interface EventMeta {
   label: string;
-  Icon: LucideIcon;
+  Icon: ReturnType<typeof emojiIcon>; // ComponentType<{ className?: string }>
   color: string;
 }
 
 export const EVENT_META: Record<string, EventMeta> = {
-  SEX: { label: eventTypeLabel('SEX'), Icon: Heart, color: '#FF6BA3' },
-  KISS: { label: eventTypeLabel('KISS'), Icon: Sparkles, color: '#E0B8FF' },
-  MASSAGE: { label: eventTypeLabel('MASSAGE'), Icon: Hand, color: '#A78BFA' },
-  ORAL: { label: eventTypeLabel('ORAL'), Icon: Flame, color: '#FB7185' },
-  ANAL: { label: eventTypeLabel('ANAL'), Icon: Flame, color: '#FB923C' },
-  OTHER: { label: eventTypeLabel('OTHER'), Icon: Flame, color: '#FF6BA3' },
-  TURNDOWN: { label: eventTypeLabel('TURNDOWN'), Icon: Ban, color: '#6B7280' },
+  SEX: { label: eventTypeLabel('SEX'), Icon: emojiIcon('❤️'), color: '#FF6BA3' },
+  KISS: { label: eventTypeLabel('KISS'), Icon: emojiIcon('💋'), color: '#E0B8FF' },
+  MASSAGE: { label: eventTypeLabel('MASSAGE'), Icon: emojiIcon('💆'), color: '#A78BFA' },
+  ORAL: { label: eventTypeLabel('ORAL'), Icon: emojiIcon('👄'), color: '#FB7185' },
+  ANAL: { label: eventTypeLabel('ANAL'), Icon: emojiIcon('🍑'), color: '#FB923C' },
+  OTHER: { label: eventTypeLabel('OTHER'), Icon: emojiIcon('🧩'), color: '#FF6BA3' },
+  TURNDOWN: { label: eventTypeLabel('TURNDOWN'), Icon: emojiIcon('🚫'), color: '#6B7280' },
 };
 
-/** Иконка/цвет фоллбэка «своего» типа (CUSTOM и любой произвольный ключ). */
-const CUSTOM_FALLBACK = { Icon: Sparkles, color: '#E0B8FF' };
+/* Иконка/цвет фоллбэка «своего» типа (CUSTOM и любой произвольный ключ). */
+const CUSTOM_FALLBACK = { Icon: emojiIcon('✨'), color: '#E0B8FF' };
 
 /**
  * Метаданные типа события по «сырому» значению из данных/API.
