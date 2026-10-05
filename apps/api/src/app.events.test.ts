@@ -166,57 +166,6 @@ describe('GET /api/events/calendar', () => {
   });
 });
 
-describe('Event photos', () => {
-  it('uploads photos and serves them via /api/files only to owner', async () => {
-    const created = await createEvent(user, { date: '2020-02-02T10:00:00.000Z' });
-    const png = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
-
-    const upload = await request(app)
-      .post(`/api/events/${created.id}/photos`)
-      .set(auth(user))
-      .attach('photo', png, { filename: 'shot.png', contentType: 'image/png' });
-    expect(upload.status).toBe(201);
-    expect(upload.body.photos).toHaveLength(1);
-
-    const filePath = upload.body.photos[0].filePath as string;
-    expect(filePath.startsWith('events/')).toBe(true);
-    expect(upload.body.photos[0].url).toContain('/api/files?path=');
-
-    const url = `/api/files?path=${encodeURIComponent(filePath)}`;
-
-    // без токена → 401
-    const anon = await request(app).get(url);
-    expect(anon.status).toBe(401);
-
-    // чужой юзер → 404 (владелец другой)
-    const stranger = await registerAndLogin(app);
-    const foreign = await request(app).get(url).set(auth(stranger));
-    expect(foreign.status).toBe(404);
-
-    // владелец → 200 + image/png
-    const own = await request(app).get(url).set(auth(user));
-    expect(own.status).toBe(200);
-    expect(own.headers['content-type']).toContain('image/png');
-    expect(own.body.length ?? own.body).toBeTruthy();
-
-    // path traversal → 404
-    const traversal = await request(app)
-      .get(`/api/files?path=${encodeURIComponent('events/../../package.json')}`)
-      .set(auth(user));
-    expect(traversal.status).toBe(404);
-  });
-
-  it('rejects multipart upload without files with 400 NO_FILES', async () => {
-    const created = await createEvent(user, { date: '2020-03-03T10:00:00.000Z' });
-    const res = await request(app)
-      .post(`/api/events/${created.id}/photos`)
-      .set(auth(user))
-      .field('caption', 'no file');
-    expect(res.status).toBe(400);
-    expect(res.body.error.code).toBe('NO_FILES');
-  });
-});
-
 describe('Event.notes encryption', () => {
   it('stores notes encrypted at rest and returns plaintext to the owner', async () => {
     const originalKey = config.ENCRYPTION_KEY;

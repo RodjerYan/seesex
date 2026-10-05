@@ -1,7 +1,6 @@
 import type { Response } from 'express';
 import type { AuthedRequest } from '../middleware/auth';
-import { ApiError, asyncHandler } from '../middleware/error';
-import { uploadedFiles } from '../middleware/upload';
+import { asyncHandler } from '../middleware/error';
 import { parseInput } from '../schemas/common';
 import {
   calendarQuerySchema,
@@ -45,20 +44,3 @@ export const remove = asyncHandler<AuthedRequest>(async (req: AuthedRequest, res
   await eventsService.deleteEvent(req.user.id, id);
   res.status(204).end();
 });
-
-/** POST /api/events/:id/photos — multipart (multer в роуте) → EventPhoto. */
-export const uploadPhotos = asyncHandler<AuthedRequest>(
-  async (req: AuthedRequest, res: Response) => {
-    const { id } = parseInput(eventIdParamSchema, req.params);
-    const files = uploadedFiles(req);
-    if (files.length === 0) {
-      throw ApiError.badRequest('NO_FILES', 'At least one image file is required');
-    }
-    const photos = await eventsService.addEventPhotos(
-      req.user.id,
-      id,
-      files.map((file) => file.filename),
-    );
-    res.status(201).json({ photos });
-  },
-);

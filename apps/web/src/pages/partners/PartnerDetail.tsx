@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ImagePlus, Pencil, Star, Trash2 } from 'lucide-react';
-import { useRef, useState, type ChangeEvent, type ReactElement } from 'react';
+import { ArrowLeft, Pencil, Star, Trash2 } from 'lucide-react';
+import { useState, type ReactElement } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { EventCard } from '../../components/events/EventCard';
-import { AuthImage } from '../../components/ui/AuthImage';
 import { Button, Card, ErrorText, SectionTitle } from '../../components/ui/controls';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../../components/ui/states';
-import { api, uploadForm } from '../../lib/api';
+import { api } from '../../lib/api';
 import { formatDate } from '../../lib/format';
 import { errorMessage } from '../../lib/errors';
 import { GENDER_LABEL, ORIENTATION_LABEL, RELATIONSHIP_LABEL, tr } from '../../lib/labels';
@@ -18,10 +17,6 @@ import {
   usePartner,
   usePartnerStats,
 } from '../../lib/queries';
-import type { PhotoView } from '../../types/api';
-
-/** Лимит фото партнёра (MAX_PHOTOS_PER_PARTNER на бэке, по умолчанию 3). */
-const MAX_PHOTOS = 3;
 
 function DataRow({ label, value }: { label: string; value: string | null | undefined }): ReactElement {
   return (
@@ -32,15 +27,13 @@ function DataRow({ label, value }: { label: string; value: string | null | undef
   );
 }
 
-/** Детали партнёра: данные, фото (≤3), статистика, события, «сделать основным». */
+/** Детали партнёра: данные, статистика, события, «сделать основным». */
 export default function PartnerDetail(): ReactElement {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [actionError, setActionError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const partnerQuery = usePartner(id);
   const eventsQuery = useEvents({ partnerId: id, limit: 10 });
@@ -68,35 +61,8 @@ export default function PartnerDetail(): ReactElement {
     onError: (error) => setActionError(errorMessage(error)),
   });
 
-  const onUpload = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const files = event.target.files;
-    event.target.value = '';
-    if (!files || files.length === 0 || !id) return;
-    const formData = new FormData();
-    for (const file of Array.from(files)) formData.append('files', file);
-    setUploading(true);
-    setActionError(null);
-    try {
-      await uploadForm<{ photos: PhotoView[] }>(`/api/partners/${id}/photos`, formData);
-      invalidate();
-    } catch (error) {
-      setActionError(errorMessage(error));
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const deletePhoto = (photoId: string): void => {
-    if (!id || !window.confirm('Удалить фотографию?')) return;
-    setActionError(null);
-    void api
-      .delete(`/api/partners/${id}/photos/${photoId}`)
-      .then(invalidate)
-      .catch((error: unknown) => setActionError(errorMessage(error)));
-  };
-
   const onDeletePartner = (): void => {
-    if (!window.confirm('Удалить партнёра вместе с его фото? Это действие нельзя отменить.')) return;
+    if (!window.confirm('Удалить партнёра? Это действие нельзя отменить.')) return;
     setActionError(null);
     remove.mutate();
   };
@@ -112,7 +78,6 @@ export default function PartnerDetail(): ReactElement {
 
   const partner = partnerQuery.data;
   const stat = (statsQuery.data?.partners ?? []).find((item) => item.id === partner.id);
-  const photosLeft = MAX_PHOTOS - partner.photos.length;
 
   return (
     <section className="px-4 py-6 sm:px-6">
@@ -187,54 +152,6 @@ export default function PartnerDetail(): ReactElement {
               <DataRow key={key} label={key} value={String(value)} />
             ))}
           </dl>
-        ) : null}
-      </Card>
-
-      <Card className="mb-4">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionTitle>Фото ({partner.photos.length}/{MAX_PHOTOS})</SectionTitle>
-          <Button
-            variant="ghost"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || photosLeft <= 0}
-          >
-            <ImagePlus className="h-4 w-4" aria-hidden="true" />
-            {uploading ? 'Загрузка…' : 'Добавить'}
-          </Button>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(event) => void onUpload(event)}
-        />
-        {partner.photos.length === 0 ? (
-          <p className="text-xs text-slate-500">Фотографий нет.</p>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {partner.photos.map((photo) => (
-              <div key={photo.id} className="relative">
-                <AuthImage
-                  src={photo.url}
-                  alt={`Фото ${partner.name}`}
-                  className="aspect-square w-full rounded-lg object-cover"
-                />
-                <button
-                  type="button"
-                  aria-label="Удалить фото"
-                  onClick={() => deletePhoto(photo.id)}
-                  className="absolute right-1 top-1 rounded-full bg-white/[0.08] p-1.5 text-slate-300 hover:text-red-400"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        {photosLeft > 0 ? (
-          <p className="mt-2 text-[11px] text-slate-500">Можно добавить ещё {photosLeft} фото.</p>
         ) : null}
       </Card>
 

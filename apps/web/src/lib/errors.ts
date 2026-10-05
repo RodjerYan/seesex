@@ -18,10 +18,6 @@ const MESSAGES: Record<string, string> = {
   CALENDAR_NOT_FOUND: 'Групповой календарь не найден',
   ALREADY_MEMBER: 'Вы уже участник этого календаря',
   NOT_A_MEMBER: 'Вы не участник этого календаря',
-  PHOTO_LIMIT_EXCEEDED: 'Достигнут лимит фотографий',
-  NO_FILES: 'Выберите изображение для загрузки',
-  FILE_TOO_LARGE: 'Файл слишком большой (лимит 5 МБ)',
-  INVALID_FILE_TYPE: 'Можно загружать только изображения',
   SESSION_NOT_FOUND: 'Сессия не найдена',
   SESSION_EXPIRED: 'Сессия истекла — войдите заново',
   // --- Токены/сессии ---
@@ -37,10 +33,6 @@ const MESSAGES: Record<string, string> = {
   FORBIDDEN: 'Доступ запрещён',
   CONFLICT: 'Такая запись уже существует',
   CALENDAR_ACCESS_DENIED: 'Нет доступа к этому календарю',
-  // --- Файлы ---
-  UPLOAD_FAILED: 'Не удалось загрузить файл — попробуйте другое изображение',
-  FILE_NOT_FOUND: 'Файл не найден',
-  PHOTO_NOT_FOUND: 'Фотография не найдена',
   // --- Прочие сущности ---
   MOOD_NOT_FOUND: 'Настроение не найдено',
   PLACE_NOT_FOUND: 'Место не найдено',

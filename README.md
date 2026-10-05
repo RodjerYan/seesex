@@ -58,7 +58,7 @@ npm run typecheck    # tsc --noEmit во всех пакетах
 
 Основные модели из ТЗ: `User` (lock/2FA-настройки), `Event`, `Partner`,
 `Wishlist`, `GroupCalendar` — плюс связи: `Profile`, `Session`, `RefreshToken`,
-`PartnerPhoto`, `EventPhoto`, `Mood`, `Place`, `Accessory`, `PeriodTracking`,
+`Mood`, `Place`, `Accessory`, `PeriodTracking`,
 `PeriodEntry`, `GroupCalendarMember`.
 
 Ключевые индексы: `Event(userId, date)`, `Event(groupCalendarId, date)`,
@@ -70,15 +70,14 @@ npm run typecheck    # tsc --noEmit во всех пакетах
 1. Залейте репозиторий в GitHub, подключите его в Render как **Blueprint**
    (Render сам прочитает `render.yaml`).
 2. Создадутся:
-   - web service `xtracker-web` (Node, plan starter, disk `uploads` 1 GB),
+   - web service `xtracker-web` (Node, plan starter),
    - PostgreSQL `xtracker-db` (plan starter, db `xtracker`),
    - env-переменные: `DATABASE_URL` подтянется из базы,
      `JWT_SECRET` и `ENCRYPTION_KEY` Render сгенерирует сам.
 3. Проверьте вручную в настройках сервиса:
    - `FRONTEND_URL` / `ALLOWED_ORIGINS` — домен сервиса
      (`https://xtracker-web.onrender.com`),
-   - `UPLOAD_DIR=/opt/render/app/uploads` (mount disk),
-   - rate-limit и лимиты фото — уже прописаны в blueprint.
+   - rate-limit — уже прописан в blueprint.
 4. Build: `cd apps/api && npm install && npm run build && cd ../web && npm install &&
 npm run build && cp -r ../web/dist ./public`
    Start: `cd apps/api && npm start` — статика web отдаётся из `apps/api/public`.
@@ -92,4 +91,3 @@ CI/CD: GitHub → Render, авто-деплой при пуше в `main`.
 - `.env` в git не попадает (см. `.gitignore`); секреты — только в env/Render Secrets.
 - Пароли — bcrypt (12 раундов), JWT access 15m / refresh 7d, TOTP 2FA.
 - Чувствительные поля — AES-256-GCM (`ENCRYPTION_KEY`).
-- Загружаемые фото — только в `UPLOAD_DIR` (Render Disk), в git не коммитятся.

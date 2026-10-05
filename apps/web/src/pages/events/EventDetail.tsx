@@ -1,23 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Heart, ImagePlus, Pencil, Trash2 } from 'lucide-react';
-import {
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { ArrowLeft, Heart, Pencil, Trash2 } from 'lucide-react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { AuthImage } from '../../components/ui/AuthImage';
 import { Stars } from '../../components/ui/Stars';
 import { Button, Card, ErrorText, SectionTitle } from '../../components/ui/controls';
 import { ErrorBlock, LoadingBlock } from '../../components/ui/states';
-import { api, uploadForm } from '../../lib/api';
+import { api } from '../../lib/api';
 import { formatDate, formatDateTime, formatDuration, formatTime } from '../../lib/format';
 import { errorMessage } from '../../lib/errors';
-import { eventQueryKey, overviewQueryKey, useEvent } from '../../lib/queries';
-import type { PhotoView } from '../../types/api';
+import { overviewQueryKey, useEvent } from '../../lib/queries';
 import { eventMeta } from '../../lib/eventMeta';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -58,16 +50,14 @@ function NamedList({ items, to }: { items: { id: string; name: string }[]; to?: 
   );
 }
 
-/** Детали события: поля, фото, связи, редактирование и удаление. */
+/** Детали события: поля, связи, редактирование и удаление. */
 export default function EventDetail(): ReactElement {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const eventQuery = useEvent(id);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const remove = useMutation({
     mutationFn: () => api.delete(`/api/events/${id ?? ''}`),
@@ -78,24 +68,6 @@ export default function EventDetail(): ReactElement {
     },
     onError: (error) => setActionError(errorMessage(error)),
   });
-
-  const onUpload = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const files = event.target.files;
-    event.target.value = '';
-    if (!files || files.length === 0 || !id) return;
-    const formData = new FormData();
-    for (const file of Array.from(files)) formData.append('files', file);
-    setUploading(true);
-    setActionError(null);
-    try {
-      await uploadForm<{ photos: PhotoView[] }>(`/api/events/${id}/photos`, formData);
-      void queryClient.invalidateQueries({ queryKey: eventQueryKey(id) });
-    } catch (error) {
-      setActionError(errorMessage(error));
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const onDelete = (): void => {
     if (!window.confirm('Удалить событие? Это действие нельзя отменить.')) return;
@@ -237,38 +209,6 @@ export default function EventDetail(): ReactElement {
             </Row>
           ) : null}
         </dl>
-      </Card>
-
-      <Card className="mb-4">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionTitle>Фото</SectionTitle>
-          <Button variant="ghost" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-            <ImagePlus className="h-4 w-4" aria-hidden="true" />
-            {uploading ? 'Загрузка…' : 'Добавить'}
-          </Button>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(event) => void onUpload(event)}
-        />
-        {item.photos.length === 0 ? (
-          <p className="text-xs text-slate-500">Фотографий нет.</p>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {item.photos.map((photo) => (
-              <AuthImage
-                key={photo.id}
-                src={photo.url}
-                alt={photo.caption ?? `Фото ${formatDate(photo.createdAt)}`}
-                className="aspect-square w-full rounded-lg object-cover"
-              />
-            ))}
-          </div>
-        )}
       </Card>
 
       {item.notes ? (

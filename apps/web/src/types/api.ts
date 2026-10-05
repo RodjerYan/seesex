@@ -12,16 +12,6 @@ export interface NamedRef {
   name: string;
 }
 
-/** Фото: url всегда относительный (`/api/files?path=...`) — требует Bearer. */
-export interface PhotoView {
-  id: string;
-  filePath: string;
-  url: string;
-  caption: string | null;
-  sortOrder?: number;
-  createdAt?: string;
-}
-
 /** GET /api/events, GET /api/events/:id, GET /api/group-calendars/:id/events. */
 export interface EventView {
   id: string;
@@ -47,7 +37,6 @@ export interface EventView {
   moods: NamedRef[];
   places: NamedRef[];
   accessories: NamedRef[];
-  photos: PhotoView[];
   groupCalendar?: { id: string; name: string; inviteCode?: string } | null;
 }
 
@@ -91,7 +80,6 @@ export interface PartnerView {
   customFields: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
-  photos: PhotoView[];
   periodTracking: {
     lastPeriodStart: string | null;
     averageCycleLength: number | null;

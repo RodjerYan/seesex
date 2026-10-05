@@ -237,29 +237,6 @@ async function sendWithRefresh(
   return response;
 }
 
-/**
- * POST multipart/form-data (загрузка фото events/partners).
- * Content-Type вручную НЕ выставляем — boundary подставляет браузер.
- */
-export async function uploadForm<T>(path: string, formData: FormData): Promise<T> {
-  const url = buildUrl(path);
-  const timeout = withTimeout(undefined, 60_000); // загрузка фото может быть медленной
-  const send = (token: string | null): Promise<Response> => {
-    const headers = new Headers();
-    headers.set('Accept', 'application/json');
-    if (token) headers.set('Authorization', `Bearer ${token}`);
-    return fetch(url, { method: 'POST', headers, body: formData, signal: timeout.signal });
-  };
-
-  try {
-    const response = await sendWithRefresh(send, true);
-    if (!response.ok) throw await toApiError(response);
-    return (await response.json()) as T;
-  } finally {
-    timeout.cleanup();
-  }
-}
-
 /** Сырой запрос (экспорт json/csv): нужен Blob + Content-Disposition. */
 export async function rawRequest(path: string, options: RequestOptions = {}): Promise<Response> {
   const { method = 'GET', body, query, auth = true, headers, signal } = options;

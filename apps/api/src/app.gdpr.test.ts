@@ -86,7 +86,7 @@ describe('POST /api/export/csv', () => {
 });
 
 describe('DELETE /api/settings/data (GDPR)', () => {
-  it('wipes user data + photo rows but keeps the account', async () => {
+  it('wipes user data but keeps the account', async () => {
     await seedUserData();
     expect(getFakeDb().events).toHaveLength(1);
     expect(getFakeDb().profiles).toHaveLength(1);

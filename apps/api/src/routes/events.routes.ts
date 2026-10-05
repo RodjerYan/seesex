@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import * as eventsController from '../controllers/events.controller';
 import { requireAuth } from '../middleware/auth';
-import { uploadPhotos } from '../middleware/upload';
 
 export const eventsRouter: Router = Router();
 
@@ -14,4 +13,3 @@ eventsRouter.post('/', eventsController.create);
 eventsRouter.get('/:id', eventsController.get);
 eventsRouter.put('/:id', eventsController.update);
 eventsRouter.delete('/:id', eventsController.remove);
-eventsRouter.post('/:id/photos', uploadPhotos('events'), eventsController.uploadPhotos);

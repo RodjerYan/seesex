@@ -1,17 +1,13 @@
-import type { Partner, PartnerPhoto, PeriodEntry, PeriodTracking, Prisma } from '@prisma/client';
-import { config } from '../lib/config';
+import type { Partner, PeriodEntry, PeriodTracking, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../middleware/error';
-import { relativeUploadPath, unlinkUpload } from '../middleware/upload';
 import type { CreatePartnerInput, UpdatePartnerInput } from '../schemas/partners.schema';
 
 const partnerInclude = {
-  photos: true,
   periodTracking: { include: { entries: true } },
 } as const;
 
 export interface PartnerRow extends Partner {
-  photos?: PartnerPhoto[];
   periodTracking?: (PeriodTracking & { entries?: PeriodEntry[] }) | null;
 }
 
@@ -35,17 +31,6 @@ function normalizeCustomFields(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
-function photoView(photo: PartnerPhoto): Record<string, unknown> {
-  return {
-    id: photo.id,
-    filePath: photo.filePath,
-    caption: photo.caption,
-    sortOrder: photo.sortOrder,
-    createdAt: photo.createdAt,
-    url: `/api/files?path=${encodeURIComponent(photo.filePath)}`,
-  };
-}
-
 export function partnerView(partner: PartnerRow): Record<string, unknown> {
   return {
     id: partner.id,
@@ -59,7 +44,6 @@ export function partnerView(partner: PartnerRow): Record<string, unknown> {
     customFields: normalizeCustomFields(partner.customFields),
     createdAt: partner.createdAt,
     updatedAt: partner.updatedAt,
-    photos: (partner.photos ?? []).map(photoView),
     periodTracking: partner.periodTracking
       ? {
           lastPeriodStart: partner.periodTracking.lastPeriodStart,
@@ -182,53 +166,8 @@ export async function updatePartner(
 }
 
 export async function deletePartner(userId: string, partnerId: string): Promise<void> {
-  const partner = await assertOwnPartner(userId, partnerId);
-  for (const photo of partner.photos ?? []) unlinkUpload(photo.filePath);
-  await prisma.partner.delete({ where: { id: partnerId } });
-}
-
-/** POST /api/partners/:id/photos — лимит MAX_PHOTOS_PER_PARTNER, иначе 400. */
-export async function addPartnerPhotos(
-  userId: string,
-  partnerId: string,
-  filenames: string[],
-): Promise<Record<string, unknown>[]> {
-  const partner = await assertOwnPartner(userId, partnerId);
-  const existing = await prisma.partnerPhoto.count({ where: { partnerId } });
-  const limit = config.MAX_PHOTOS_PER_PARTNER;
-  if (existing + filenames.length > limit) {
-    for (const filename of filenames) unlinkUpload(relativeUploadPath('partners', filename));
-    throw ApiError.badRequest(
-      'PHOTO_LIMIT_EXCEEDED',
-      `A partner can have at most ${limit} photos`,
-    );
-  }
-  for (const filename of filenames) {
-    await prisma.partnerPhoto.create({
-      data: {
-        partnerId: partner.id,
-        filePath: relativeUploadPath('partners', filename),
-        sortOrder: existing,
-      },
-    });
-  }
-  const updated = (await prisma.partner.findUnique({
-    where: { id: partnerId },
-    include: partnerInclude,
-  })) as PartnerRow;
-  return (updated.photos ?? []).map(photoView);
-}
-
-export async function deletePartnerPhoto(
-  userId: string,
-  partnerId: string,
-  photoId: string,
-): Promise<void> {
   await assertOwnPartner(userId, partnerId);
-  const photo = await prisma.partnerPhoto.findFirst({ where: { id: photoId, partnerId } });
-  if (!photo) throw ApiError.notFound('PHOTO_NOT_FOUND', 'Photo not found');
-  unlinkUpload(photo.filePath);
-  await prisma.partnerPhoto.delete({ where: { id: photoId } });
+  await prisma.partner.delete({ where: { id: partnerId } });
 }
 
 /** PUT /api/partners/:id/primary — снять isPrimary у остальных в транзакции. */

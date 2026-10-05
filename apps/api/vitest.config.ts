@@ -1,5 +1,3 @@
-import os from 'node:os';
-import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -8,10 +6,6 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     // Переменные для config.ts: тесты не требуют живую БД и реальные секреты.
     env: {
-      // Файлы из тестов загрузки фото — во временный каталог, не в репозиторий.
-      UPLOAD_DIR: path.join(os.tmpdir(), 'xtracker-test-uploads'),
-      MAX_FILE_SIZE: '5242880',
-      MAX_PHOTOS_PER_PARTNER: '3',
       NODE_ENV: 'test',
       DATABASE_URL: 'postgresql://test:test@127.0.0.1:5432/xtracker_test',
       JWT_SECRET: 'vitest-local-secret-not-for-production',

@@ -1,6 +1,6 @@
 // xTracker — Prisma schema (PostgreSQL 15)
 // Поля User/Event/Partner/Wishlist/GroupCalendar — точно по request.md;
-// Profile/Session/RefreshToken/PartnerPhoto/EventPhoto/Mood/Place/Accessory/
+// Profile/Session/RefreshToken/Mood/Place/Accessory/
 // PeriodTracking/PeriodEntry/GroupCalendarMember — вспомогательные модели связей.
 
 generator client {
@@ -122,7 +122,6 @@ model Event {
   moods        Mood[]       @relation("EventMoods")
   places       Place[]      @relation("EventPlaces")
   accessories  Accessory[]  @relation("EventAccessories")
-  photos       EventPhoto[]
 
   @@index([userId, date])
   @@index([groupCalendarId, date])
@@ -143,35 +142,9 @@ model Partner {
   updatedAt          DateTime @updatedAt
 
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos         PartnerPhoto[]
   periodTracking PeriodTracking?
 
   events Event[]
-}
-
-model PartnerPhoto {
-  id        String   @id @default(uuid())
-  partnerId String
-  filePath  String
-  caption   String?
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-
-  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-
-  @@index([partnerId])
-}
-
-model EventPhoto {
-  id        String   @id @default(uuid())
-  eventId   String
-  filePath  String
-  caption   String?
-  createdAt DateTime @default(now())
-
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
 }
 
 model Wishlist {

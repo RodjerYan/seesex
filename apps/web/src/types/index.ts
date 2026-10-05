@@ -41,16 +41,6 @@ export interface Event {
   partners?: Partner[];
 }
 
-/** Фото партнёра. */
-export interface PartnerPhoto {
-  id: string;
-  filePath?: string;
-  url?: string;
-  caption?: string | null;
-  sortOrder?: number;
-  createdAt?: string;
-}
-
 /** Партнёр (модель Partner). */
 export interface Partner {
   id: string;
@@ -65,7 +55,6 @@ export interface Partner {
   customFields?: Record<string, unknown> | null;
   createdAt?: string;
   updatedAt?: string;
-  photos?: PartnerPhoto[];
   periodTracking?: PeriodTracking | null;
 }
 

@@ -1,7 +1,6 @@
 # xTracker — Render Blueprint
 # Деплой: GitHub -> Render (auto-deploy on push to main).
-# Тариф free — карта не требуется; persistent disk на free недоступен,
-# поэтому фото/загрузки эфемерны (UPLOAD_DIR на локальном диске, теряются при рестарте).
+# Тариф free — карта не требуется; persistent disk на free недоступен.
 # Секреты (JWT_SECRET, ENCRYPTION_KEY) Render сгенерирует сам (generateValue).
 # DATABASE_URL — внешняя БД Neon (https://neon.tech): значение подставляется вручную
 # в Render Dashboard -> Environment (env ниже помечен sync: false).
@@ -30,12 +29,6 @@ services:
         value: '60000'
       - key: RATE_LIMIT_MAX
         value: '100'
-      - key: UPLOAD_DIR
-        value: /opt/render/app/src/uploads
-      - key: MAX_FILE_SIZE
-        value: '5242880'
-      - key: MAX_PHOTOS_PER_PARTNER
-        value: '3'
       - key: PORT
         value: '10000'
       # Пусто = фронт ходит в API по относительным путям /api (тот же origin на Render).

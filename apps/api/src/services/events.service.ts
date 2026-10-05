@@ -1,7 +1,6 @@
 import type {
   Accessory,
   Event,
-  EventPhoto,
   GroupCalendar,
   Mood,
   Partner,
@@ -12,7 +11,6 @@ import { decrypt, encrypt } from '../lib/crypto';
 import { dayKey } from '../lib/date';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../middleware/error';
-import { relativeUploadPath, unlinkUpload } from '../middleware/upload';
 import type { CreateEventInput, ListEventsQuery, UpdateEventInput } from '../schemas/events.schema';
 
 /** Известные типы событий (для определения isCustomType). */
@@ -37,7 +35,6 @@ export const eventInclude = {
   moods: true,
   places: true,
   accessories: true,
-  photos: true,
   groupCalendar: true,
 } as const;
 
@@ -47,7 +44,6 @@ export interface EventRow extends Event {
   moods?: Mood[];
   places?: Place[];
   accessories?: Accessory[];
-  photos?: EventPhoto[];
   groupCalendar?: GroupCalendar | null;
 }
 
@@ -66,16 +62,6 @@ export function isTurndown(event: Pick<Event, 'eventType'>): boolean {
 export function eventStatus(event: Pick<Event, 'eventType' | 'date'>): CalendarStatus {
   if (isTurndown(event)) return 'turndown';
   return event.date.getTime() > Date.now() ? 'planned' : 'occurred';
-}
-
-function photoView(photo: EventPhoto): Record<string, unknown> {
-  return {
-    id: photo.id,
-    filePath: photo.filePath,
-    caption: photo.caption,
-    createdAt: photo.createdAt,
-    url: `/api/files?path=${encodeURIComponent(photo.filePath)}`,
-  };
 }
 
 function namedView(rows: { id: string; name: string | null }[] | undefined) {
@@ -107,7 +93,6 @@ export function eventView(event: EventRow): Record<string, unknown> {
     moods: namedView(event.moods),
     places: namedView(event.places),
     accessories: namedView(event.accessories),
-    photos: (event.photos ?? []).map(photoView),
   };
 }
 
@@ -383,15 +368,8 @@ export async function updateEvent(
 }
 
 export async function deleteEvent(userId: string, eventId: string): Promise<void> {
-  const event = await assertOwnEvent(userId, eventId);
+  await assertOwnEvent(userId, eventId);
   await prisma.event.delete({ where: { id: eventId } });
-  for (const photo of event.photos ?? []) {
-    try {
-      unlinkUpload(photo.filePath);
-    } catch {
-      // Файл уже отсутствует — не блокируем удаление.
-    }
-  }
 }
 
 export interface CalendarDay {
@@ -443,21 +421,3 @@ export async function calendar(userId: string, from?: Date, to?: Date): Promise<
   return { from: fromD, to: toD, days: [...byDay.values()] };
 }
 
-/** POST /api/events/:id/photos — создаёт EventPhoto для сохранённых multer-файлов. */
-export async function addEventPhotos(
-  userId: string,
-  eventId: string,
-  filenames: string[],
-): Promise<Record<string, unknown>[]> {
-  await assertOwnEvent(userId, eventId);
-  for (const filename of filenames) {
-    await prisma.eventPhoto.create({
-      data: { eventId, filePath: relativeUploadPath('events', filename) },
-    });
-  }
-  const event = (await prisma.event.findUnique({
-    where: { id: eventId },
-    include: eventInclude,
-  })) as EventRow;
-  return (event.photos ?? []).map(photoView);
-}

@@ -31,7 +31,6 @@ export const createPartnerSchema = partnerBodyBase;
 export const updatePartnerSchema = partnerBodyBase.partial();
 
 export const partnerIdParamSchema = z.object({ id: idParamSchema });
-export const partnerPhotoParamSchema = z.object({ id: idParamSchema, photoId: idParamSchema });
 
 export type CreatePartnerInput = z.infer<typeof createPartnerSchema>;
 export type UpdatePartnerInput = z.infer<typeof updatePartnerSchema>;

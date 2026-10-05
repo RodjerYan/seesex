@@ -43,10 +43,6 @@ export const calendarQuerySchema = z.object({
   to: z.coerce.date().optional(),
 });
 
-export const uploadCaptionSchema = z.object({
-  caption: z.string().trim().max(500).optional(),
-});
-
 export type ListEventsQuery = z.infer<typeof listEventsQuerySchema>;
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

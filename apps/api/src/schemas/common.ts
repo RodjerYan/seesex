@@ -27,7 +27,3 @@ export function nullableInt(min: number, max: number) {
   return z.number().int().min(min).max(max).nullable().optional();
 }
 
-/** GET /api/files?path=… — относительный путь файла внутри UPLOAD_DIR. */
-export const fileQuerySchema = z.object({
-  path: z.string().trim().min(1).max(512),
-});

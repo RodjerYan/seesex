@@ -10,7 +10,6 @@ import { generalLimiter } from './middleware/rateLimit';
 import { authRouter } from './routes/auth.routes';
 import { eventsRouter } from './routes/events.routes';
 import { exportRouter } from './routes/export.routes';
-import { filesRouter } from './routes/files.routes';
 import { groupCalendarsRouter } from './routes/group-calendars.routes';
 import { healthRouter } from './routes/health.routes';
 import { partnersRouter } from './routes/partners.routes';
@@ -81,7 +80,6 @@ export function createApp(): Express {
   app.use('/api/group-calendars', groupCalendarsRouter);
   app.use('/api/settings', settingsRouter);
   app.use('/api/export', exportRouter);
-  app.use('/api/files', filesRouter);
   // Apple Health (T-20261002-019): device-token приём проб + токены для UI.
   // ВАЖНО: после app.get('/api/health') — тот зарегистрирован раньше и
   // GET /api/health остаётся health-check'ом, а не роутом healthRouter.

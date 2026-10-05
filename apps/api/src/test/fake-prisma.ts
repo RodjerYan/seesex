@@ -27,8 +27,6 @@ type ModelKey =
   | 'deviceTokens'
   | 'events'
   | 'partners'
-  | 'partnerPhotos'
-  | 'eventPhotos'
   | 'wishlists'
   | 'groupCalendars'
   | 'groupCalendarMembers'
@@ -57,8 +55,6 @@ export interface FakeDb {
   deviceTokens: Row[];
   events: Row[];
   partners: Row[];
-  partnerPhotos: Row[];
-  eventPhotos: Row[];
   wishlists: Row[];
   groupCalendars: Row[];
   groupCalendarMembers: Row[];
@@ -78,8 +74,6 @@ const db: FakeDb = {
   deviceTokens: [],
   events: [],
   partners: [],
-  partnerPhotos: [],
-  eventPhotos: [],
   wishlists: [],
   groupCalendars: [],
   groupCalendarMembers: [],
@@ -108,8 +102,6 @@ export function resetFakeDb(): void {
   db.deviceTokens.length = 0;
   db.events.length = 0;
   db.partners.length = 0;
-  db.partnerPhotos.length = 0;
-  db.eventPhotos.length = 0;
   db.wishlists.length = 0;
   db.groupCalendars.length = 0;
   db.groupCalendarMembers.length = 0;
@@ -230,7 +222,6 @@ const MODELS: Record<ModelKey, ModelSpec> = {
         left: 'events',
         right: 'accessories',
       },
-      photos: { kind: 'oneToMany', target: 'eventPhotos', fk: 'eventId' },
     },
     defaults: (now) => ({
       title: null,
@@ -252,7 +243,6 @@ const MODELS: Record<ModelKey, ModelSpec> = {
     updatedAt: true,
     relations: {
       user: { kind: 'manyToOne', target: 'users', fk: 'userId' },
-      photos: { kind: 'oneToMany', target: 'partnerPhotos', fk: 'partnerId' },
       periodTracking: { kind: 'oneToOne', target: 'periodTrackings', fk: 'partnerId' },
       events: {
         kind: 'm2m',
@@ -272,16 +262,6 @@ const MODELS: Record<ModelKey, ModelSpec> = {
       customFields: null,
       ...baseTimestamps(now),
     }),
-  },
-  partnerPhotos: {
-    updatedAt: false,
-    relations: { partner: { kind: 'manyToOne', target: 'partners', fk: 'partnerId' } },
-    defaults: (now) => ({ caption: null, sortOrder: 0, createdAt: now }),
-  },
-  eventPhotos: {
-    updatedAt: false,
-    relations: { event: { kind: 'manyToOne', target: 'events', fk: 'eventId' } },
-    defaults: (now) => ({ caption: null, createdAt: now }),
   },
   wishlists: {
     updatedAt: false,
@@ -387,8 +367,6 @@ const DELEGATES: Record<string, ModelKey> = {
   deviceToken: 'deviceTokens',
   event: 'events',
   partner: 'partners',
-  partnerPhoto: 'partnerPhotos',
-  eventPhoto: 'eventPhotos',
   wishlist: 'wishlists',
   groupCalendar: 'groupCalendars',
   groupCalendarMember: 'groupCalendarMembers',
@@ -426,8 +404,6 @@ const REF_RULES: RefRule[] = [
     parent: 'groupCalendars',
     action: 'cascade',
   },
-  { child: 'eventPhotos', fk: 'eventId', parent: 'events', action: 'cascade' },
-  { child: 'partnerPhotos', fk: 'partnerId', parent: 'partners', action: 'cascade' },
   { child: 'periodTrackings', fk: 'partnerId', parent: 'partners', action: 'cascade' },
   {
     child: 'periodEntries',
