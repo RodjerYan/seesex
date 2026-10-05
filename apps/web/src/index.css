@@ -547,39 +547,62 @@ body {
 }
 
 /* ============================================================
-   7. CALENDAR SLIDE ANIMATIONS (CAL-004)
-   Направленные анимации смены месяца + prefers-reduced-motion
+   7. CALENDAR MONTH-CHANGE ANIMATIONS (CAL-004 → T-20261005-005/B3)
+   Flip/fade вместо горизонтального слайда: fade (opacity 0→1) +
+   мягкий вертикальный сдвиг ±10px — направление различается
+   (left = вперёд/следующий месяц, right = назад/предыдущий),
+   easing как у grow-up/stagger. Плюс stagger-проявление чисел
+   дней (.animate-cal-cell) — задержка задаётся inline
+   animationDelay (index ячейки × 35ms) в CalendarView.
    ============================================================ */
-@keyframes slide-left {
+@keyframes cal-in-left {
   from {
     opacity: 0;
-    transform: translateX(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
-@keyframes slide-right {
+@keyframes cal-in-right {
   from {
     opacity: 0;
-    transform: translateX(-12px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
-.animate-slide-left {
-  animation: slide-left 200ms ease-out;
+.animate-cal-in-left {
+  animation: cal-in-left 190ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
-.animate-slide-right {
-  animation: slide-right 200ms ease-out;
+.animate-cal-in-right {
+  animation: cal-in-right 190ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* Число дня: проявляется каскадом после монтирования сетки
+   (React key на grid пересоздаёт ячейки только при реальной
+   смене месяца — ре-рендер/подгрузка данных анимацию не трогает). */
+@keyframes cal-cell-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-cal-cell {
+  animation: cal-cell-in 180ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-slide-left,
-  .animate-slide-right {
+  .animate-cal-in-left,
+  .animate-cal-in-right,
+  .animate-cal-cell {
     animation: none;
   }
 }
