@@ -10,7 +10,15 @@ export interface ChartItem {
   hint?: string;
 }
 
-/** Вертикальные столбцы (частота по месяцам). */
+/**
+ * Вертикальные столбцы (частота по месяцам).
+ *
+ * Мало данных (1–3 месяца): у колонки есть `max-w-[48px]`, поэтому она не
+ * растягивается на всю ширину — столбцы компактные и центрируются
+ * (`justify-center` на контейнере), а не превращаются в сплошную плашку.
+ * Много данных (6–12+ месяцев): `flex-1` упирается в max-w раньше, чем
+ * закончится ширина контейнера, распределение остаётся равномерным.
+ */
 export function ColumnBars({
   items,
   height = 120,
@@ -22,11 +30,19 @@ export function ColumnBars({
 }): ReactElement {
   const max = Math.max(1, ...items.map((item) => item.value));
   return (
-    <div className="flex items-end gap-1.5" style={{ height }} role="img" aria-label="Столбчатая диаграмма">
+    <div
+      className="flex items-end justify-center gap-1.5"
+      style={{ height }}
+      role="img"
+      aria-label="Столбчатая диаграмма"
+    >
       {items.map((item, index) => {
         const ratio = item.value / max;
         return (
-          <div key={`${item.label}-${index}`} className="group relative flex h-full min-w-0 flex-1 flex-col justify-end">
+          <div
+            key={`${item.label}-${index}`}
+            className="group relative flex h-full min-w-0 max-w-[48px] flex-1 flex-col justify-end"
+          >
             <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/[0.08] backdrop-blur-md border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-200 group-hover:block group-active:block">
               {valueLabel ? valueLabel(item.value) : item.value}
             </span>
