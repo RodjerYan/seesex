@@ -396,7 +396,9 @@ export function CalendarView({
           id="cal-month-picker"
           className={cx(
             'absolute left-0 top-full z-20 mt-1.5 w-full rounded-xl border border-white/15',
-            'bg-white/[0.12] p-2 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-md',
+            // Непрозрачный тёмный фон (T-20261005-006): bg-white/[0.12] просвечивал —
+            // числа сетки читались сквозь пикер. Тёмный solid + blur как у модалок.
+            'bg-[#12141C]/95 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-md',
             'transition-opacity duration-150',
             monthPickerOpen ? 'opacity-100' : 'pointer-events-none invisible opacity-0',
           )}
@@ -606,7 +608,7 @@ export function CalendarView({
               ? { left: longPress.left, bottom: longPress.offset }
               : { left: longPress.left, top: longPress.offset }
           }
-          className="pointer-events-none absolute z-20 w-max max-w-[240px] -translate-x-1/2 rounded-lg border border-white/15 bg-white/[0.12] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+          className="pointer-events-none absolute z-20 w-max max-w-[240px] -translate-x-1/2 rounded-lg border border-white/15 bg-[#12141C]/95 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
         >
           <ul className="flex flex-col gap-0.5">
             {longPress.events.slice(0, TOOLTIP_MAX_ROWS).map((event) => (
