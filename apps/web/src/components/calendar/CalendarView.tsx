@@ -338,15 +338,17 @@ export function CalendarView({
         <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true" />
       )}
 
-      {/* Шапка: кнопка-заголовок месяца (B4 — открывает пикер) + "Сегодня" + круглые стрелки 48px. */}
+      {/* Шапка: кнопка-заголовок месяца (B4 — открывает пикер) + "Сегодня" + круглые стрелки 48px.
+          -ml-1 висит на h2, НЕ на кнопке (T-20261005-006): на кнопке он урезал
+          max-w-full на 4px и truncate обрезал год — «Октябрь 2...». */}
       <div className="relative mb-2 flex items-center justify-between gap-2">
-        <h2 className="min-w-0 text-xl font-bold leading-tight tracking-tight text-slate-50">
+        <h2 className="-ml-1 min-w-0 text-xl font-bold leading-tight tracking-tight text-slate-50">
           <button
             type="button"
             onClick={() => setMonthPickerOpen((open) => !open)}
             aria-expanded={monthPickerOpen}
             aria-controls="cal-month-picker"
-            className="-ml-1 block max-w-full truncate rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="block max-w-full truncate rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
             <span className="brand-gradient">{monthName}</span>
             {yearName ? (
