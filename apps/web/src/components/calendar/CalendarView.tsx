@@ -6,12 +6,11 @@
  * строка недели с сегодняшним днём — тонкий фон-бэнд, выходные числа —
  * brand-tint; заголовок месяца — крупный, с subtle brand-gradient по названию.
  *
- * Статусы событий — один сегментный бар под числом (B2): полоска во всю
- * ширину ячейки, сегменты пропорционально количеству событий каждого
- * статуса, «+N» справа при 4+ событиях:
- * occurred #EF4444, turndown #94A3B8, planned #8B5CF6.
- * compact (Dashboard): бар есть, иконки типов нет. Иконки типов
- * (не-compact) и 4-й чип легенды — через eventMeta (lib/eventMeta, S1).
+ * T-20261012-002: день с событиями — красное сердечко (Heart, fill-red-500)
+ * вместо сегментного бара статусов; появление месяца — разовое магическое
+ * (cal-magical-in: blur→кристалл + scale-up на всю сетку) вместо stagger
+ * по дням. compact (Dashboard): сердечко есть, иконки типов нет. Иконки
+ * типов (не-compact) и 4-й чип легенды — через eventMeta (lib/eventMeta, S1).
  * Данные: GET /api/events/calendar?from&to за видимый месяц (useCalendar).
  *
  * B4 (T-20261005-005): долгий тап (≥350ms) на день с событиями —
@@ -19,7 +18,7 @@
  * STATUS_PILL, максимум 5 строк + «+N ещё»); тап по заголовку месяца —
  * мини-пикер 12 месяцев года курсора (3×4, glass-фон, overlay/Esc).
  */
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import { useCalendar } from '../../lib/queries';
@@ -36,15 +35,12 @@ import { ErrorBlock, LoadingBlock } from '../ui/states';
 
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
-/** Цвета сегментов бара статуса — в ячейке дня и в легенде (единый источник). */
+/** Цвета сегментов бара статуса — в long-press тултипе и в легенде (единый источник). */
 const STATUS_PILL: Record<CalendarStatus, string> = {
   occurred: 'bg-[#EF4444]',
   turndown: 'bg-[#94A3B8]',
   planned: 'bg-[#8B5CF6]',
 };
-
-/** Порядок сегментов бара и чипов легенды — как в STATUS_PILL (порядок ключей = порядок вставки). */
-const STATUS_ORDER = Object.keys(STATUS_PILL) as CalendarStatus[];
 
 /** Иконка 4-го чипа легенды «тип» (только не-compact режим). */
 const TYPE_LEGEND_ICON = eventMeta('SEX').Icon;
@@ -115,7 +111,10 @@ export function CalendarView({
   }));
 
   // Анимация смены месяца: направление слайда
-  const [animDirection, setAnimDirection] = useState<'left' | 'right' | null>(null);
+  // 'none' — после завершения свайп-flip: сетка уже видима, повторная
+  // смена класса на animate-cal-magical-in перезапустила бы анимацию
+  // на том же mounted элементе (двойной прояв) — T-20261012-002.
+  const [animDirection, setAnimDirection] = useState<'left' | 'right' | 'none' | null>(null);
 
   // Touch-свайп для навигации по месяцам
   const touchStartX = useRef(0);
@@ -292,13 +291,24 @@ export function CalendarView({
     if (animTimerRef.current !== null) clearTimeout(animTimerRef.current);
     animTimerRef.current = setTimeout(() => {
       animTimerRef.current = null;
-      setAnimDirection(null);
+      // 'none', не null: null = магическое появление (mount/пикер),
+      // 'none' = без анимации (сетка уже показана flip'ом).
+      setAnimDirection('none');
     }, 250);
   };
 
   // B4: выбор месяца в пикере — год не переключаем (всегда год курсора).
+  // T-20261012-002: animDirection=null — новый месяц проявляется магически
+  // (та же ветка, что и первый mount сетки).
   const pickMonth = (month: number) => {
     setMonthPickerOpen(false);
+    // Гонка с pending-таймером свайпа: сбрасываем, чтобы он не снял
+    // magical-in класс в середине анимации (setAnimDirection('none')).
+    if (animTimerRef.current !== null) {
+      clearTimeout(animTimerRef.current);
+      animTimerRef.current = null;
+    }
+    setAnimDirection(null);
     setCursor((current) => (current.month === month ? current : { year: current.year, month }));
   };
 
@@ -475,8 +485,13 @@ export function CalendarView({
           style={{ minHeight: 'calc(6 * 48px)' }}
           className={cx(
             'grid grid-cols-7 gap-0.5',
+            // T-20261012-002: свайп-смена месяца — направленный flip;
+            // первый показ / выбор месяца из пикера — разовое магическое
+            // появление всей сетки (blur→кристалл + scale-up) вместо
+            // stagger-проявления чисел по дням.
             animDirection === 'left' && 'animate-cal-in-left',
             animDirection === 'right' && 'animate-cal-in-right',
+            animDirection === null && 'animate-cal-magical-in',
           )}
         >
           {displayCells.map((date, index) => {
@@ -490,13 +505,6 @@ export function CalendarView({
             // Ячейка строки «сегодня» (фон-бэнд всей недели).
             const inWeekBand = weekRowToday !== -1 && Math.floor(index / 7) === weekRowToday;
             const types = [...new Set(events.flatMap((event) => event.eventTypes?.length ? event.eventTypes : [event.eventType]))].slice(0, 3);
-            // B2: счётчики статусов — пропорции сегментов бара (2 occurred + 1 planned → 2:1).
-            const statusCounts: Record<CalendarStatus, number> = {
-              occurred: 0,
-              turndown: 0,
-              planned: 0,
-            };
-            for (const event of events) statusCounts[event.status] += 1;
 
             // CAL-009: Человекочитаемый aria-label
             const ariaLabel = `${date.getDate()} ${MONTHS_GEN[date.getMonth()]} ${date.getFullYear()}${
@@ -543,12 +551,11 @@ export function CalendarView({
                 )}
               >
                 {/* Число дня: tabular-nums, вес/цвет по иерархии selected > today > inMonth > outside.
-                    B3: stagger-проявление (opacity + сдвиг 4px) — задержка inline,
-                    только на числовом span, бар/гало/бэнд не анимируются. */}
+                    T-20261012-002: stagger-проявление по дням убрано — месяц
+                    проявляется целиком магической анимацией сетки. */}
                 <span
                   className={cx(
                     'tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-[13px] leading-none transition-colors',
-                    'animate-cal-cell',
                     isSelected
                       ? 'font-semibold text-white'
                       : isToday
@@ -559,7 +566,6 @@ export function CalendarView({
                             : 'font-medium text-slate-100'
                           : 'font-normal text-slate-600/60',
                   )}
-                  style={{ animationDelay: `${index * 35}ms` }}
                 >
                   {date.getDate()}
                 </span>
@@ -574,39 +580,22 @@ export function CalendarView({
                   </span>
                 )}
 
-                {/* B2: сегментный бар статусов — одна полоска во всю ширину внизу
-                    ячейки (absolute), сегменты пропорционально count каждого
-                    статуса; подложка: bg-white/10 на обычных плитках, bg-black/20
-                    на выбранном дне (на bg-primary белая подложка вымывала
-                    контраст — REWORK #1). Пустой день — ничего не рисуем. */}
+                {/* T-20261012-002: день с событиями — красное сердечко вместо
+                    сегментного бара статусов (heart-beat-иконка статична,
+                    пульс — только у выбранного дня). На выбранном дне
+                    (bg-primary) — тонкая тёмная обводка, чтобы красное не
+                    сливалось с розовым фоном. Пустой день — ничего. */}
                 {events.length > 0 && (
                   <span
-                    className="pointer-events-none absolute inset-x-1 bottom-1 flex h-1 items-center gap-1"
+                    className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center"
                     aria-hidden="true"
                   >
-                    <span
+                    <Heart
                       className={cx(
-                        'flex h-1 min-w-0 flex-1 overflow-hidden rounded-full',
-                        isSelected ? 'bg-black/20' : 'bg-white/10',
+                        'h-2.5 w-2.5 fill-red-500 text-red-500',
+                        isSelected && 'drop-shadow-[0_0_1px_rgba(0,0,0,0.6)]',
                       )}
-                    >
-                      {STATUS_ORDER.map((status) =>
-                        statusCounts[status] > 0 ? (
-                          <span
-                            key={status}
-                            className={cx('h-full', STATUS_PILL[status])}
-                            style={{ flexGrow: statusCounts[status] }}
-                          />
-                        ) : null,
-                      )}
-                    </span>
-                    {events.length > 3 ? (
-                      // CAL-006: +N — 10px, bg-white/10, rounded-full, text-slate-300
-                      // (bar flex-1, бейдж shrink-0 — на узкой ячейке не переполняется)
-                      <span className="shrink-0 rounded-full bg-white/10 px-0.5 text-[10px] font-semibold leading-none text-slate-300">
-                        +{events.length - 3}
-                      </span>
-                    ) : null}
+                    />
                   </span>
                 )}
               </button>

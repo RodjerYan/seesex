@@ -649,9 +649,10 @@ body {
    Flip/fade вместо горизонтального слайда: fade (opacity 0→1) +
    мягкий вертикальный сдвиг ±10px — направление различается
    (left = вперёд/следующий месяц, right = назад/предыдущий),
-   easing как у grow-up/stagger. Плюс stagger-проявление чисел
-   дней (.animate-cal-cell) — задержка задаётся inline
-   animationDelay (index ячейки × 35ms) в CalendarView.
+   easing как у grow-up/stagger.
+   T-20261012-002: вместо stagger-проявления чисел по дням —
+   разовое магическое появление ВСЕЙ сетки (cal-magical-in):
+   blur→кристалл + scale-up, один раз на появление месяца.
    ============================================================ */
 @keyframes cal-in-left {
   from {
@@ -680,27 +681,34 @@ body {
   animation: cal-in-right 190ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-/* Число дня: проявляется каскадом после монтирования сетки
-   (React key на grid пересоздаёт ячейки только при реальной
-   смене месяца — ре-рендер/подгрузка данных анимацию не трогает). */
-@keyframes cal-cell-in {
-  from {
+/* Магическое появление месяца: расфокус → фокус + мягкое увеличение.
+   Один раз на mount сетки (React key на grid пересоздаёт ячейки при
+   реальной смене месяца — ре-рендер/подгрузка данных анимацию не трогает).
+   Во время свайп-flip (cal-in-left/right) не применяется. */
+@keyframes cal-magical-in {
+  0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: scale(0.92);
+    filter: blur(6px);
   }
-  to {
+  60% {
     opacity: 1;
-    transform: translateY(0);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
   }
 }
-.animate-cal-cell {
-  animation: cal-cell-in 180ms cubic-bezier(0.32, 0.72, 0, 1) both;
+.animate-cal-magical-in {
+  animation: cal-magical-in 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-cal-in-left,
   .animate-cal-in-right,
-  .animate-cal-cell {
+  .animate-cal-magical-in {
     animation: none;
   }
 }
