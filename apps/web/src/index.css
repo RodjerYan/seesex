@@ -366,11 +366,6 @@ body {
     filter: drop-shadow(0 0 10px rgba(224, 184, 255, 0.45));
   }
 
-  /* Selected day glow — for CalendarView */
-  .day-selected-glow {
-    box-shadow: 0 0 16px rgba(245, 41, 110, 0.35);
-  }
-
   /* Page transition animation */
   @keyframes page-in {
     from {
@@ -498,11 +493,12 @@ body {
     animation: heart-burst 600ms ease-out;
   }
 
-  /* Mягкая пульсация glow: только для selected-дня CalendarView. Ключевые
-     кадры пульсируют ОТ базового primary-glow (не от прозрачности) — иначе
-     перебивают статический .day-selected-glow (review B-02). 2 итерации
-     («двойной вдох» при выборе дня), затем остаётся статическая тень
-     day-selected-glow (review M-03 — без бесконечного мелькания). */
+  /* Мягкая пульсация glow: только для selected-дня CalendarView (кружок числа,
+     iOS-restyle T-20261012-003). Ключевые кадры пульсируют ОТ базового
+     primary-glow (не от прозрачности) — иначе после конца анимации (2
+     итерации) тень-фолбэк элемента подменялась бы прозрачной (review B-02
+     в T-20261012-001). Затем остаётся статический shadow-[...] кружка
+     (review M-03 — без бесконечного мелькания). */
   @keyframes sensual-pulse {
     0%, 100% { box-shadow: 0 0 14px 1px rgba(245, 41, 110, 0.35); }
     50% { box-shadow: 0 0 20px 4px rgba(245, 41, 110, 0.60); }
