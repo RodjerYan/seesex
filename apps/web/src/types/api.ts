@@ -26,8 +26,6 @@ export interface EventView {
   notes: string | null;
   calories: number | null;
   heartRate: number | null;
-  /** Максимальный пульс за событие (обогащение Apple Health, см. health.service). */
-  heartRateMax?: number | null;
   initiatedBy: string | null;
   groupCalendarId: string | null;
   userId: string;
@@ -211,24 +209,4 @@ export interface TotpSetupResult {
   secret: string;
   otpauthUrl: string;
   setupToken: string;
-}
-
-/**
- * GET /api/health/token (JWT) — статус device-токенов Apple Health.
- * lastSyncAt — ISO-строка (Date JSON) либо null, если синхронизации не было.
- */
-export interface HealthTokenStatus {
-  hasToken: boolean;
-  tokensCount: number;
-  lastSyncAt: string | null;
-}
-
-/** POST /api/health/token { action: 'create' } → 201 (токен показывается один раз). */
-export interface HealthTokenCreated {
-  token: string;
-}
-
-/** POST /api/health/token { action: 'revoke' } → 200. */
-export interface HealthTokenRevoked {
-  ok: true;
 }

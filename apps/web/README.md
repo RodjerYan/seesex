@@ -18,7 +18,7 @@ npm run icons -w apps/web   # регенерация PWA-иконок (scripts/g
 src/
   app/          # router.tsx (lazy-маршруты), Layout.tsx (header + таб-бар/сайдбар), RequireAuth.tsx
   components/   # ui/ — общие компоненты (PageStub — страница-заглушка S4)
-  lib/          # api.ts (fetch-клиент), queryClient.ts, queries/ (useHealth, useMe)
+  lib/          # api.ts (fetch-клиент), queryClient.ts, queries/ (useMe)
   pages/        # страницы-заглушки (наполнит S5)
   stores/       # auth.store.ts (Zustand)
   types/        # доменные типы (базовые — реэкспорт @xtracker/shared)

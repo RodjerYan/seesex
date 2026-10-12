@@ -15,6 +15,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { SecurityLock } from '../components/security/SecurityLock';
 import { CardSkeleton } from '../components/ui/listStates';
 import { useAutoLock } from '../hooks/useAutoLock';
+import { useProfile } from '../lib/queries/profile';
 
 interface NavItem {
   to: string;
@@ -90,13 +91,28 @@ export default function Layout() {
   const navigate = useNavigate();
   // Автоблокировка (неактивность / фон вкладки) + ручная блокировка из шапки.
   const { locked, settings, lock, unlock } = useAutoLock();
+  const profileQuery = useProfile();
 
   return (
     <div className="app-dvh bg-surface text-slate-100">
       <header className="app-header fixed inset-x-0 top-0 z-30 glass-strong">
-        {/* Логотип по центру шапки (T10-S2): кнопка блокировки вынесена в
-            absolute справа, чтобы не сдвигать/перекрывать надпись. */}
+        {/* Логотип по центру шапки (T10-S2): аватар слева, кнопка блокировки
+            справа — обе absolute, чтобы не сдвигать/перекрывать надпись. */}
         <div className="relative mx-auto flex h-14 max-w-5xl items-center justify-center px-4">
+          {profileQuery.data?.avatarUrl ? (
+            <img
+              src={profileQuery.data.avatarUrl}
+              alt="Профиль"
+              className="absolute left-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full object-cover ring-1 ring-white/20"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.08] text-sm font-bold text-slate-300 ring-1 ring-white/20"
+            >
+              {(profileQuery.data?.displayName?.[0] ?? '?').toUpperCase()}
+            </span>
+          )}
           <span className="logo-script font-['Great_Vibes'] text-[26px] leading-tight tracking-tight brand-gradient py-1">
             SeeSex
           </span>

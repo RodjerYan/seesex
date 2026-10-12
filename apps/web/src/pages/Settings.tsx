@@ -1,14 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
-import { ChevronRight, Fingerprint, FileSpreadsheet, Lock, LogOut } from 'lucide-react';
-import { type ReactElement } from 'react';
+import { ChevronRight, Fingerprint, FileSpreadsheet, Lock, LogOut, Save } from 'lucide-react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button, Card, ErrorText, SectionTitle } from '../components/ui/controls';
+import { Button, Card, ErrorText, Field, Input, SectionTitle } from '../components/ui/controls';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
-import { AppleHealthPanel } from '../components/settings/AppleHealthPanel';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
 import { useMe } from '../lib/queries';
+import { useProfile, useUpdateProfile } from '../lib/queries/profile';
 import { useAuthStore } from '../stores/auth.store';
 
 interface MenuItem {
@@ -79,6 +79,8 @@ export default function Settings(): ReactElement {
         </p>
       </Card>
 
+      <ProfileCard />
+
       <ul className="mb-4 space-y-2">
         {MENU.map((item) => (
           <li key={item.to}>
@@ -99,9 +101,6 @@ export default function Settings(): ReactElement {
         ))}
       </ul>
 
-      {/* Apple Health: device-токен + инструкция подключения шортката (H3). */}
-      <AppleHealthPanel />
-
       {onLogout.isError ? (
         <div className="mb-4">
           <ErrorText>{errorMessage(onLogout.error)}</ErrorText>
@@ -118,5 +117,109 @@ export default function Settings(): ReactElement {
         {onLogout.isPending ? 'Выходим…' : 'Выйти из аккаунта'}
       </Button>
     </section>
+  );
+}
+
+/** Никнейм + аватар (URL): GET/PATCH /api/auth/profile. */
+function ProfileCard(): ReactElement {
+  const profileQuery = useProfile();
+  const updateProfile = useUpdateProfile();
+  const [displayName, setDisplayName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  // Синхронизируем форму с ответом сервера один раз при загрузке.
+  useEffect(() => {
+    if (profileQuery.data) {
+      setDisplayName(profileQuery.data.displayName ?? '');
+      setAvatarUrl(profileQuery.data.avatarUrl ?? '');
+    }
+  }, [profileQuery.data]);
+
+  const dirty =
+    profileQuery.data !== undefined &&
+    (displayName !== (profileQuery.data.displayName ?? '') ||
+      avatarUrl !== (profileQuery.data.avatarUrl ?? ''));
+
+  const onSave = async () => {
+    setSaved(false);
+    try {
+      await updateProfile.mutateAsync({
+        displayName: displayName.trim(),
+        avatarUrl: avatarUrl.trim(),
+      });
+      setSaved(true);
+    } catch {
+      // Баннер ниже.
+    }
+  };
+
+  if (profileQuery.isLoading) return <LoadingBlock label="Загрузка профиля…" />;
+
+  return (
+    <Card className="mb-4">
+      <SectionTitle>Никнейм и аватар</SectionTitle>
+      <div className="mb-3 flex items-center gap-3">
+        {avatarUrl.trim() ? (
+          <img
+            src={avatarUrl.trim()}
+            alt="Аватар"
+            className="h-12 w-12 rounded-full object-cover ring-1 ring-white/20"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08] text-lg font-bold text-slate-300 ring-1 ring-white/20"
+          >
+            {(displayName.trim()[0] ?? '?').toUpperCase()}
+          </div>
+        )}
+        <p className="min-w-0 truncate text-sm text-slate-300">
+          {displayName.trim() || 'Имя не задано'}
+        </p>
+      </div>
+
+      <Field label="Никнейм" htmlFor="profile-name">
+        <Input
+          id="profile-name"
+          maxLength={50}
+          placeholder="Как вас называть"
+          value={displayName}
+          onChange={(e) => {
+            setDisplayName(e.target.value);
+            setSaved(false);
+          }}
+        />
+      </Field>
+      <Field label="Аватар (URL изображения)" htmlFor="profile-avatar">
+        <Input
+          id="profile-avatar"
+          type="url"
+          inputMode="url"
+          maxLength={500}
+          placeholder="https://…"
+          value={avatarUrl}
+          onChange={(e) => {
+            setAvatarUrl(e.target.value);
+            setSaved(false);
+          }}
+        />
+      </Field>
+
+      {updateProfile.isError ? <ErrorText>{errorMessage(updateProfile.error)}</ErrorText> : null}
+      {saved ? <p className="mb-2 text-sm text-emerald-400">Сохранено</p> : null}
+
+      <Button
+        className="w-full"
+        onClick={() => void onSave()}
+        disabled={!dirty || updateProfile.isPending}
+      >
+        <Save className="h-4 w-4" aria-hidden="true" />
+        {updateProfile.isPending ? 'Сохраняем…' : 'Сохранить'}
+      </Button>
+    </Card>
   );
 }

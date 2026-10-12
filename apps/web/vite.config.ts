@@ -40,7 +40,10 @@ export default defineConfig({
           {
             // Относительный паттерн (любой origin + /api/...), НЕ api.seesex.app:
             // одиночный деплой — API раздаётся с того же origin, что и статика.
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            // /api/auth (логин/refresh/сессии) НЕ кэшируем — устаревшие токены
+            // в SW-кэше = вечный 401 после logout/login чужого аккаунта.
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/auth/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -68,6 +71,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // Прод-бандл без sourcemaps: меньше трафика и не отдаём исходники наружу.
+    sourcemap: false,
   },
 });

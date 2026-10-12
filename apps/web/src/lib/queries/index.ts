@@ -1,5 +1,3 @@
-export { healthQueryKey, healthTokenStatusQueryKey, useCreateHealthToken, useHealth, useHealthTokenStatus, useRevokeHealthToken } from './health';
-export type { HealthResponse } from './health';
 export { meQueryKey, useMe } from './me';
 export { calendarQueryKey, useCalendar } from './calendar';
 export { eventQueryKey, eventsQueryKey, useEvent, useEvents } from './events';
@@ -26,3 +24,12 @@ export {
   useGroupCalendars,
 } from './groupCalendars';
 export { sessionsQueryKey, useSessions } from './sessions';
+export {
+  profileQueryKey,
+  useProfile,
+  useUpdateProfile,
+  useChangePassword,
+  useTotpSetup,
+  useTotpDisable,
+  useDeleteSession,
+} from './profile';

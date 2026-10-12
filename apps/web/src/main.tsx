@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { registerSW } from 'virtual:pwa-register';
 
+// Inter Variable: index.css разбивает subset'ы по unicode-range — браузер сам
+// скачает только нужные (latin + cyrillic для русского UI).
 import '@fontsource-variable/inter';
-import '@fontsource/great-vibes/400.css';
+// Great Vibes — только логотип «SeeSex» (латиница): полный 400.css тянул
+// 68KB латину + кириллицу/греческий/вьетнамский, которые не используются.
+import '@fontsource/great-vibes/latin-400.css';
 import AppRouter from './app/router';
 import { queryClient } from './lib/queryClient';
 import { setUpdateSW, markNeedRefreshFired } from './lib/pwa';

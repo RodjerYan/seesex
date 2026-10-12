@@ -25,6 +25,7 @@ const PeriodTracker = lazy(() => import('../pages/PeriodTracker'));
 const GroupCalendarManager = lazy(() => import('../pages/GroupCalendarManager'));
 const GroupCalendarView = lazy(() => import('../pages/GroupCalendarView'));
 const Settings = lazy(() => import('../pages/Settings'));
+const SettingsSecurity = lazy(() => import('../pages/SettingsSecurity'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 /**
@@ -88,6 +89,7 @@ export default function AppRouter(): ReactElement {
               <Route path="group-calendars" element={<GroupCalendarManager />} />
               <Route path="group-calendars/:id" element={<GroupCalendarView />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="settings/security" element={<SettingsSecurity />} />
             </Route>
           </Route>
 

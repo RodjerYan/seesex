@@ -14,7 +14,7 @@ import {
 } from '../lib/jwt';
 import { prisma } from '../lib/prisma';
 import { buildOtpauthUri, generateTotpSecret, verifyTotpCode } from '../lib/totp';
-import type { LoginInput, RegisterInput } from '../schemas/auth.schema';
+import type { LoginInput, ProfileUpdateInput, RegisterInput, TotpDisableInput, ChangePasswordInput } from '../schemas/auth.schema';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -62,6 +62,12 @@ export interface TotpVerifyArgs {
   code: string;
   setupToken?: string | undefined;
   meta: RequestMeta;
+}
+
+/** Профиль текущего пользователя (никнейм + аватар). */
+export interface ProfileView {
+  displayName: string | null;
+  avatarUrl: string | null;
 }
 
 function toPublicUser(user: User): PublicUser {
@@ -298,4 +304,59 @@ export async function deleteSession(auth: AuthUser, sessionId: string): Promise<
     throw ApiError.forbidden('SESSION_FORBIDDEN', "Cannot access another user's session");
   }
   await prisma.session.delete({ where: { id: session.id } });
+}
+
+/** GET /api/auth/profile — никнейм + аватар (Profile создаётся при register). */
+export async function getProfile(auth: AuthUser): Promise<ProfileView> {
+  const profile = await prisma.profile.findUnique({ where: { userId: auth.id } });
+  return { displayName: profile?.displayName ?? null, avatarUrl: profile?.avatarUrl ?? null };
+}
+
+/** PATCH /api/auth/profile — upsert никнейма/аватара. */
+export async function updateProfile(auth: AuthUser, input: ProfileUpdateInput): Promise<ProfileView> {
+  const data: { displayName?: string; avatarUrl?: string | null } = {};
+  if (input.displayName !== undefined) data.displayName = input.displayName;
+  if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl === '' ? null : input.avatarUrl;
+  const profile = await prisma.profile.upsert({
+    where: { userId: auth.id },
+    update: data,
+    create: { userId: auth.id, ...data },
+  });
+  return { displayName: profile.displayName, avatarUrl: profile.avatarUrl };
+}
+
+/**
+ * POST /api/auth/password — смена пароля: bcrypt-compare текущего, hash нового
+ * (cost 12). Чужие сессии НЕ отзываем (refresh-токены валидны до истечения) —
+ * пользователь сам закрывает их в списке сессий.
+ */
+export async function changePassword(auth: AuthUser, input: ChangePasswordInput): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: auth.id } });
+  if (!user) throw ApiError.unauthorized('USER_NOT_FOUND', 'User not found');
+  const ok = await bcrypt.compare(input.currentPassword, user.passwordHash);
+  if (!ok) {
+    throw ApiError.badRequest('INVALID_CURRENT_PASSWORD', 'Current password is incorrect');
+  }
+  if (input.currentPassword === input.newPassword) {
+    throw ApiError.badRequest('PASSWORD_UNCHANGED', 'New password must differ from current');
+  }
+  const passwordHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+}
+
+/**
+ * POST /api/auth/totp/disable — отключение 2FA: требуем пароль (защита от
+ * скомпрометированной сессии), totpSecret → null.
+ */
+export async function totpDisable(auth: AuthUser, input: TotpDisableInput): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: auth.id } });
+  if (!user) throw ApiError.unauthorized('USER_NOT_FOUND', 'User not found');
+  const ok = await bcrypt.compare(input.password, user.passwordHash);
+  if (!ok) {
+    throw ApiError.badRequest('INVALID_PASSWORD', 'Password is incorrect');
+  }
+  if (!user.totpSecret) {
+    throw ApiError.badRequest('TWO_FA_NOT_CONFIGURED', 'Two-factor is not configured');
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { totpSecret: null } });
 }

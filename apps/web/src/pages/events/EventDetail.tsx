@@ -88,14 +88,8 @@ export default function EventDetail(): ReactElement {
   const date = new Date(item.date);
   const { Icon, color, label } = eventMeta(item.eventType);
 
-  // Пульс/калории одной строкой (обогащение Apple Health добавляет heartRateMax):
-  // «♥ 88/105 уд/мин · 181 ккал»; без max — просто средний пульс.
-  const heartRatePart =
-    item.heartRate === null
-      ? null
-      : item.heartRateMax === null || item.heartRateMax === undefined
-        ? `${item.heartRate} уд/мин`
-        : `${item.heartRate}/${item.heartRateMax} уд/мин`;
+  // Пульс/калории одной строкой: «♥ 88 уд/мин · 181 ккал».
+  const heartRatePart = item.heartRate === null ? null : `${item.heartRate} уд/мин`;
   const caloriesPart = item.calories === null ? null : `${item.calories} ккал`;
   const healthPart = [heartRatePart, caloriesPart].filter(Boolean).join(' · ');
 
