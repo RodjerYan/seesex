@@ -51,7 +51,11 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
                 return (
                   <span
                     key={type}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                    // S3 (review M-02): read-only чип — однократный twinkle при
+                    // mount. Hover/press-glow (sensual-chip) намеренно НЕ тут:
+                    // карточка не интерактивна по чипам; интерактивные чипы —
+                    // в EventForm (sensual-chip press-pop).
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] animate-sensual-pop"
                     style={{
                       borderColor: `${color}55`,
                       backgroundColor: `${color}1A`,

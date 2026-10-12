@@ -7,6 +7,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactElement, ReactNode } from 'react';
 
+import { cx } from './controls';
+
 /** Скелетон из glass-карточек: shimmer-полоски (.skeleton) + пульсация (.skeleton-card). */
 export function CardSkeleton({
   count = 3,
@@ -34,11 +36,14 @@ export function EmptyState({
   title,
   description,
   action,
+  iconClass,
 }: {
   icon: LucideIcon;
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Доп. классы для глифа (например, animate-heart-beat в Wishlist). */
+  iconClass?: string;
 }): ReactElement {
   return (
     <div className="glass px-4 py-8 text-center">
@@ -46,7 +51,7 @@ export function EmptyState({
         aria-hidden="true"
         className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.06] ring-1 ring-white/10"
       >
-        <Icon className="h-7 w-7 text-primary-400" />
+        <Icon className={cx('h-7 w-7 text-primary-400', iconClass)} />
       </span>
       <p className="mt-3 text-sm font-medium text-slate-200">{title}</p>
       {description ? <p className="mx-auto mt-1 max-w-xs text-xs text-slate-500">{description}</p> : null}

@@ -153,6 +153,7 @@ export default function Wishlist(): ReactElement {
       {entries.length === 0 ? (
         <EmptyState
           icon={Heart}
+          iconClass="animate-heart-beat"
           title="Вишлист пуст"
           description="Запишите, что хочется попробовать."
           action={
@@ -194,9 +195,9 @@ export default function Wishlist(): ReactElement {
                   title={entry.isCompleted ? 'Вернуть в планы' : 'Отметить выполненным'}
                   onClick={() => toggle.mutate(entry)}
                   disabled={toggle.isPending}
-                  className="press rounded-lg p-2 transition-colors hover:bg-white/[0.06] hover:text-emerald-400"
+                  className="press press-heart rounded-lg p-2 transition-colors hover:bg-white/[0.06] hover:text-emerald-400"
                 >
-                  <Check className="h-4 w-4" aria-hidden="true" />
+                  <Check className="press-heart-icon h-4 w-4" aria-hidden="true" />
                 </button>
                 <button
                   type="button"

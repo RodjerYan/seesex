@@ -274,11 +274,26 @@ export function CalendarView({
   // CAL-002: Всегда показываем 6 недель (42 ячейки), убираем условную обрезку
   const displayCells = cells;
 
+  // Таймер снятия анимации смены месяца: ref + clearTimeout, чтобы быстрые
+  // клики «вперёд/назад» не снимали animate-cal-in-* в середине второй
+  // анимации (рывок) и не делали setState после unmount (T-20261012-001/S2).
+  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current);
+    },
+    [],
+  );
+
   const shift = (delta: number) => {
     setAnimDirection(delta > 0 ? 'left' : 'right');
     const next = addMonths(cursor.year, cursor.month, delta);
     setCursor(next);
-    setTimeout(() => setAnimDirection(null), 250);
+    if (animTimerRef.current !== null) clearTimeout(animTimerRef.current);
+    animTimerRef.current = setTimeout(() => {
+      animTimerRef.current = null;
+      setAnimDirection(null);
+    }, 250);
   };
 
   // B4: выбор месяца в пикере — год не переключаем (всегда год курсора).
@@ -493,7 +508,9 @@ export function CalendarView({
             // ТЕКУЩЕГО месяца без собственного акцентного фона (не selected /
             // не today); вне-месячные ячейки бэнд не получают (REWORK #1).
             const cellStyle = isSelected
-              ? 'day-selected-glow z-10 scale-[1.04] border-transparent bg-primary shadow-[0_0_16px_rgba(245,41,110,0.35)]'
+              // day-selected-glow — статическая тень (фолбэк при reduce-motion);
+              // animate-sensual-pulse пульсирует ОТ неё (2 «вдоха» при выборе)
+              ? 'day-selected-glow z-10 scale-[1.04] border-transparent bg-primary animate-sensual-pulse'
               : isToday
                 ? 'border border-pink-400/30'
                 : inWeekBand && inMonth
@@ -518,7 +535,9 @@ export function CalendarView({
                 className={cx(
                   // select-none: долгий тап не должен запускать выделение текста (B4)
                   'relative flex min-h-[52px] flex-col items-center justify-start rounded-xl border px-0.5 pt-1.5 select-none',
-                  'transition-all duration-200',
+                  // явный список вместо transition-all: на 42 ячейках анимируется
+                  // только то, что реально меняется (T-20261012-001/S2)
+                  'transition-[background-color,border-color,transform,box-shadow] duration-200',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                   cellStyle,
                 )}

@@ -58,10 +58,9 @@ export function TypeBars({
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-primary-400/80 animate-grow-up"
+              className="h-full rounded-full bg-primary-400/80 animate-grow-x"
               style={{
                 width: `${Math.max(3, (count / max) * 100)}%`,
-                transformOrigin: 'left',
                 animationDelay: `${index * 40}ms`,
               }}
             />

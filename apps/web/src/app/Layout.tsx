@@ -182,12 +182,16 @@ export default function Layout() {
               >
                 {({ isActive }) => (
                   <>
-                    {/* 24px (≥24pt), у активной вкладки слегка крупнее;
-                        drop-shadow — читаемость поверх контента за стеклом. */}
+                    {/* 24px (≈24pt), в активной пилюле чуть больше для доступности;
+                        drop-shadow — съедает границы текста/иконки.
+                        S3 (review M-01): press-pop — только таб «Партнёры» (Heart);
+                        на остальных табах pop читается как смена страницы и размывает
+                        скоуп микро-анимаций. Сравнение по `to` — стабильный идентификатор
+                        пункта меню (см. NAV_ITEMS), не зависит от icon/label. */}
                     <Icon
                       className={`h-6 w-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-transform duration-200 ${
-                        isActive ? 'scale-110' : ''
-                      }`}
+                        to === '/partners' ? 'press-pop' : ''
+                      } ${isActive ? 'scale-110' : ''}`}
                       aria-hidden="true"
                     />
                     {badge ? (

@@ -109,7 +109,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           ))}
         </div>
       ) : null}
-      <p className="mt-1 text-[11px] text-slate-600">
+      <p className="mt-1 text-[11px] text-slate-400">
         Пунктирные чипы — локальные: API справочников для этих полей нет, они не сохраняются.
       </p>
     </div>

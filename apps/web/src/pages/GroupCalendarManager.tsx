@@ -147,10 +147,12 @@ export default function GroupCalendarManager(): ReactElement {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>
-                  <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-slate-500">
-                    <Users className="h-3 w-3" aria-hidden="true" />
-                    {calendar.memberCount} участник(ов) · {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} ·{' '}
-                    {formatDate(calendar.createdAt)}
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
+                    <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">
+                      {calendar.memberCount} участник(ов) · {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} ·{' '}
+                      {formatDate(calendar.createdAt)}
+                    </span>
                   </p>
                 </div>
                 {calendar.inviteCode ? (

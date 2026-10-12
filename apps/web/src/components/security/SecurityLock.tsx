@@ -95,7 +95,7 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-slate-600">
+          <p className="mt-6 text-center text-xs text-slate-400">
             Секрет хранится только на этом устройстве (sha-256 в localStorage).
           </p>
         </div>

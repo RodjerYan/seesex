@@ -293,7 +293,10 @@ export function EventForm({
   // иначе пользователь, стоящий у кнопки, его не увидит.
   const errorBannerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (formError) errorBannerRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (formError) {
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      errorBannerRef.current?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    }
   }, [formError]);
 
   return (
@@ -396,6 +399,8 @@ export function EventForm({
                   className={cx(
                     'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                    // S3: тактильный отклик на интимный тип — glow по hover/pressed + pop по тапу
+                    'sensual-chip press-pop',
                     active
                       ? 'border-primary-400 bg-primary/20 text-primary-400'
                       : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',
@@ -425,6 +430,7 @@ export function EventForm({
                     className={cx(
                       'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                      'sensual-chip press-pop',
                       'border-primary-400 bg-primary/20 text-primary-400',
                       typeFieldDisabled && 'cursor-not-allowed opacity-50',
                     )}

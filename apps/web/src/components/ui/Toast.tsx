@@ -6,6 +6,7 @@
  * подтверждения «Событие создано» перед переходом на страницу события.
  */
 import { useEffect, useState, type ReactElement } from 'react';
+import { cx } from './controls';
 
 export interface ToastProps {
   message: string;
@@ -26,21 +27,30 @@ export function Toast({
   durationMs = 2400,
 }: ToastProps): ReactElement | null {
   const [visible, setVisible] = useState(true);
+  /** mounted: тост всегда в DOM — плавный fade через class-переключение (не return null). */
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setVisible(true);
     const timer = window.setTimeout(() => setVisible(false), durationMs);
     return () => window.clearTimeout(timer);
   }, [durationMs, message]);
 
-  if (!visible) return null;
-
   return (
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 z-40 flex justify-center px-4"
-      style={{ bottom: 'calc(56px + env(safe-area-inset-bottom) + 16px)' }}
+      aria-hidden={!visible}
+      className={cx(
+        'pointer-events-none fixed inset-x-0 z-40 flex justify-center px-4 transition-all duration-300',
+        mounted && visible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
+      )}
+      style={{
+        /* 8px — визуальный зазор между тостом и верхней гранью таб-пилюли
+           (magic number — константа макета, см. review m-01). */
+        bottom: 'calc(var(--tabbar-height, 3.75rem) + var(--tabbar-bottom, 1rem) + 8px)',
+      }}
     >
       <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[rgba(28,28,30,0.9)] px-4 py-3 text-sm font-medium text-slate-100 shadow-lg backdrop-blur-md">
         <span

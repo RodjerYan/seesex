@@ -221,7 +221,9 @@ export default function GroupCalendarView(): ReactElement {
                         <p className="truncate text-sm font-medium text-slate-100">{event.title}</p>
                       ) : null}
                       <span
-                        className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+                        // S3 (review M-02): read-only чип — однократный twinkle при
+                        // mount; hover/press-glow — только интерактивным чипам EventForm.
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] animate-sensual-pop"
                         style={{
                           borderColor: `${color}55`,
                           backgroundColor: `${color}1A`,

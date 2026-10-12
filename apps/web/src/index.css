@@ -77,7 +77,7 @@
   --sar: env(safe-area-inset-right, 0px);
 
   /* Tab-bar geometry (coupled with .fab-mobile bottom offset). */
-  --tabbar-height: 3.5rem;   /* h-11 (2.75rem) + py-2 (0.5rem) */
+  --tabbar-height: 3.75rem;   /* реальная высота пилюли Layout (h-12 + py-1.5); была 3.5rem — Toast наезжал на пилюлю */
   --tabbar-bottom: calc(var(--sab) + 1rem);
   --fab-bottom-mobile: calc(var(--tabbar-bottom) + var(--tabbar-height) + 1rem); /* 1rem gap above tab-bar */
 
@@ -335,6 +335,7 @@ body {
     box-shadow:
       0 12px 32px -8px rgba(245, 41, 110, 0.50),
       0 4px 14px rgba(165, 80, 217, 0.35);
+    transition: filter 150ms ease; /* hover/active brightness — без прыжка (S2) */
   }
 
   .grad-intimate:hover {
@@ -453,6 +454,103 @@ body {
 
   .animate-grow-up {
     animation: grow-up 400ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* Горизонтальный рост баров (RowBars/TypeBars): scaleX от левого края.
+     grow-up (scaleY origin bottom) перебивал inline transformOrigin:'left' —
+     бары не росли вправо (T-20261012-001/S2). */
+  @keyframes grow-x {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .animate-grow-x {
+    transform-origin: left center;
+    animation: grow-x 400ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* ============================================================
+     SENSUAL MICRO-ANIMATIONS (T-20261012-001/S3)
+     Тактильные отклики для интимного контента: pop при тапе,
+     мягкий pulse-glow, heart-burst, star-wave. Всё — 1 раз /
+     по событию, без мелькания; глобальный reduced-motion guard
+     (ниже) гасит каждое.
+     ============================================================ */
+  @keyframes sensual-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.12); }
+    70% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  /* 0.34,1.56,0.64,1 — overshoot/back-easing (review m-03): y>1 на 40% даёт
+     bounce-отскок; константа повторяет iOS spring-подобный tap feedback. */
+  .animate-sensual-pop {
+    animation: sensual-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Тап-отклик: pop только во время :active (без JS-состояний) */
+  .press-pop:active {
+    animation: sensual-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Wishlist: сердечко-вспышка на иконке при тапе «выполнено».
+     Без forwards: после конца анимации иконка возвращается к исходному виду. */
+  .press-heart:active .press-heart-icon {
+    animation: heart-burst 600ms ease-out;
+  }
+
+  /* Mягкая пульсация glow: только для selected-дня CalendarView. Ключевые
+     кадры пульсируют ОТ базового primary-glow (не от прозрачности) — иначе
+     перебивают статический .day-selected-glow (review B-02). 2 итерации
+     («двойной вдох» при выборе дня), затем остаётся статическая тень
+     day-selected-glow (review M-03 — без бесконечного мелькания). */
+  @keyframes sensual-pulse {
+    0%, 100% { box-shadow: 0 0 14px 1px rgba(245, 41, 110, 0.35); }
+    50% { box-shadow: 0 0 20px 4px rgba(245, 41, 110, 0.60); }
+  }
+  .animate-sensual-pulse {
+    animation: sensual-pulse 1.4s ease-in-out 2;
+  }
+
+  @keyframes heart-beat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.18); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.12); }
+    60% { transform: scale(1); }
+  }
+  .animate-heart-beat {
+    animation: heart-beat 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+  }
+
+  @keyframes heart-burst {
+    0% { transform: scale(0.6); opacity: 0; }
+    50% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  .animate-heart-burst {
+    animation: heart-burst 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes star-wave {
+    0% { transform: scale(1) rotate(0deg); }
+    30% { transform: scale(1.3) rotate(-8deg); }
+    60% { transform: scale(0.95) rotate(6deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .animate-star-wave {
+    animation: star-wave 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* hover/active-glow для интимных чипов (eventMeta-типы) */
+  .sensual-chip {
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .sensual-chip:hover,
+  .sensual-chip[aria-pressed='true'] {
+    box-shadow: 0 0 12px 1px rgba(255, 107, 163, 0.35);
+  }
+  .sensual-chip:active {
+    transform: scale(0.96);
   }
 }
 

@@ -48,7 +48,12 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
             className={cx(
               iconClass,
               star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-500',
+              // S3: волна слева-направо по выбранной оценке.
+              // 45ms — stagger между звёздами (magic number макета, review m-02):
+              // достаточно, чтобы волна читалась, короче star-wave (380ms).
+              star <= rating && rating > 0 ? 'animate-star-wave' : '',
             )}
+            style={star <= rating && rating > 0 ? { animationDelay: `${(star - 1) * 45}ms` } : undefined}
           />
         </button>
       ))}

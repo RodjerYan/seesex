@@ -70,7 +70,8 @@ export function UpdatePrompt(): JSX.Element | null {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 sm:pb-6 pointer-events-none"
+      className="fixed left-0 right-0 z-50 px-4 pointer-events-none"
+      style={{ bottom: 'var(--fab-bottom-mobile, 5rem)' }}
     >
       <div className="pointer-events-auto mx-auto max-w-[32.5rem] glass rounded-2xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
         <div className="flex items-start justify-between gap-3 p-4">

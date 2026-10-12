@@ -51,7 +51,7 @@ export function ColumnBars({
               style={{ height: `${Math.max(2, ratio * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint ?? `${item.label}: ${item.value}`}
             />
-            <span className="mt-1 truncate text-center text-[9px] text-slate-500">{item.label}</span>
+            <span className="mt-1 truncate text-center text-[9px] text-slate-400">{item.label}</span>
           </div>
         );
       })}
@@ -75,8 +75,8 @@ export function RowBars({ items, suffix }: { items: ChartItem[]; suffix?: string
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-primary-400/80 animate-grow-up"
-              style={{ width: `${Math.max(3, (item.value / max) * 100)}%`, transformOrigin: 'left', animationDelay: `${index * 40}ms` }}
+              className="h-full rounded-full bg-primary-400/80 animate-grow-x"
+              style={{ width: `${Math.max(3, (item.value / max) * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint}
             />
           </div>
@@ -99,9 +99,9 @@ export function StatTile({
   return (
     // !rounded-2xl — перебивает border-radius:32px из .glass (плитка не должна быть pill)
     <div className="glass !rounded-2xl p-2.5 flex flex-col gap-1">
-      <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="text-[11px] uppercase tracking-wide text-slate-400">{label}</p>
       <p className="text-lg font-semibold tabular-nums text-slate-100 -mt-0.5">{value}</p>
-      {hint ? <p className="text-[11px] text-slate-500">{hint}</p> : null}
+      {hint ? <p className="text-[11px] text-slate-400">{hint}</p> : null}
     </div>
   );
 }
