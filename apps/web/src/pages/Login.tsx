@@ -69,7 +69,7 @@ export default function Login(): ReactElement {
         <div className="mb-6 text-center">
           <span
             aria-hidden="true"
-            className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white"
+            className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl grad-intimate text-lg font-bold text-white"
           >
             S
           </span>

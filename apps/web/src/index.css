@@ -92,18 +92,21 @@ body,
 
 /* ============================================================
    1. AMBIENT BACKGROUND — «КИНО»
-   База #07040A + 3 radial-свечения + виньетка + медленный дрейф
+   Роли цвета (T-20261013-004):
+   - ФОН: тёплый бордо-чёрный #140409 (база, дышит бархатом)
+   - ДЕКОР: свечения приглушены (≤0.10) и тёплые — не спорят с UI
+   - ИНТЕРАКТИВ: чистый primary-розовый только на CTA/активных
    ============================================================ */
 body {
   margin: 0;
-  background-color: #07040A;
+  background-color: #140409;
   background-image:
-    /* Rose glow — top center */
-    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(245, 41, 110, 0.12), transparent 60%),
-    /* Violet glow — top right */
-    radial-gradient(ellipse 55% 35% at 110% -10%, rgba(165, 80, 217, 0.09), transparent 60%),
-    /* Deep magenta glow — bottom left */
-    radial-gradient(ellipse 60% 40% at -10% 110%, rgba(200, 20, 90, 0.07), transparent 65%);
+    /* Rose glow — top center (декор, приглушён) */
+    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(245, 41, 110, 0.10), transparent 60%),
+    /* Warm plum glow — top right */
+    radial-gradient(ellipse 55% 35% at 110% -10%, rgba(176, 66, 146, 0.07), transparent 60%),
+    /* Deep bordeaux glow — bottom left */
+    radial-gradient(ellipse 60% 40% at -10% 110%, rgba(150, 25, 70, 0.06), transparent 65%);
   color: #F2F2F7;
   font-family:
     'Inter Variable',
@@ -163,7 +166,7 @@ body {
     padding-top: var(--sat);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(26, 13, 22, 0.72);
+    background: rgba(42, 12, 26, 0.72);
     backdrop-filter: blur(50px) saturate(200%);
     -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-bottom: 0.5px solid rgba(255, 107, 163, 0.12);
@@ -182,7 +185,7 @@ body {
     padding-bottom: calc(var(--sab) + 0.25rem);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(26, 13, 22, 0.72);
+    background: rgba(42, 12, 26, 0.72);
     backdrop-filter: blur(50px) saturate(200%);
     -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-top: 0.5px solid rgba(255, 107, 163, 0.12);
@@ -195,7 +198,7 @@ body {
     padding-top: calc(var(--sat) + 3.5rem);
     padding-bottom: 1rem;
     padding-left: var(--sal);
-    background: rgba(26, 13, 22, 0.72);
+    background: rgba(42, 12, 26, 0.72);
     backdrop-filter: blur(50px) saturate(200%);
     -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-right: 0.5px solid rgba(255, 107, 163, 0.12);
@@ -247,7 +250,7 @@ body {
   /* Strong glass — header, tabbar, sidebar */
   .glass-strong {
     position: relative;
-    background: rgba(26, 13, 22, 0.72);
+    background: rgba(42, 12, 26, 0.72);
     backdrop-filter: blur(50px) saturate(200%);
     -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-radius: 32px;
@@ -344,6 +347,13 @@ body {
 
   .grad-intimate:active {
     filter: brightness(0.95);
+  }
+
+  /* Дуотон для полос/баров статистики вместо плоского primary
+     (идея 5, T-20261013-004): rose→violet как в CTA */
+  .bar-intimate {
+    background-image: linear-gradient(135deg, #FF2A5D 0%, #A550D9 100%);
+    transition: filter 150ms ease;
   }
 
   /* Active tab/icon glow — applied via Layout.tsx className */

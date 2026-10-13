@@ -14,7 +14,7 @@ export default {
           500: '#F5296E',
           600: '#D0134F',
         },
-        surface: '#000000',
+        surface: '#140409', // warm bordeaux base — синхронен с body (T-20261013-004)
         // iOS neutral grays (slate override)
         slate: {
           50: '#F2F2F7',

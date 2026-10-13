@@ -47,7 +47,7 @@ export function ColumnBars({
               {valueLabel ? valueLabel(item.value) : item.value}
             </span>
             <div
-              className="w-full rounded-t bg-primary/70 animate-grow-up transition-colors group-hover:bg-primary group-active:bg-primary"
+              className="bar-intimate w-full rounded-t animate-grow-up group-hover:brightness-110 group-active:brightness-95"
               style={{ height: `${Math.max(2, ratio * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint ?? `${item.label}: ${item.value}`}
             />
@@ -75,7 +75,7 @@ export function RowBars({ items, suffix }: { items: ChartItem[]; suffix?: string
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-primary-400/80 animate-grow-x"
+              className="bar-intimate h-full rounded-full animate-grow-x"
               style={{ width: `${Math.max(3, (item.value / max) * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint}
             />
