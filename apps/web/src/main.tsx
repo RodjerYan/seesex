@@ -91,9 +91,45 @@ function registerServiceWorker(): void {
   setUpdateSW(updateSW);
 }
 
+// === Self-heal версии (T-20261013-004, rev5) ===
+// Раньше registerType:'prompt' зависал: пользователь не нажимал баннер
+// «Обновить» и НАВСЕГДА оставался на старой версии («ничего не меняется»).
+// autoUpdate SW закрывает будущие деплои, но НЕ помогает клиентам, у которых
+// в контроле ещё старый SW. Поэтому — вторая линия обороны: на каждой
+// visibility/таймере сверяем /version.txt (вне precache → идёт по сети даже
+// через старый SW) и перезагружаемся один раз при смене сборки.
+const VERSION_KEY = 'xtracker-version';
+
+async function checkAppVersion(): Promise<void> {
+  try {
+    const res = await fetch('/version.txt', { cache: 'no-store' });
+    if (!res.ok) return;
+    const server = (await res.text()).trim();
+    if (!server) return;
+    const local = localStorage.getItem(VERSION_KEY);
+    if (local === server) return;
+    localStorage.setItem(VERSION_KEY, server);
+    if (local !== null) {
+      location.reload(); // смена сборки; после reload local===server → цикла нет
+    }
+    // local===null — первый визит: только запоминаем метку, не перезагружаем.
+  } catch {
+    // offline / abort — молча игнорируем
+  }
+}
+
+function startVersionWatcher(): void {
+  void checkAppVersion();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') void checkAppVersion();
+  });
+  setInterval(() => void checkAppVersion(), 5 * 60 * 1000);
+}
+
 // Run one-time cleanup, then register SW, then render app (non-blocking)
 void cleanupLegacySWOnce().then(() => {
   registerServiceWorker();
+  startVersionWatcher();
   void runAuditAutoLogin().finally(() => {
     createRoot(container).render(
       <StrictMode>

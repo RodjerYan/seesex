@@ -285,11 +285,16 @@ body {
   }
 
   .press {
-    transition: transform 120ms cubic-bezier(0.32, 0.72, 0, 1), opacity 120ms;
+    /* ВАЖНО (T-20261013-004 rev5): scale — отдельное CSS-свойство, а НЕ
+       transform. Прежний `transform: scale(0.97)` на :active ПЕРЕТИРАЛ
+       Tailwind `-translate-y-1/2` (оба пишут в transform): кнопка шапки
+       прыгала вниз на ~16px, палец попадал на её край → клик терялся
+       («кнопка замка не активна»). scale композируется с transform. */
+    transition: scale 120ms cubic-bezier(0.32, 0.72, 0, 1), opacity 120ms;
   }
 
   .press:active {
-    transform: scale(0.97);
+    scale: 0.97;
   }
 
   /* Skeleton shimmer animation */
@@ -555,16 +560,17 @@ body {
     animation: star-wave 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* hover/active-glow для интимных чипов (eventMeta-типы) */
+  /* hover/active-glow для интимных чипов (eventMeta-типы).
+     scale (не transform) — та же защита от перетирания Tailwind-переносов. */
   .sensual-chip {
-    transition: box-shadow 200ms ease, transform 200ms ease;
+    transition: box-shadow 200ms ease, scale 200ms ease;
   }
   .sensual-chip:hover,
   .sensual-chip[aria-pressed='true'] {
     box-shadow: 0 0 12px 1px rgba(255, 107, 163, 0.35);
   }
   .sensual-chip:active {
-    transform: scale(0.96);
+    scale: 0.96;
   }
 }
 

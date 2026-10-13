@@ -1,11 +1,30 @@
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+/**
+ * Генерирует dist/version.txt с меткой сборки. main.tsx сравнивает её с
+ * localStorage и перезагружается при расхождении — самое надёжное средство
+ * от PWA-кэша: /version.txt НЕ входит в workbox-precache, fetch с cache:'no-store'
+ * обходит даже застаревший Service Worker (он не знает этого маршрута → сеть).
+ */
+function emitVersionTxt(): PluginOption {
+  return {
+    name: 'emit-version-txt',
+    apply: 'build',
+    closeBundle() {
+      writeFileSync(resolve(__dirname, 'dist/version.txt'), new Date().toISOString());
+    },
+  };
+}
 
 // dev: /api -> Express (default порт 3001, см. apps/api/src/lib/config.ts).
 export default defineConfig({
   plugins: [
     react(),
+    emitVersionTxt(),
     VitePWA({
       // Единственный регистратор — явный import { registerSW } из
       // 'virtual:pwa-register' в src/main.tsx (workbox-window). 'auto' генерировал

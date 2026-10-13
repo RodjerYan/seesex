@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Suspense } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 
 import { SecurityLock } from '../components/security/SecurityLock';
 import { CardSkeleton } from '../components/ui/listStates';
@@ -99,20 +99,29 @@ export default function Layout() {
         {/* Логотип по центру шапки (T10-S2): аватар слева, кнопка блокировки
             справа — обе absolute, чтобы не сдвигать/перекрывать надпись. */}
         <div className="relative mx-auto flex h-14 max-w-5xl items-center justify-center px-4">
-          {profileQuery.data?.avatarUrl ? (
-            <img
-              src={profileQuery.data.avatarUrl}
-              alt="Профиль"
-              className="absolute left-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full object-cover ring-1 ring-white/20"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.08] text-sm font-bold text-slate-300 ring-1 ring-white/20"
-            >
-              {(profileQuery.data?.displayName?.[0] ?? '?').toUpperCase()}
-            </span>
-          )}
+          {/* Аватар слева — ССЫЛКА на «Настройки» (T-20261013-004 rev5):
+              раньше был мёртвым <span>/img> без обработчика — «кнопка профиля
+              не активна». Теперь кликабелен и с видимым press/фокус-состоянием. */}
+          <Link
+            to="/settings"
+            aria-label="Профиль и настройки"
+            className="press absolute left-4 top-1/2 -translate-y-1/2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            {profileQuery.data?.avatarUrl ? (
+              <img
+                src={profileQuery.data.avatarUrl}
+                alt=""
+                className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.08] text-sm font-bold text-slate-300 ring-1 ring-white/20"
+              >
+                {(profileQuery.data?.displayName?.[0] ?? '?').toUpperCase()}
+              </span>
+            )}
+          </Link>
           {/* Заголовок — двухтоновый (ревизия 3, T-20261013-004):
               прежний градиент rose->violet гаснул на правой половине
               (тонкие штрихи Great Vibes на чёрном читались «замутнёнными»).
