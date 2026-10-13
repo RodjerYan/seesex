@@ -113,8 +113,14 @@ export default function Layout() {
               {(profileQuery.data?.displayName?.[0] ?? '?').toUpperCase()}
             </span>
           )}
-          <span className="logo-script font-['Great_Vibes'] text-[26px] leading-tight tracking-tight brand-gradient py-1">
-            SeeSex
+          {/* Заголовок — двухтоновый (ревизия 3, T-20261013-004):
+              прежний градиент rose->violet гаснул на правой половине
+              (тонкие штрихи Great Vibes на чёрном читались «замутнёнными»).
+              Теперь: «See» — молочно-белый (всегда контрастен),
+              «Sex» — яркий rose #FF5E97 (обе половины читаются). */}
+          <span className="logo-script font-['Great_Vibes'] text-[27px] leading-tight tracking-tight py-1 select-none">
+            <span className="text-[#F7EFF3]">See</span>
+            <span className="text-[#FF5E97]">Sex</span>
           </span>
           {/* Кнопка блокировки — круглый glass-чип, зеркалит аватар слева
               (ревизия T-20261013-004: прежний «голый» Lock читался как

@@ -376,9 +376,9 @@ body {
      drop-shadow glow: работает поверх background-clip:text — тень берёт
      альфу от нарисованных глифов-градиента, а не от прозрачного color. */
   .logo-script {
-    /* Крисп вместо «дымки»: тонкий тёплый ореол + контактная тень
-       (раньше 10px-lavender glow размывал половину надписи). */
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 8px rgba(255, 94, 151, 0.35));
+    /* Ревизия 3 (T-20261013-004): только контактная тень + очень
+       тугой нейтрально-розовый ореол — никакой дымки на глифах. */
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 6px rgba(255, 94, 151, 0.28));
   }
 
   /* Page transition animation */
