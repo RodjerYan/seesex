@@ -9,9 +9,14 @@ export default defineConfig({
     VitePWA({
       // Единственный регистратор — явный import { registerSW } из
       // 'virtual:pwa-register' в src/main.tsx (workbox-window). 'auto' генерировал
-      // бы dist/registerSW.js с второй navigator.serviceWorker.register() в проде.
+      // бы dist/registerSW.js с второй navigatorServiceWorker.register() в проде.
       injectRegister: false,
-      registerType: 'prompt',
+      // autoUpdate (T-20261013-004): новый SW активируется сам и страница
+      // перезагружается автоматически — иначе registerType:'prompt' зависал:
+      // пользователь не видел/не нажимал баннер «Обновить» и НЕПРЕРЫВНО
+      // сидел на старой версии («заголовок не меняется»). UpdatePrompt
+      // остаётся в коде, но при autoUpdate не показывается.
+      registerType: 'autoUpdate',
       manifest: {
         name: 'SeeSex — Личный дневник событий, статистика и календарь',
         short_name: 'SeeSex',
