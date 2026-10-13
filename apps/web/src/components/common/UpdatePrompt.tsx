@@ -36,6 +36,13 @@ export function UpdatePrompt(): JSX.Element | null {
     setUpdating(true);
     try {
       await applyUpdate();
+      // applyUpdate ждёт controllerchange (skipWaiting + reload). Если у
+      // браузера вдруг нет waiting-SW (сработал self-heal-баннер, а workbox
+      // обновление не увидел) — перезагрузка не придёт. Fallback: через
+      // 2.5с делаем полный сброс SW+кэш, чтобы обновление точно применилось.
+      setTimeout(() => {
+        void handleHardReset();
+      }, 2500);
     } catch (err) {
       console.warn('[UpdatePrompt] applyUpdate failed:', err);
     } finally {
