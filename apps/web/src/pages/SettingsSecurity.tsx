@@ -9,7 +9,15 @@ import { LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
-import { useMe } from '../lib/queries';
+import {
+  DEFAULT_LOCK_SETTINGS,
+  TIMEOUT_OPTIONS,
+  isValidSecret,
+  readLockSettings,
+  sha256Hex,
+  writeLockSettings,
+  type LockMethod,
+} from '../lib/lock';
 import {
   useChangePassword,
   useDeleteSession,
@@ -43,9 +51,12 @@ interface VerifyResponse {
   user: SessionUser;
 }
 
-/** /settings/security: смена пароля, включение/выключение 2FA, сессии. */
+/** /settings/security: блокировка (PIN), смена пароля, 2FA, сессии. */
 export default function SettingsSecurity(): ReactElement {
-  const meQuery = useMe();
+  // hasTotp — напрямую из auth-store: verify/disable пишет сюда синхронно
+  // (setSession/setState). useMe (react-query, staleTime 60s) отдавал бы
+  // устаревшее значение — статус 2FA «включена» появлялся бы с задержкой.
+  const hasTotp = useAuthStore((s) => s.user?.hasTotp ?? false);
 
   return (
     <section className="px-4 py-6 sm:px-6">
@@ -53,10 +64,172 @@ export default function SettingsSecurity(): ReactElement {
         <h1 className="text-lg font-bold tracking-tight text-slate-100">Безопасность</h1>
       </div>
 
+      <AppLockCard />
       <PasswordCard />
-      <TwoFactorCard hasTotp={meQuery.data?.hasTotp ?? false} />
+      <TwoFactorCard hasTotp={hasTotp} />
       <SessionsCard />
     </section>
+  );
+}
+
+/**
+ * Экран блокировки приложения (SecurityLock): установка/смена/снятие PIN
+ * или пароля. Секрет хранится sha-256 в localStorage (lib/lock.ts — API-эндпоинта
+ * для lock-настроек нет). Layout-кнопка замка при отсутствии секрета ведёт сюда.
+ */
+function AppLockCard(): ReactElement {
+  const [settings, setSettings] = useState(() => readLockSettings());
+  const [method, setMethod] = useState<LockMethod>(settings.lockMethod);
+  const [secret, setSecret] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [timeoutSec, setTimeoutSec] = useState(settings.autoLockTimeout);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const hasSecret = settings.secretHash !== null;
+  const isPin = method === 'PIN';
+
+  const onSave = async () => {
+    setError(null);
+    setSaved(false);
+    if (!isValidSecret(method, secret)) {
+      setError(isPin ? 'PIN — от 4 до 6 цифр' : 'Пароль — минимум 6 символов');
+      return;
+    }
+    if (secret !== confirm) {
+      setError('Значения не совпадают');
+      return;
+    }
+    setBusy(true);
+    try {
+      const hash = await sha256Hex(secret);
+      const next = writeLockSettings({
+        lockEnabled: true,
+        lockMethod: method,
+        secretHash: hash,
+        autoLockTimeout: timeoutSec,
+      });
+      setSettings(next);
+      setSecret('');
+      setConfirm('');
+      setSaved(true);
+    } catch {
+      setError('Не удалось сохранить — недоступен криптографический API браузера');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onDisable = () => {
+    setError(null);
+    setSaved(false);
+    const next = writeLockSettings({
+      ...DEFAULT_LOCK_SETTINGS,
+      autoLockTimeout: timeoutSec,
+    });
+    setSettings(next);
+  };
+
+  return (
+    <Card className="mb-4">
+      <SectionTitle>Блокировка приложения</SectionTitle>
+      <p className="mb-3 text-sm text-slate-400">
+        {hasSecret
+          ? `Секрет задан (${settings.lockMethod === 'PIN' ? 'PIN' : 'пароль'}), автоблокировка через ${settings.autoLockTimeout} с неактивности.`
+          : 'Защитите приложение PIN-кодом или паролем — экран блокировки появится при входе и после неактивности.'}
+      </p>
+
+      <Field label="Тип секрета" htmlFor="lock-method">
+        <div className="flex gap-2" role="radiogroup" aria-label="Тип секрета">
+          {(['PIN', 'PASSWORD'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={method === m}
+              className={`press flex-1 rounded-xl border px-3 py-2 text-sm transition-colors ${
+                method === m
+                  ? 'border-primary/60 bg-primary/15 text-slate-100'
+                  : 'border-white/10 bg-white/[0.04] text-slate-400 hover:text-slate-200'
+              }`}
+              onClick={() => {
+                setMethod(m);
+                setError(null);
+              }}
+            >
+              {m === 'PIN' ? 'PIN (4–6 цифр)' : 'Пароль'}
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label={isPin ? 'Новый PIN' : 'Новый пароль'} htmlFor="lock-secret" error={error ?? undefined}>
+        <Input
+          id="lock-secret"
+          type={isPin ? 'password' : 'password'}
+          inputMode={isPin ? 'numeric' : 'text'}
+          autoComplete={hasSecret ? 'new-password' : 'off'}
+          maxLength={isPin ? 6 : 128}
+          placeholder={isPin ? '••••' : 'Минимум 6 символов'}
+          value={secret}
+          onChange={(e) => {
+            setSecret(isPin ? e.target.value.replace(/\D/g, '') : e.target.value);
+            setError(null);
+            setSaved(false);
+          }}
+        />
+      </Field>
+      <Field label="Повторите" htmlFor="lock-confirm">
+        <Input
+          id="lock-confirm"
+          type="password"
+          autoComplete="off"
+          maxLength={isPin ? 6 : 128}
+          value={confirm}
+          onChange={(e) => {
+            setConfirm(isPin ? e.target.value.replace(/\D/g, '') : e.target.value);
+            setError(null);
+            setSaved(false);
+          }}
+        />
+      </Field>
+
+      <Field label="Автоблокировка" htmlFor="lock-timeout">
+        <select
+          id="lock-timeout"
+          className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-200 focus:border-primary/50 focus:outline-none"
+          value={timeoutSec}
+          onChange={(e) => {
+            setTimeoutSec(Number(e.target.value));
+            setSaved(false);
+          }}
+        >
+          {TIMEOUT_OPTIONS.map((sec) => (
+            <option key={sec} value={sec}>
+              {sec < 60 ? `${sec} с` : `${sec / 60} мин`}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      {saved ? <p className="mb-2 text-sm text-emerald-400">Сохранено — секрет обновлён</p> : null}
+
+      <div className="flex gap-2">
+        <Button
+          className="flex-1"
+          onClick={() => void onSave()}
+          disabled={busy || secret.length === 0}
+        >
+          {busy ? 'Сохраняем…' : hasSecret ? 'Сменить секрет' : 'Установить'}
+        </Button>
+        {hasSecret ? (
+          <Button variant="ghost" className="flex-1" onClick={onDisable}>
+            Отключить
+          </Button>
+        ) : null}
+      </div>
+    </Card>
   );
 }
 

@@ -121,7 +121,7 @@ export default function Layout() {
             aria-label="Заблокировать приложение"
             onClick={() => {
               if (settings.secretHash) lock();
-              else navigate('/settings'); // Секрет не задан — предложить настроить PIN.
+              else navigate('/settings/security'); // Секрет не задан — установить PIN.
             }}
             className="press absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
