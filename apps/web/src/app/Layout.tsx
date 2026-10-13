@@ -3,7 +3,7 @@ import {
   CalendarDays,
   Heart,
   Home,
-  Lock,
+  LockKeyhole,
   Settings,
   User,
   Users,
@@ -116,6 +116,10 @@ export default function Layout() {
           <span className="logo-script font-['Great_Vibes'] text-[26px] leading-tight tracking-tight brand-gradient py-1">
             SeeSex
           </span>
+          {/* Кнопка блокировки — круглый glass-чип, зеркалит аватар слева
+              (ревизия T-20261013-004: прежний «голый» Lock читался как
+              собачья кость; LockKeyhole — настоящий замок с замочным
+              скважиной, в круге со стеклом выглядит как элемент шапки). */}
           <button
             type="button"
             aria-label="Заблокировать приложение"
@@ -123,9 +127,9 @@ export default function Layout() {
               if (settings.secretHash) lock();
               else navigate('/settings/security'); // Секрет не задан — установить PIN.
             }}
-            className="press absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="press absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.06] text-slate-300 ring-1 ring-white/20 transition-colors hover:bg-white/[0.12] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            <Lock className="h-5 w-5" aria-hidden="true" />
+            <LockKeyhole className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -163,7 +167,7 @@ export default function Layout() {
           «проступал» в 16-px зазоре под плавающей пилюлей (см. nav ниже) —
           пользователь видел «вылезающие» блоки. Градиент снизу вверх:
           непрозрачный фон приложения (token surface — ровно тот, что рисует
-          корневой .app-dvh, body-фон #140409 закрыт им) → прозрачный сверху.
+          корневой .app-dvh, body-фон #0D0A10 закрыт им) → прозрачный сверху.
           h-24 (96px) перекрывает зазор под nav (1rem) + запас.
           Слои: контент < маска (z-10) < FAB (z-20) < nav (z-30);
           pointer-events-none — клики доходят до контента/FAB/nav.
