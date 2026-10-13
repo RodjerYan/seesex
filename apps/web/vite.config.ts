@@ -30,12 +30,13 @@ export default defineConfig({
       // 'virtual:pwa-register' в src/main.tsx (workbox-window). 'auto' генерировал
       // бы dist/registerSW.js с второй navigatorServiceWorker.register() в проде.
       injectRegister: false,
-      // autoUpdate (T-20261013-004): новый SW активируется сам и страница
-      // перезагружается автоматически — иначе registerType:'prompt' зависал:
-      // пользователь не видел/не нажимал баннер «Обновить» и НЕПРЕРЫВНО
-      // сидел на старой версии («заголовок не меняется»). UpdatePrompt
-      // остаётся в коде, но при autoUpdate не показывается.
-      registerType: 'autoUpdate',
+      // prompt (T-20261013-004, ревизия по запросу пользователя): при новой
+      // версии появляется баннер «Обновить» (UpdatePrompt) — пользователь
+      // сам решает, когда обновиться. Раньше зависания из-за невниманного
+      // пользователя чинились иначе: sw.js/version.txt отдаются с no-cache
+      // (apps/api/src/app.ts) + self-heal чекер версии в main.tsx диспатчит
+      // тот же баннер, если workbox не увидел обновление.
+      registerType: 'prompt',
       manifest: {
         name: 'SeeSex — Личный дневник событий, статистика и календарь',
         short_name: 'SeeSex',

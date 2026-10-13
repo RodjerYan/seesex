@@ -11,7 +11,7 @@ import '@fontsource-variable/inter';
 import '@fontsource/great-vibes/latin-400.css';
 import AppRouter from './app/router';
 import { queryClient } from './lib/queryClient';
-import { setUpdateSW, markNeedRefreshFired } from './lib/pwa';
+import { setUpdateSW, markNeedRefreshFired, PWA_NEED_REFRESH } from './lib/pwa';
 import './index.css';
 import runAuditAutoLogin from './dev/auditAutologin';
 
@@ -91,13 +91,13 @@ function registerServiceWorker(): void {
   setUpdateSW(updateSW);
 }
 
-// === Self-heal версии (T-20261013-004, rev5) ===
-// Раньше registerType:'prompt' зависал: пользователь не нажимал баннер
-// «Обновить» и НАВСЕГДА оставался на старой версии («ничего не меняется»).
-// autoUpdate SW закрывает будущие деплои, но НЕ помогает клиентам, у которых
-// в контроле ещё старый SW. Поэтому — вторая линия обороны: на каждой
-// visibility/таймере сверяем /version.txt (вне precache → идёт по сети даже
-// через старый SW) и перезагружаемся один раз при смене сборки.
+// === Self-heal версии (T-20261013-004) ===
+// workbox видит новую версию только когда перезапрашивает sw.js; если по
+// какой-то причине не увидел (например, старый HTTP-кэш на клиенте), этот
+// чекер всё равно заметит смену сборки по /version.txt (вне precache →
+// идёт по сети даже через старый SW) и покажет баннер «Обновить» —
+// тот же PWA_NEED_REFRESH, что и у registerSW. Молчаливой перезагрузки
+// нет: обновление всегда по кнопке (по запросу пользователя).
 const VERSION_KEY = 'xtracker-version';
 
 async function checkAppVersion(): Promise<void> {
@@ -110,9 +110,11 @@ async function checkAppVersion(): Promise<void> {
     if (local === server) return;
     localStorage.setItem(VERSION_KEY, server);
     if (local !== null) {
-      location.reload(); // смена сборки; после reload local===server → цикла нет
+      // Смена сборки: баннер «Обновить» (UpdatePrompt слушает это событие).
+      markNeedRefreshFired();
+      window.dispatchEvent(new CustomEvent(PWA_NEED_REFRESH));
     }
-    // local===null — первый визит: только запоминаем метку, не перезагружаем.
+    // local===null — первый визит: только запоминаем метку.
   } catch {
     // offline / abort — молча игнорируем
   }
