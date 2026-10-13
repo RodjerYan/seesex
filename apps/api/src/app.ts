@@ -86,7 +86,25 @@ export function createApp(): Express {
   // В dev её нет — SPA отдаёт vite dev-сервер, поэтому ветка условная.
   const spaDir = path.resolve(__dirname, '..', 'public');
   if (fs.existsSync(path.join(spaDir, 'index.html'))) {
-    app.use(express.static(spaDir, { index: false, maxAge: '1h' }));
+    app.use(
+      express.static(spaDir, {
+        index: false,
+        maxAge: '1h',
+        setHeaders: (res, filePath) => {
+          // sw.js / version.txt — всегда без кэша. sw.js с max-age=1h в
+          // HTTP-кэше браузера = клиент навечно зависает на старой версии
+          // PWA (T-20261013-004: «ничего не меняется»).
+          if (filePath.endsWith(`${path.sep}sw.js`) || filePath.endsWith(`${path.sep}version.txt`)) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            return;
+          }
+          // Vite-хешированные бандлы — контент неизменяем по определению.
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          }
+        },
+      }),
+    );
     // SPA fallback: любые не-API маршруты (React Router) -> index.html.
     app.get(/^\/(?!api\/|health$).*/, (req: Request, res: Response, next) => {
       res.setHeader('Cache-Control', 'no-store');
