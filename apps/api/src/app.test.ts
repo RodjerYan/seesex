@@ -157,6 +157,75 @@ describe('POST /api/auth/refresh + logout', () => {
     expect(again.status).toBe(200);
   });
 
+  it('reuse of a revoked token within grace period is 401 without killing other tokens', async () => {
+    const auth = await registerAndLogin();
+
+    const refreshed = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: auth.refreshToken });
+    expect(refreshed.status).toBe(200);
+    const newToken = refreshed.body.refreshToken as string;
+
+    // Повтор старого токена сразу после ротации (гонка вкладок) → 401,
+    // но остальные активные токены не отзываются.
+    const reuse = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: auth.refreshToken });
+    expect(reuse.status).toBe(401);
+
+    const stillAlive = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: newToken });
+    expect(stillAlive.status).toBe(200);
+  });
+
+  it('reuse of a revoked token older than grace revokes ALL user refresh tokens', async () => {
+    const auth = await registerAndLogin();
+    // Вторая активная сессия того же пользователя (второй refresh-токен).
+    const secondLogin = await request(app)
+      .post('/api/auth/login')
+      .send({ email: auth.email, password: PASSWORD });
+    expect(secondLogin.status).toBe(200);
+    const secondToken = secondLogin.body.refreshToken as string;
+
+    // Ротация первого токена → новый активный.
+    const refreshed = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: auth.refreshToken });
+    expect(refreshed.status).toBe(200);
+    const newToken = refreshed.body.refreshToken as string;
+
+    // Имитируем «старый» revoked-токен: возраст отзыва больше grace (60с).
+    const revokedRow = getFakeDb().refreshTokens.find(
+      (token) => token.userId === auth.userId && token.revokedAt !== null,
+    );
+    expect(revokedRow).toBeTruthy();
+    if (revokedRow) revokedRow.revokedAt = new Date(Date.now() - 2 * 60_000);
+
+    // Повтор отозванного токена спустя grace → 401 + отзыв ВСЕХ активных токенов.
+    const reuse = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: auth.refreshToken });
+    expect(reuse.status).toBe(401);
+
+    const active = getFakeDb().refreshTokens.filter(
+      (token) => token.userId === auth.userId && token.revokedAt === null,
+    );
+    expect(active).toHaveLength(0);
+
+    // Токен, выпущенный первой ротацией, теперь мёртв.
+    const dead = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: newToken });
+    expect(dead.status).toBe(401);
+
+    // Вторая сессия тоже мертва.
+    const deadSecond = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: secondToken });
+    expect(deadSecond.status).toBe(401);
+  });
+
   it('logout revokes refresh token (204) and kills further refresh', async () => {
     const auth = await registerAndLogin();
 

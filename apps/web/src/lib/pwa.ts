@@ -51,3 +51,19 @@ export async function applyUpdate(): Promise<void> {
 export function hasUpdateSW(): boolean {
   return updateSW !== null;
 }
+
+/**
+ * Fire-and-forget: удаляет записи кэша API (api-cache) из Cache Storage.
+ * Вызывается при logout и при сбое refresh — чтобы очистить персональные данные.
+ */
+export async function purgeApiCache(): Promise<void> {
+  try {
+    if (typeof caches === 'undefined') return;
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter((k) => k.startsWith('api-cache')).map((k) => caches.delete(k)),
+    );
+  } catch {
+    /* ничего: очистка кэша не должна ломать выход */
+  }
+}

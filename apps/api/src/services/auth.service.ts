@@ -14,9 +14,12 @@ import {
 } from '../lib/jwt';
 import { prisma } from '../lib/prisma';
 import { buildOtpauthUri, generateTotpSecret, verifyTotpCode } from '../lib/totp';
+import { logger } from '../lib/winston';
 import type { LoginInput, ProfileUpdateInput, RegisterInput, TotpDisableInput, ChangePasswordInput } from '../schemas/auth.schema';
 
 const BCRYPT_ROUNDS = 12;
+/** Окно « grace » для повторного refresh после ротации (гонка вкладок). */
+const REFRESH_REUSE_GRACE_MS = 60_000;
 
 export interface PublicUser {
   id: string;
@@ -160,9 +163,28 @@ export async function login(input: LoginInput, meta: RequestMeta): Promise<Login
 export async function refresh(refreshToken: string): Promise<AuthTokens> {
   const claims = verifyRefreshToken(refreshToken);
   const tokenHash = sha256Hex(refreshToken);
+  // Поиск БЕЗ фильтра revokedAt: повтор уже отозванного токена — сигнал reuse.
   const record = await prisma.refreshToken.findUnique({ where: { tokenHash } });
   const now = Date.now();
-  if (!record || record.revokedAt !== null || record.expiresAt.getTime() <= now) {
+  if (!record) {
+    throw ApiError.unauthorized('REFRESH_INVALID', 'Refresh token is invalid or expired');
+  }
+  if (record.revokedAt !== null) {
+    const reuseAgeMs = now - record.revokedAt.getTime();
+    if (reuseAgeMs >= REFRESH_REUSE_GRACE_MS) {
+      // Токен переиспользуют спустя grace-период — возможна кража: отзываем все активные.
+      await prisma.refreshToken.updateMany({
+        where: { userId: record.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      logger.warn(
+        `Refresh token reuse detected for user ${record.userId} — revoked all active refresh tokens`,
+      );
+    }
+    // Внутри grace-окна — просто 401 (гонка вкладок), без отзыва остальных токенов.
+    throw ApiError.unauthorized('REFRESH_INVALID', 'Refresh token is invalid or expired');
+  }
+  if (record.expiresAt.getTime() <= now) {
     throw ApiError.unauthorized('REFRESH_INVALID', 'Refresh token is invalid or expired');
   }
   if (!claims.sid) {
@@ -175,20 +197,28 @@ export async function refresh(refreshToken: string): Promise<AuthTokens> {
   const user = await prisma.user.findUnique({ where: { id: record.userId } });
   if (!user) throw invalidCredentials();
 
-  // Ротация: старый refresh — revoked, новый — в ту же сессию.
-  await prisma.refreshToken.update({
-    where: { id: record.id },
-    data: { revokedAt: new Date() },
+  // Ротация атомарна: revoke старого (compare-and-set revokedAt: null) + выпуск нового
+  // в ту же сессию внутри одной транзакции. Гонка двух параллельных refresh → один 401.
+  const newRefreshToken = await prisma.$transaction(async (tx) => {
+    const upd = await tx.refreshToken.updateMany({
+      where: { id: record.id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    if (upd.count !== 1) return null;
+    await tx.session.update({
+      where: { id: session.id },
+      data: { lastSeenAt: new Date() },
+    });
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
+    const token = signRefreshToken(user.id, session.id);
+    await tx.refreshToken.create({
+      data: { userId: user.id, tokenHash: sha256Hex(token), expiresAt },
+    });
+    return token;
   });
-  await prisma.session.update({
-    where: { id: session.id },
-    data: { lastSeenAt: new Date() },
-  });
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
-  const newRefreshToken = signRefreshToken(user.id, session.id);
-  await prisma.refreshToken.create({
-    data: { userId: user.id, tokenHash: sha256Hex(newRefreshToken), expiresAt },
-  });
+  if (!newRefreshToken) {
+    throw ApiError.unauthorized('REFRESH_INVALID', 'Refresh token is invalid or expired');
+  }
   return {
     accessToken: signAccessToken(user.id, user.email),
     refreshToken: newRefreshToken,

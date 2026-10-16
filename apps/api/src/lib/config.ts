@@ -15,25 +15,18 @@ const EnvSchema = z.object({
   ENCRYPTION_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   FRONTEND_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
   ALLOWED_ORIGINS: z.preprocess(emptyToUndefined, z.string().optional()),
-  // Общий rate-limit.
+  // Общий rate-limit (дефолты = фактическое прод-поведение: 1000 запросов / 15 мин / IP).
   RATE_LIMIT_WINDOW_MS: z.preprocess(
     emptyToUndefined,
-    z.coerce.number().int().positive().default(60_000),
+    z.coerce.number().int().positive().default(15 * 60 * 1000),
   ),
-  RATE_LIMIT_MAX: z.preprocess(emptyToUndefined, z.coerce.number().int().positive().default(100)),
-  // Жёсткий лимит на /api/auth/login и /api/auth/register: 10 запросов / 15 мин / IP.
+  RATE_LIMIT_MAX: z.preprocess(emptyToUndefined, z.coerce.number().int().positive().default(1000)),
+  // Жёсткий лимит на /api/auth/login и /api/auth/register: 30 запросов / 15 мин / IP.
   AUTH_RATE_LIMIT_WINDOW_MS: z.preprocess(
     emptyToUndefined,
-    z.coerce
-      .number()
-      .int()
-      .positive()
-      .default(15 * 60 * 1000),
+    z.coerce.number().int().positive().default(15 * 60 * 1000),
   ),
-  AUTH_RATE_LIMIT_MAX: z.preprocess(
-    emptyToUndefined,
-    z.coerce.number().int().positive().default(10),
-  ),
+  AUTH_RATE_LIMIT_MAX: z.preprocess(emptyToUndefined, z.coerce.number().int().positive().default(30)),
   LOG_LEVEL: z.preprocess(
     emptyToUndefined,
     z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info'),
@@ -44,15 +37,26 @@ export type Env = z.infer<typeof EnvSchema>;
 
 function loadConfig(): Env {
   const parsed = EnvSchema.safeParse(process.env);
-  if (parsed.success) return parsed.data;
+  if (!parsed.success) {
+    const issues = parsed.error.issues
+      .map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      .join('\n');
+    throw new Error(
+      `Invalid environment configuration:\n${issues}\n` +
+        'Set the missing variables in apps/api/.env (see apps/api/.env.example).',
+    );
+  }
 
-  const issues = parsed.error.issues
-    .map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
-    .join('\n');
-  throw new Error(
-    `Invalid environment configuration:\n${issues}\n` +
-      'Set the missing variables in apps/api/.env (see apps/api/.env.example).',
-  );
+  // Fail-fast в production: без ENCRYPTION_KEY чувствительные поля (Event.notes)
+  // лежали бы открытым текстом. В dev/test оставляем plaintext-fallback (crypto.ts).
+  if (parsed.data.NODE_ENV === 'production' && !parsed.data.ENCRYPTION_KEY) {
+    throw new Error(
+      'ENCRYPTION_KEY is required in production: set a 32+ char secret ' +
+        '(e.g. openssl rand -base64 32) so sensitive fields stay encrypted.',
+    );
+  }
+
+  return parsed.data;
 }
 
 export const config: Env = loadConfig();

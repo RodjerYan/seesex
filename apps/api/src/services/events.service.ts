@@ -68,7 +68,11 @@ function namedView(rows: { id: string; name: string | null }[] | undefined) {
   return (rows ?? []).map((row) => ({ id: row.id, name: row.name }));
 }
 
-export function eventView(event: EventRow): Record<string, unknown> {
+/**
+ * API-представление события. notes — чувствительное поле: расшифровывается
+ * и возвращается только владельцу события; остальным зрителям — null.
+ */
+export function eventView(event: EventRow, viewerId: string): Record<string, unknown> {
   const types = Array.isArray(event.eventTypes) && event.eventTypes.length ? event.eventTypes : [event.eventType];
   return {
     id: event.id,
@@ -80,7 +84,7 @@ export function eventView(event: EventRow): Record<string, unknown> {
     date: event.date,
     duration: event.duration,
     rating: event.rating,
-    notes: decrypt(event.notes),
+    notes: event.userId === viewerId ? decrypt(event.notes) : null,
     calories: event.calories,
     heartRate: event.heartRate,
     initiatedBy: event.initiatedBy,
@@ -321,7 +325,7 @@ export async function listEvents(
     }),
   ]);
   return {
-    events: rows.map((row) => eventView(row as EventRow)),
+    events: rows.map((row) => eventView(row as EventRow, userId)),
     total,
     limit: query.limit,
     offset: query.offset,
@@ -336,7 +340,7 @@ export async function getEvent(userId: string, eventId: string): Promise<Record<
   if (!event || !(await canAccessEvent(userId, event))) {
     throw ApiError.notFound('EVENT_NOT_FOUND', 'Event not found');
   }
-  return eventView(event);
+  return eventView(event, userId);
 }
 
 export async function createEvent(
@@ -348,7 +352,7 @@ export async function createEvent(
     data: buildCreateData(userId, input),
     include: eventInclude,
   })) as EventRow;
-  return eventView(event);
+  return eventView(event, userId);
 }
 
 export async function updateEvent(
@@ -363,7 +367,7 @@ export async function updateEvent(
     data: buildUpdateData(input),
     include: eventInclude,
   })) as EventRow;
-  return eventView(event);
+  return eventView(event, userId);
 }
 
 export async function deleteEvent(userId: string, eventId: string): Promise<void> {

@@ -182,18 +182,6 @@ body {
     padding-right: var(--sar);
   }
 
-  /* Нижняя таб-навигация: отступ под home-indicator. */
-  .app-tabbar {
-    padding-bottom: calc(var(--sab) + 0.25rem);
-    padding-left: var(--sal);
-    padding-right: var(--sar);
-    background: rgba(16, 14, 22, 0.78);
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
-    border-top: 0.5px solid rgba(255, 255, 255, 0.10);
-    min-height: 3.5rem;
-  }
-
   /* Desktop-сайдбар (sm+): появляется вместо таб-бара. */
   .app-sidebar {
     top: 0;

@@ -122,6 +122,57 @@ describe('Group calendars', () => {
     expect(strangerWrite.status).toBe(404);
   });
 
+  it('hides event notes from group members, keeps them for the owner', async () => {
+    const calendarId = await createCalendar(owner);
+    const detail = await request(app).get(`/api/group-calendars/${calendarId}`).set(auth(owner));
+    await request(app)
+      .post('/api/group-calendars/join')
+      .set(auth(member))
+      .send({ inviteCode: detail.body.calendar.inviteCode });
+
+    // владелец создаёт событие с заметками в общем календаре
+    const created = await request(app)
+      .post(`/api/group-calendars/${calendarId}/events`)
+      .set(auth(owner))
+      .send({
+        title: 'Совместное',
+        date: '2020-09-09T20:00:00.000Z',
+        notes: 'секретные заметки владельца',
+      });
+    expect(created.status).toBe(201);
+    // создатель (владелец) сразу видит расшифрованные notes
+    expect(created.body.event.notes).toBe('секретные заметки владельца');
+
+    // участник видит событие, но notes скрыты
+    const memberEvents = await request(app)
+      .get(`/api/group-calendars/${calendarId}/events`)
+      .set(auth(member));
+    expect(memberEvents.status).toBe(200);
+    expect(memberEvents.body.events).toHaveLength(1);
+    expect(memberEvents.body.events[0].title).toBe('Совместное');
+    expect(memberEvents.body.events[0].notes).toBeNull();
+
+    // участник видит событие и в общем списке /api/events — тоже без notes
+    const memberList = await request(app)
+      .get('/api/events')
+      .query({ groupCalendarId: calendarId })
+      .set(auth(member));
+    expect(memberList.body.events).toHaveLength(1);
+    expect(memberList.body.events[0].notes).toBeNull();
+
+    // владелец видит свои notes и через /events, и через /api/events
+    const ownerEvents = await request(app)
+      .get(`/api/group-calendars/${calendarId}/events`)
+      .set(auth(owner));
+    expect(ownerEvents.body.events[0].notes).toBe('секретные заметки владельца');
+
+    const ownerList = await request(app)
+      .get('/api/events')
+      .query({ groupCalendarId: calendarId })
+      .set(auth(owner));
+    expect(ownerList.body.events[0].notes).toBe('секретные заметки владельца');
+  });
+
   it('leave removes membership and access, owner keeps calendar', async () => {
     const calendarId = await createCalendar(owner);
     const detail = await request(app).get(`/api/group-calendars/${calendarId}`).set(auth(owner));

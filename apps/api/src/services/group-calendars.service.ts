@@ -184,7 +184,8 @@ export async function listCalendarEvents(
     include: eventInclude,
     orderBy: { date: 'desc' },
   });
-  return rows.map((row) => eventView(row as EventRow));
+  // viewerId = запрашивающий участник: чужие notes (владельца события) скрыты (null).
+  return rows.map((row) => eventView(row as EventRow, userId));
 }
 
 /**

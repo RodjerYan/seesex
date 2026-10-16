@@ -16,6 +16,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { api, refreshAccessToken, setAuthAdapter, isTokenExpiring } from '../lib/api';
 import type { SessionUser } from '../types';
+import { purgeApiCache } from '../lib/pwa';
 
 export interface AuthTokens {
   accessToken: string;
@@ -156,6 +157,8 @@ export const useAuthStore = create<AuthState>()(
         refreshToken = null;
         writeLocalStorage(REFRESH_STORAGE_KEY, null);
         set({ accessToken: null, user: null });
+        // Чистим SW-кэш персональных данных (api-cache) при выходе.
+        void purgeApiCache();
         // zustand persist после set() выше синхронно пишет в localStorage ключ
         // xtracker.auth = {"state":{accessToken:null,user:null},"version":0}.
         // QA-приём (T8-S2): после logout ни в localStorage, ни в sessionStorage

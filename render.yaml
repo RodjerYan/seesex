@@ -26,9 +26,13 @@ services:
       - key: ALLOWED_ORIGINS
         value: https://xtracker-web.onrender.com
       - key: RATE_LIMIT_WINDOW_MS
-        value: '60000'
+        value: '900000'
       - key: RATE_LIMIT_MAX
-        value: '100'
+        value: '1000'
+      - key: AUTH_RATE_LIMIT_WINDOW_MS
+        value: '900000'
+      - key: AUTH_RATE_LIMIT_MAX
+        value: '30'
       - key: PORT
         value: '10000'
       # Пусто = фронт ходит в API по относительным путям /api (тот же origin на Render).

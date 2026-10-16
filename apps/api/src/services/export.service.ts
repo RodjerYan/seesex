@@ -1,7 +1,7 @@
 import { isoDay } from '../lib/date';
 import { prisma } from '../lib/prisma';
 import * as calendarsService from './group-calendars.service';
-import * as eventsService from './events.service';
+import { eventInclude, eventView, type EventRow } from './events.service';
 import * as partnersService from './partners.service';
 import * as wishlistService from './wishlist.service';
 
@@ -9,18 +9,24 @@ import * as wishlistService from './wishlist.service';
 
 const EXPORT_PAGE_SIZE = 500;
 
-/** Все события юзера (постранично — обходит лимит пагинации). */
+/**
+ * Только СОБСТВЕННЫЕ события юзера (постранично — обходит лимит пагинации).
+ * События из общих групповых календарей (userId ≠ userId запросившего) в экспорт не попадают.
+ */
 async function allEvents(userId: string): Promise<Record<string, unknown>[]> {
   const out: Record<string, unknown>[] = [];
   let offset = 0;
   for (;;) {
-    const page = await eventsService.listEvents(userId, {
-      limit: EXPORT_PAGE_SIZE,
-      offset,
+    const rows = await prisma.event.findMany({
+      where: { userId },
+      include: eventInclude,
+      orderBy: { date: 'desc' },
+      skip: offset,
+      take: EXPORT_PAGE_SIZE,
     });
-    out.push(...page.events);
-    offset += page.events.length;
-    if (offset >= page.total || page.events.length === 0) break;
+    out.push(...rows.map((row) => eventView(row as EventRow, userId)));
+    offset += rows.length;
+    if (rows.length < EXPORT_PAGE_SIZE) break;
   }
   return out;
 }
