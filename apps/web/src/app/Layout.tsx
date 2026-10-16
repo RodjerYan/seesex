@@ -47,19 +47,15 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /**
- * Слот мобильной пилюли (T10-S1, ревизия S4): hit-area 48×48 (≥44pt HIG),
- * только иконка 24px (текстовый лейбл заменён на aria-label у NavLink).
+ * Слот мобильной пилюли (T10-S1): hit-area 48×48 (≥44pt HIG), только иконка
+ * 24px (текстовый лейбл заменён на aria-label у NavLink).
  *
- * Активная вкладка — «дорогой» тёмный капсульный хайлайт поверх серой
- * пилюли: глубокий вертикальный градиент (капсуль всегда ТЁМНЕЕ пилюли,
- * контраст читается мгновенно), hairline-обводка ring-white/16, тонкая
- * световая линия по верхней кромке + внутренний inset-виньет (объём),
- * плотная нижняя тень (капсуль «приподнят») и очень мягкий розовый
- * ореол бренда; иконка вырастает (scale-110) и всегда pure white.
- * Иконки всех слотов получают лёгкий drop-shadow — контраст не тонет
- * в контенте, просвечивающем сквозь стекло пилюли.
+ * Активная вкладка (S1 «Премиальный нуар»): аккуратная пилюля с rose-tint
+ * (bg-primary/[0.16] поверх тёмной пилюли таббара) + hairline ring-primary/30
+ * и мягкий розовый glow — вместо прежнего тёмного капсула с «белой» обводкой.
+ * Иконка активного слота — primary-400 (rose).
  *
- * Переходы точечные: цвет/трансформ/тень плавные (200ms), background-color —
+ * Переходы точечные: цвет/тень плавные (200ms), background-color —
  * мгновенный, чтобы подсветка не «запаздывала» за пальцем. Tap-фидбэк
  * (T7-S2): active:scale-95 + instant-подсветка неактивного слота;
  * touch-manipulation убирает double-tap-zoom-задержку; active:opacity-100
@@ -72,15 +68,15 @@ function tabLinkClassName(isActive: boolean): string {
     'active:scale-95 active:opacity-100 ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400';
   return isActive
-    ? `${base} bg-gradient-to-b from-black/55 via-black/60 to-black/75 text-white ring-1 ring-white/[0.16] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_0_12px_rgba(0,0,0,0.5),0_6px_16px_-6px_rgba(0,0,0,0.85),0_0_14px_-7px_rgba(245,41,110,0.5)] active:bg-black/80`
+    ? `${base} bg-primary/[0.16] text-primary-400 ring-1 ring-primary/30 shadow-[0_0_16px_-6px_rgba(255,77,141,0.55)] active:bg-primary/25`
     : `${base} text-white/70 hover:text-white hover:bg-white/[0.08] active:bg-white/20 active:text-white`;
 }
 
 function sidebarLinkClassName(isActive: boolean): string {
   const base = 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors';
   return isActive
-    ? `${base} text-primary bg-white/[0.06] tab-active-glow`
-    : `${base} text-slate-400 hover:bg-white/[0.06] hover:text-slate-100`;
+    ? `${base} text-primary-400 bg-primary/[0.12] tab-active-glow`
+    : `${base} text-ink-muted hover:bg-white/[0.06] hover:text-ink`;
 }
 
 /**
@@ -94,7 +90,9 @@ export default function Layout() {
   const profileQuery = useProfile();
 
   return (
-    <div className="app-dvh bg-surface text-slate-100">
+    <div className="app-dvh text-ink">
+      {/* S1: без bg-surface — подложкой служит ambient-фон body
+          (градиент bg_deep→bg_base + статичные свечения, design-spec.md). */}
       <header className="app-header fixed inset-x-0 top-0 z-30 glass-strong">
         {/* Логотип по центру шапки (T10-S2): аватар слева, кнопка блокировки
             справа — обе absolute, чтобы не сдвигать/перекрывать надпись. */}
@@ -181,8 +179,8 @@ export default function Layout() {
       {/* Нижняя fade-маска (T-20261001-013/A2): скроллящийся контент
           «проступал» в 16-px зазоре под плавающей пилюлей (см. nav ниже) —
           пользователь видел «вылезающие» блоки. Градиент снизу вверх:
-          непрозрачный фон приложения (token surface — ровно тот, что рисует
-          корневой .app-dvh, body-фон #0D0A10 закрыт им) → прозрачный сверху.
+          непрозрачный фон приложения (token surface — #0A0A0F = bg_base,
+          нижняя часть градиента body) → прозрачный сверху.
           h-24 (96px) перекрывает зазор под nav (1rem) + запас.
           Слои: контент < маска (z-10) < FAB (z-20) < nav (z-30);
           pointer-events-none — клики доходят до контента/FAB/nav.

@@ -1,15 +1,18 @@
 /**
  * Состояния списков (T7-S2): карточный скелетон загрузки и пустое состояние.
  * Скелетон — тот же компонент, что fallback контентной зоны в Layout
- * (единая разметка, без дублирования), пустое состояние — глиф-иллюстрация,
- * понятный текст и primary-CTA через существующие кнопки проекта.
+ * (единая разметка, без дублирования). S1 «Премиальный нуар»: скелетон
+ * на elevated (.glass solid + hairline), пустое состояние — тот же язык,
+ * что у EmptyBlock (states.tsx): плитка-иконка 48px, заголовок 15/600,
+ * подсказка 13 muted, CTA снаружи. API/экспорты не менялись.
  */
 import type { LucideIcon } from 'lucide-react';
 import type { ReactElement, ReactNode } from 'react';
 
 import { cx } from './controls';
+import { EmptyIconTile } from './states';
 
-/** Скелетон из glass-карточек: shimmer-полоски (.skeleton) + пульсация (.skeleton-card). */
+/** Скелетон из elevated-карточек: shimmer-полоски (.skeleton) + пульсация (.skeleton-card). */
 export function CardSkeleton({
   count = 3,
   label = 'Загрузка…',
@@ -30,7 +33,7 @@ export function CardSkeleton({
   );
 }
 
-/** Пустое состояние списка: глиф в glass-капле, заголовок, объяснение, primary-CTA. */
+/** Пустое состояние списка: глиф в тонированной плитке 48px, заголовок, объяснение, CTA. */
 export function EmptyState({
   icon: Icon,
   title,
@@ -47,14 +50,13 @@ export function EmptyState({
 }): ReactElement {
   return (
     <div className="glass px-4 py-8 text-center">
-      <span
-        aria-hidden="true"
-        className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.06] ring-1 ring-white/10"
-      >
-        <Icon className={cx('h-7 w-7 text-primary-400', iconClass)} />
-      </span>
-      <p className="mt-3 text-sm font-medium text-slate-200">{title}</p>
-      {description ? <p className="mx-auto mt-1 max-w-xs text-xs text-slate-500">{description}</p> : null}
+      <EmptyIconTile>
+        <Icon className={cx('h-6 w-6 text-primary-400', iconClass)} />
+      </EmptyIconTile>
+      <p className="mt-3 text-[15px] font-semibold leading-5 text-ink">{title}</p>
+      {description ? (
+        <p className="mx-auto mt-1 max-w-xs text-[13px] text-ink-muted">{description}</p>
+      ) : null}
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );

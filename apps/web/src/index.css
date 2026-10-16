@@ -91,25 +91,28 @@ body,
 }
 
 /* ============================================================
-   1. AMBIENT BACKGROUND — «КИНО»
-   Роли цвета (T-20261013-004, ревизия 2):
-   - ФОН: нейтральный глубокий графит #0D0A10 (лёгкий фиолетовый
-     подтон, без бордо/розовой заливки на всю страницу)
-   - ДЕКОР: свечения КООЛ-гаммы (индиго/лаванда), розовое — только
-     маленький точечный акцент; панели/стекло нейтральные
-   - ИНТЕРАКТИВ: розовый только на CTA/активных элементах
+   1. AMBIENT BACKGROUND — «ПРЕМИАЛЬНЫЙ НУАР» (S1)
+   Роли цвета (apps/web/artifacts/design-spec.md):
+   - ФОН: вертикальный градиент bg_deep #050507 → bg_base #0A0A0F
+     (сверху глубже, низ — спокойный базовый)
+   - ДЕКОР: мягкие СТАТИЧНЫЕ радиальные свечения (индиго/лаванда
+     сверху, розовый точечный акцент сверху-справа, индиго снизу-слева)
+   - Бесконечные ambient-анимации фона УДАЛЕНЫ (мелькание/дрейф
+     нарушают «сдержанный нуар» Linear/Raycast)
    ============================================================ */
 body {
   margin: 0;
-  background-color: #0D0A10;
+  background-color: #0A0A0F;
   background-image:
     /* Cool violet glow — top center (декор) */
-    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(130, 105, 255, 0.11), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(130, 105, 255, 0.07), transparent 60%),
     /* Rose accent — top right, маленький точечный (не заливает) */
-    radial-gradient(ellipse 45% 30% at 110% -10%, rgba(245, 41, 110, 0.07), transparent 60%),
+    radial-gradient(ellipse 45% 30% at 110% -10%, rgba(245, 41, 110, 0.05), transparent 60%),
     /* Indigo glow — bottom left */
-    radial-gradient(ellipse 60% 40% at -10% 110%, rgba(70, 90, 220, 0.08), transparent 65%);
-  color: #F2F2F7;
+    radial-gradient(ellipse 60% 40% at -10% 110%, rgba(70, 90, 220, 0.05), transparent 65%),
+    /* Base vertical: deep сверху → base снизу */
+    linear-gradient(180deg, #050507 0%, #0A0A0F 55%, #0A0A0F 100%);
+  color: #EDEDF2;
   font-family:
     'Inter Variable',
     'Inter',
@@ -125,53 +128,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Vignette — fixed overlay */
+/* Vignette — fixed overlay (мягче прежнего, чтобы не «давить» края) */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.40) 100%);
 }
 
-/* Ambient drift animation — slow scale/translate on the background gradients */
-@keyframes ambient-drift {
-  0% {
-    background-position: 50% -15%, 110% -10%, -10% 110%;
-    background-size: 70% 45%, 55% 35%, 60% 40%;
-  }
-  50% {
-    background-position: 55% -10%, 105% -5%, -5% 105%;
-    background-size: 75% 50%, 60% 40%, 65% 45%;
-  }
-  100% {
-    background-position: 50% -15%, 110% -10%, -10% 110%;
-    background-size: 70% 45%, 55% 35%, 60% 40%;
-  }
-}
-
-body {
-  animation: ambient-drift 25s ease-in-out infinite alternate;
-}
-
-/* Respect reduced motion — reuse existing guard pattern */
-@media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-  }
-}
+/* S1: ambient-drift keyframes/анимация удалены — фон статичный.
+   Глобальный prefers-reduced-motion guard сохранён внизу файла. */
 
 @layer components {
-  /* Header: учитывает вырез экрана (top inset) и боковые safe-area. */
+  /* Header: учитывает вырез экрана (top inset) и боковые safe-area.
+     S1: стекло ≤24px + hairline strong (спека: стекло только у
+     шапки/таббара/сайдбара/шторок). */
   .app-header {
     padding-top: var(--sat);
     padding-left: var(--sal);
     padding-right: var(--sar);
-    background: rgba(16, 14, 22, 0.78);
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.10);
+    background: rgba(10, 10, 15, 0.72);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   /* Основной контент: отступ под fixed-header, над нижним таб-баром (mobile-first). */
@@ -188,88 +169,39 @@ body {
     padding-top: calc(var(--sat) + 3.5rem);
     padding-bottom: 1rem;
     padding-left: var(--sal);
-    background: rgba(16, 14, 22, 0.78);
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
-    border-right: 0.5px solid rgba(255, 255, 255, 0.10);
+    background: rgba(10, 10, 15, 0.72);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   /* ============================================================
-     2. LIQUID GLASS (iOS 27) — .glass и .glass-strong
+     2. ELEVATED LAYERS — .glass / .glass-strong (S1 нуар)
+     .glass — контентные карточки: SOLID elevated + hairline,
+     БЕЗ backdrop-blur (спека: «стеклянный шум» на контенте запрещён).
+     .glass-strong — только шапка/сайдбар (blur ≤24px в .app-header/.app-sidebar).
+     Gradient hairline ::after-обводки удалены — только чистый hairline rgba.
      ============================================================ */
 
-  /* Base glass — cards, calendar, modals (нейтральное стекло:
-     без розового подтона — розовый только на интерактиве) */
+  /* Base layer — карточки, плитки, модальные панели */
   .glass {
     position: relative;
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border-radius: 32px;
-    /* Mirror highlight top + bottom */
+    background: #101016; /* elev1 */
+    border: 1px solid rgba(255, 255, 255, 0.08); /* hairline */
+    border-radius: 20px; /* карточки 20 */
     box-shadow:
-      0 24px 60px rgba(0, 0, 0, 0.65),
-      0 2px 8px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.50);
-    /* Hairline border — base */
-    border: 1px solid rgba(255, 255, 255, 0.13);
+      0 1px 2px rgba(0, 0, 0, 0.35),
+      0 12px 32px -16px rgba(0, 0, 0, 0.7);
   }
 
-  /* Gradient hairline border via ::after (mask-composite trick) */
-  .glass::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(160deg,
-      rgba(255, 255, 255, 0.38) 0%,
-      rgba(255, 255, 255, 0.06) 35%,
-      rgba(170, 150, 255, 0.20) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-  }
-
-  /* Strong glass — header, tabbar, sidebar */
+  /* Strong glass — header, sidebar (blur задан в .app-header/.app-sidebar) */
   .glass-strong {
     position: relative;
-    background: rgba(16, 14, 22, 0.78);
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
-    border-radius: 32px;
-    box-shadow:
-      0 24px 60px rgba(0, 0, 0, 0.65),
-      0 2px 8px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.50);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .glass-strong::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(160deg,
-      rgba(255, 255, 255, 0.38) 0%,
-      rgba(255, 255, 255, 0.06) 35%,
-      rgba(170, 150, 255, 0.20) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+    background: rgba(10, 10, 15, 0.72);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12); /* hairline strong */
+    box-shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.8);
   }
 
   .press {
@@ -277,8 +209,10 @@ body {
        transform. Прежний `transform: scale(0.97)` на :active ПЕРЕТИРАЛ
        Tailwind `-translate-y-1/2` (оба пишут в transform): кнопка шапки
        прыгала вниз на ~16px, палец попадал на её край → клик терялся
-       («кнопка замка не активна»). scale композируется с transform. */
-    transition: scale 120ms cubic-bezier(0.32, 0.72, 0, 1), opacity 120ms;
+       («кнопка замка не активна»). scale композируется с transform.
+       S1: easing единый нуар cubic-bezier(0.16,1,0.3,1), press 160ms
+       (диапазон спеки 160–320ms), press scale 0.97. */
+    transition: scale 160ms cubic-bezier(0.16, 1, 0.3, 1), opacity 160ms;
   }
 
   .press:active {
@@ -326,13 +260,14 @@ body {
      3. GLOW ACCENTS — «КОНФЕТА»
      ============================================================ */
 
-  /* Intimate gradient CTA — brighter hover, consistent 1.10 */
+  /* Intimate gradient CTA — S1: 135deg #FF4D7E → #A855F7 + мягкий glow
+     rgba(255,77,141,0.35). Hover/active brightness — без прыжка. */
   .grad-intimate {
-    background-image: linear-gradient(135deg, #FF2A5D 0%, #A550D9 100%);
+    background-image: linear-gradient(135deg, #FF4D7E 0%, #A855F7 100%);
     box-shadow:
-      0 12px 32px -8px rgba(245, 41, 110, 0.50),
-      0 4px 14px rgba(165, 80, 217, 0.35);
-    transition: filter 150ms ease; /* hover/active brightness — без прыжка (S2) */
+      0 8px 24px -8px rgba(255, 77, 141, 0.35),
+      0 2px 8px rgba(168, 85, 247, 0.22);
+    transition: filter 160ms cubic-bezier(0.16, 1, 0.3, 1); /* hover/active brightness — без прыжка */
   }
 
   .grad-intimate:hover {
@@ -343,16 +278,51 @@ body {
     filter: brightness(0.95);
   }
 
-  /* Дуотон для полос/баров статистики вместо плоского primary
-     (идея 5, T-20261013-004): rose→violet как в CTA */
+  /* Дуотон для полос/баров статистики — та же нуар-градиента CTA */
   .bar-intimate {
-    background-image: linear-gradient(135deg, #FF2A5D 0%, #A550D9 100%);
-    transition: filter 150ms ease;
+    background-image: linear-gradient(135deg, #FF4D7E 0%, #A855F7 100%);
+    transition: filter 160ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Active tab/icon glow — applied via Layout.tsx className */
   .tab-active-glow {
     filter: drop-shadow(0 0 6px rgba(245, 41, 110, 0.55));
+  }
+
+  /* ============================================================
+     S1 ТИПОГРАФИЧЕСКИЕ КЛАССЫ (рецепты из design-spec.md)
+     Только Inter; никаких font-light/thin в UI.
+     ============================================================ */
+
+  /* Display-число/заголовок: 28px/700, tracking −0.02em, tabular-nums */
+  .type-display {
+    font-size: 28px;
+    line-height: 1.18;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Display крупный: 34px/700 */
+  .type-display-lg {
+    font-size: 34px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Метка/лейбл секции: 12px/500, tracking +0.04em */
+  .type-label {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* Tabular numbers для любых счётчиков/дат */
+  .num {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Brand gradient text — SeeSex in header.
@@ -402,7 +372,7 @@ body {
   }
 
   .stagger > * {
-    animation: card-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: card-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .stagger > *:nth-child(1) { animation-delay: 0ms; }
@@ -459,7 +429,7 @@ body {
   }
 
   .animate-grow-up {
-    animation: grow-up 400ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: grow-up 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   /* Горизонтальный рост баров (RowBars/TypeBars): scaleX от левого края.
@@ -471,7 +441,7 @@ body {
   }
   .animate-grow-x {
     transform-origin: left center;
-    animation: grow-x 400ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: grow-x 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   /* ============================================================
@@ -605,16 +575,17 @@ body {
     }
   }
 
+/* S1: таб-пилюля — noir glass (elevated-полупрозрачный + blur ≤24px),
+   hairline strong. Геометрия/позиционирование — в Layout.tsx. */
 .glass-pill {
-  background: rgba(58, 58, 60, 0.72); /* slate-800 (токен темы) с альфой под макет. */
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-top-color: rgba(255, 255, 255, 0.25);
+  background: rgba(16, 16, 22, 0.82);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.16);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.45),
-    0 2px 8px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* ============================================================
@@ -683,10 +654,10 @@ body {
   }
 }
 .animate-cal-in-left {
-  animation: cal-in-left 190ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: cal-in-left 190ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .animate-cal-in-right {
-  animation: cal-in-right 190ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: cal-in-right 190ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Магическое появление месяца: расфокус → фокус + мягкое увеличение.
@@ -710,7 +681,7 @@ body {
   }
 }
 .animate-cal-magical-in {
-  animation: cal-magical-in 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: cal-magical-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

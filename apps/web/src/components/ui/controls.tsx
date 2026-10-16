@@ -1,10 +1,13 @@
 /**
- * Базовые элементы форм (mobile-first, тема: iOS 27 Liquid Glass dark).
+ * Базовые элементы форм (mobile-first, тема: S1 «Премиальный нуар»).
  * Вынесены сюда, чтобы одинаковые стили не дублировались по всем страницам.
+ * Правила (design-spec.md): контролы — elev2, radius 12, высота 48,
+ * focus ring rose; secondary — elev2 + hairline; primary — градиент CTA + glow.
  */
 import { forwardRef } from 'react';
 import type {
   ButtonHTMLAttributes,
+  ElementType,
   InputHTMLAttributes,
   ReactElement,
   ReactNode,
@@ -12,9 +15,10 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 
+/** Контрол формы: elev2 + hairline, radius 12 (control), высота 48. */
 export const inputClass =
-  'w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-white/[0.08] h-12 px-3 py-2.5 text-left text-[16px] leading-5 text-slate-100 ' +
-  'placeholder:text-slate-500 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ' +
+  'w-full min-w-0 max-w-full rounded-control border border-white/[0.08] bg-elev-2 h-12 px-3 py-2.5 text-left text-[16px] leading-5 text-ink ' +
+  'placeholder:text-ink-dim focus:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,77,141,0.35)] ' +
   'disabled:opacity-50';
 
 export const inputErrorClass = 'border-red-500/70';
@@ -23,23 +27,27 @@ export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(' ');
 }
 
+/**
+ * Карточка — базовый контентный блок (.glass: solid elev1 + hairline, без blur).
+ * `as` — рендер другим тегом (проп опциональный, обратно совместим).
+ */
 export function Card({
   children,
   className,
+  as,
 }: {
   children: ReactNode;
   className?: string;
+  as?: 'div' | 'section' | 'article' | 'aside';
 }): ReactElement {
-  return (
-    <div className={cx('glass p-4', className)}>
-      {children}
-    </div>
-  );
+  const Comp = (as ?? 'div') as ElementType;
+  return <Comp className={cx('glass p-4', className)}>{children}</Comp>;
 }
 
+/** Заголовок секции: метка 12/500 tracking +0.04em (type-label). */
 export function SectionTitle({ children }: { children: ReactNode }): ReactElement {
   return (
-    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+    <h2 className="type-label mb-3 uppercase text-ink-dim">
       {children}
     </h2>
   );
@@ -60,14 +68,14 @@ export function Field({
 }): ReactElement {
   return (
     <div className="mb-4 min-w-0">
-      <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium text-slate-400">
+      <label htmlFor={htmlFor} className="type-label mb-1 block text-ink-muted">
         {label}
       </label>
       {children}
       {error ? (
-        <p className="mt-1 text-xs text-red-400">{error}</p>
+        <p className="mt-1 text-[13px] text-red-400">{error}</p>
       ) : hint ? (
-        <p className="mt-1 text-xs text-slate-500">{hint}</p>
+        <p className="mt-1 text-[13px] text-ink-dim">{hint}</p>
       ) : null}
     </div>
   );
@@ -113,10 +121,13 @@ export const Select = forwardRef<
 type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
+  // primary — градиент CTA 135deg #FF4D7E→#A855F7 + glow (в .grad-intimate)
   primary: 'grad-intimate text-white hover:brightness-110 active:brightness-95',
-  ghost: 'bg-white/[0.06] text-slate-200 hover:bg-white/[0.12] active:bg-white/[0.12]',
+  // secondary — elev2 + hairline, никакого backdrop-blur
+  ghost: 'bg-elev-2 text-ink border border-white/[0.08] hover:bg-elev-3 active:bg-elev-3',
+  // semantic red (iOS) не трогаем
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-600',
-  quiet: 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] active:bg-white/[0.06]',
+  quiet: 'text-ink-muted hover:text-ink hover:bg-white/[0.06] active:bg-white/[0.06]',
 };
 
 export function Button({
@@ -174,5 +185,5 @@ export function ErrorText({ children }: { children: ReactNode }): ReactElement {
 }
 
 export function MutedText({ children }: { children: ReactNode }): ReactElement {
-  return <p className="text-xs text-slate-500">{children}</p>;
+  return <p className="text-[13px] text-ink-muted">{children}</p>;
 }

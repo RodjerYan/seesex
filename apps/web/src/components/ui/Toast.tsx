@@ -52,7 +52,7 @@ export function Toast({
         bottom: 'calc(var(--tabbar-height, 3.75rem) + var(--tabbar-bottom, 1rem) + 8px)',
       }}
     >
-      <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[rgba(28,28,30,0.9)] px-4 py-3 text-sm font-medium text-slate-100 shadow-lg backdrop-blur-md">
+      <div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-elev-3 px-4 py-3 text-[15px] font-medium leading-5 text-ink shadow-[0_12px_32px_-12px_rgba(0,0,0,0.7)]">
         <span
           aria-hidden="true"
           className="h-2.5 w-2.5 shrink-0 rounded-full"

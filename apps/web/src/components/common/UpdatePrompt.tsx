@@ -80,15 +80,15 @@ export function UpdatePrompt(): JSX.Element | null {
       className="fixed left-0 right-0 z-50 px-4 pointer-events-none"
       style={{ bottom: 'var(--fab-bottom-mobile, 5rem)' }}
     >
-      <div className="pointer-events-auto mx-auto max-w-[32.5rem] glass rounded-2xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+      <div className="pointer-events-auto mx-auto max-w-[32.5rem] glass rounded-card overflow-hidden shadow-[0_12px_32px_-12px_rgba(0,0,0,0.7)]">
         <div className="flex items-start justify-between gap-3 p-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <AlertCircle className="h-5 w-5 text-primary-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-100 truncate">
+              <p className="text-[15px] font-semibold leading-5 text-ink truncate">
                 Доступна новая версия приложения
               </p>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
+              <p className="text-[13px] text-ink-muted truncate mt-0.5">
                 Обновите, чтобы получить последние изменения
               </p>
             </div>
@@ -108,7 +108,7 @@ export function UpdatePrompt(): JSX.Element | null {
             <button
               type="button"
               onClick={handleHardReset}
-              className="press px-3 py-2 rounded-xl text-xs text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+              className="press px-3 py-2 rounded-xl text-xs text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               aria-label="Сбросить кэш и перезагрузить"
             >
               Не обновляется? Сбросить кэш
@@ -116,7 +116,7 @@ export function UpdatePrompt(): JSX.Element | null {
             <button
               type="button"
               onClick={handleDismiss}
-              className="press p-2 rounded-xl text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+              className="press p-2 rounded-xl text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               aria-label="Скрыть баннер"
             >
               <X className="h-5 w-5" aria-hidden="true" />
