@@ -36,6 +36,7 @@ export const EVENT_META: Record<string, EventMeta> = {
   MASSAGE: { label: eventTypeLabel('MASSAGE'), Icon: emojiIcon('💆'), color: '#A78BFA' },
   ORAL: { label: eventTypeLabel('ORAL'), Icon: emojiIcon('👄'), color: '#FB7185' },
   ANAL: { label: eventTypeLabel('ANAL'), Icon: emojiIcon('🍑'), color: '#FB923C' },
+  MASTURBATION: { label: eventTypeLabel('MASTURBATION'), Icon: emojiIcon('✊'), color: '#7DD3FC' },
   OTHER: { label: eventTypeLabel('OTHER'), Icon: emojiIcon('🧩'), color: '#FF6BA3' },
   // S8: #6B7280 давал контраст текста чипа ~3:1 на тёмном стекле — поднят
   // до #9CA3AF (gray-400, ≥5.5:1): категорийный серый «отказа» сохранён.

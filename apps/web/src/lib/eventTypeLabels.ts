@@ -12,6 +12,7 @@ export function eventTypeLabel(raw: string): string {
     MASSAGE: 'Массаж',
     ORAL: 'Оральный',
     ANAL: 'Анальный',
+    MASTURBATION: 'Мастурбация',
     OTHER: 'Другое',
     TURNDOWN: 'Отказ',
     REFUSED: 'Отказ',

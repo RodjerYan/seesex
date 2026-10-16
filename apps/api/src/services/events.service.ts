@@ -20,6 +20,7 @@ const KNOWN_EVENT_TYPES = [
   'MASSAGE',
   'ORAL',
   'ANAL',
+  'MASTURBATION',
   'OTHER',
   'CUSTOM',
   'TURNDOWN',
