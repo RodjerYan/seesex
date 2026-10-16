@@ -8,9 +8,9 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { CalendarView } from '../components/calendar/CalendarView';
 import { EventCard } from '../components/events/EventCard';
-import { StatTile } from '../components/statistics/Charts';
-import { Button, Card, SectionTitle } from '../components/ui/controls';
+import { Button } from '../components/ui/controls';
 import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { SectionHeader, StatTile } from '../components/ui/primitives';
 import { ErrorBlock } from '../components/ui/states';
 import { dayKey, formatDate } from '../lib/format';
 import { useEvents, useOverview, type EventsFilter } from '../lib/queries';
@@ -63,10 +63,10 @@ export default function Dashboard(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <header className="mb-4">
-        <h1 className="text-lg font-bold tracking-tight bg-[linear-gradient(95deg,#FFC2D6_0%,#FFFFFF_45%,#E3C9FF_100%)] bg-clip-text text-transparent">
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">
           {greetingFor(now.getHours())}!
         </h1>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-[13px] text-ink-muted">
           {formatDate(now)}, {WEEKDAYS_RU[now.getDay()]}
         </p>
       </header>
@@ -87,20 +87,22 @@ export default function Dashboard(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-              События дня
-            </h2>
-            <p className="text-xs text-slate-500">{formatDate(`${selectedDate}T00:00:00`)}</p>
-          </div>
-          <Link
-            to={`/events?date=${selectedDate}`}
-            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 transition-colors hover:text-primary active:text-primary"
+        <div className="mb-3">
+          <SectionHeader
+            className="!mb-1"
+            action={
+              <Link
+                to={`/events?date=${selectedDate}`}
+                className="flex shrink-0 items-center gap-1 text-[13px] text-primary-400 transition-colors hover:text-primary active:text-primary"
+              >
+                В списке
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            }
           >
-            В списке
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
+            События дня
+          </SectionHeader>
+          <p className="text-[13px] text-ink-muted">{formatDate(`${selectedDate}T00:00:00`)}</p>
         </div>
 
         {dayQuery.isLoading ? (
@@ -129,7 +131,7 @@ export default function Dashboard(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <SectionTitle>Сводка</SectionTitle>
+        <SectionHeader>Сводка</SectionHeader>
         {overviewQuery.isLoading ? (
           <CardSkeleton count={1} label="Загрузка сводки…" />
         ) : overviewQuery.isError ? (
@@ -148,45 +150,44 @@ export default function Dashboard(): ReactElement {
               }
             />
           ) : (
-            <Card>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatTile
-                  label="Событий"
-                  value={String(overviewQuery.data.totalEvents)}
-                  hint="за всё время"
-                />
-                <StatTile
-                  label="Средняя оценка"
-                  value={overviewQuery.data.avgRating === null ? '—' : String(overviewQuery.data.avgRating)}
-                />
-                <StatTile
-                  label="Средняя длительность"
-                  value={
-                    overviewQuery.data.avgDurationMinutes === null
-                      ? '—'
-                      : `${Math.round(overviewQuery.data.avgDurationMinutes)} мин`
-                  }
-                />
-                <StatTile label="Партнёров" value={String(overviewQuery.data.partnersCount)} />
-              </div>
-            </Card>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatTile
+                label="Событий"
+                value={String(overviewQuery.data.totalEvents)}
+                hint="за всё время"
+              />
+              <StatTile
+                label="Средняя оценка"
+                value={overviewQuery.data.avgRating === null ? '—' : String(overviewQuery.data.avgRating)}
+              />
+              <StatTile
+                label="Средняя длительность"
+                value={
+                  overviewQuery.data.avgDurationMinutes === null
+                    ? '—'
+                    : `${Math.round(overviewQuery.data.avgDurationMinutes)} мин`
+                }
+              />
+              <StatTile label="Партнёров" value={String(overviewQuery.data.partnersCount)} />
+            </div>
           )
         ) : null}
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Последние события
-          </h2>
-          <Link
-            to="/events"
-            className="flex shrink-0 items-center gap-1 text-xs text-primary-400 transition-colors hover:text-primary active:text-primary"
-          >
-            Все события
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
-        </div>
+        <SectionHeader
+          action={
+            <Link
+              to="/events"
+              className="flex shrink-0 items-center gap-1 text-[13px] text-primary-400 transition-colors hover:text-primary active:text-primary"
+            >
+              Все события
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          }
+        >
+          Последние события
+        </SectionHeader>
 
         {recentQuery.isLoading ? (
           <CardSkeleton label="Загрузка событий…" />

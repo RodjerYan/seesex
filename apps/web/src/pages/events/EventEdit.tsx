@@ -46,11 +46,11 @@ export default function EventEdit(): ReactElement {
         <Link
           to={`/events/${id ?? ''}`}
           aria-label="Назад к событию"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          className="rounded-full p-2 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">Редактирование</h1>
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Редактирование</h1>
       </div>
 
       <EventForm

@@ -70,7 +70,7 @@ export default function Register(): ReactElement {
   });
 
   return (
-    <div className="flex app-dvh items-center justify-center bg-surface px-4 py-10">
+    <div className="flex app-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <span
@@ -79,10 +79,10 @@ export default function Register(): ReactElement {
           >
             S
           </span>
-          <h1 className="mt-3 text-xl font-bold tracking-tight text-slate-100">
+          <h1 className="mt-3 text-[22px] font-semibold leading-7 text-ink">
             Регистрация
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-[13px] text-ink-muted">
             Новый аккаунт{' '}
             <span className="font-['Great_Vibes'] text-[19px] leading-none tracking-tight brand-gradient">
               SeeSex
@@ -93,7 +93,7 @@ export default function Register(): ReactElement {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="glass p-5"
+          className="glass rounded-card p-5"
         >
           <Field label="Email" htmlFor="reg-email" error={errors.email?.message}>
             <Input
@@ -129,7 +129,7 @@ export default function Register(): ReactElement {
                 type="button"
                 aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-3 text-slate-400 transition-colors hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-3 text-ink-dim transition-colors hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" aria-hidden="true" />
@@ -169,7 +169,7 @@ export default function Register(): ReactElement {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-ink-muted">
           Уже есть аккаунт?{' '}
           <Link to="/login" className="font-medium text-primary-400 hover:text-primary">
             Войти

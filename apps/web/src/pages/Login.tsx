@@ -64,7 +64,7 @@ export default function Login(): ReactElement {
   });
 
   return (
-    <div className="flex app-dvh items-center justify-center bg-surface px-4 py-10">
+    <div className="flex app-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <span
@@ -73,8 +73,8 @@ export default function Login(): ReactElement {
           >
             S
           </span>
-          <h1 className="mt-3 text-xl font-bold tracking-tight text-slate-100">Вход</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="mt-3 text-[22px] font-semibold leading-7 text-ink">Вход</h1>
+          <p className="mt-1 text-[13px] text-ink-muted">
             <span className="font-['Great_Vibes'] text-[19px] leading-none tracking-tight brand-gradient">
               SeeSex
             </span>{' '}
@@ -85,15 +85,15 @@ export default function Login(): ReactElement {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="glass p-5"
+          className="glass rounded-card p-5"
         >
           {state.registered ? (
-            <p className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
+            <p className="mb-4 rounded-control border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
               Аккаунт создан — теперь войдите.
             </p>
           ) : null}
           {state.notice ? (
-            <p className="mb-4 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs text-sky-300">
+            <p className="mb-4 rounded-control border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs text-sky-300">
               {state.notice}
             </p>
           ) : null}
@@ -127,7 +127,7 @@ export default function Login(): ReactElement {
                 type="button"
                 aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-3 text-slate-400 transition-colors hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-3 text-ink-dim transition-colors hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" aria-hidden="true" />
@@ -151,13 +151,13 @@ export default function Login(): ReactElement {
             )}
           </Button>
 
-          <p className="mt-4 flex items-center justify-center gap-1 text-xs text-slate-500">
+          <p className="mt-4 flex items-center justify-center gap-1 text-[13px] text-ink-dim">
             <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
             Данные доступны только вам
           </p>
         </form>
 
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-ink-muted">
           Нет аккаунта?{' '}
           <Link to="/register" className="font-medium text-primary-400 hover:text-primary">
             Зарегистрироваться

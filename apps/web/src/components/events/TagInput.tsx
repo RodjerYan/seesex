@@ -48,7 +48,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
 
   return (
     <div className="mb-4">
-      <p className="mb-1 block text-xs font-medium text-slate-400">{label}</p>
+      <p className="type-label mb-1 block text-ink-muted">{label}</p>
       <div className="flex gap-2">
         <Input
           value={draft}
@@ -61,7 +61,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           type="button"
           onClick={addLocal}
           aria-label={`Добавить: ${label}`}
-          className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-300 transition-colors hover:bg-white/[0.06]"
+          className="shrink-0 rounded-full border border-white/[0.08] bg-elev-2 px-3 text-ink-muted transition-colors hover:bg-elev-3 hover:text-ink"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -72,7 +72,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           {group.saved.map((item) => (
             <span
               key={item.id}
-              className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-white/[0.08] px-2 py-0.5 text-xs text-slate-300"
+              className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-elev-2 px-2 py-0.5 text-xs text-ink-muted"
             >
               {item.name}
               <button
@@ -81,7 +81,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
                 onClick={() =>
                   onChange({ ...group, saved: group.saved.filter((tag) => tag.id !== item.id) })
                 }
-                className="text-slate-500 hover:text-red-400"
+                className="text-ink-dim hover:text-red-400"
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </button>
@@ -91,7 +91,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
             <span
               key={`local-${item}`}
               className={cx(
-                'inline-flex items-center gap-1 rounded-full border border-dashed border-slate-600 px-2 py-0.5 text-xs text-slate-400',
+                'inline-flex items-center gap-1 rounded-full border border-dashed border-white/20 px-2 py-0.5 text-xs text-ink-dim',
               )}
             >
               {item}
@@ -101,7 +101,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
                 onClick={() =>
                   onChange({ ...group, local: group.local.filter((tag) => tag !== item) })
                 }
-                className="text-slate-500 hover:text-red-400"
+                className="text-ink-dim hover:text-red-400"
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </button>
@@ -109,7 +109,7 @@ export function TagInput({ label, placeholder, group, onChange }: TagInputProps)
           ))}
         </div>
       ) : null}
-      <p className="mt-1 text-[11px] text-slate-400">
+      <p className="mt-1 text-[11px] text-ink-dim">
         Пунктирные чипы — локальные: API справочников для этих полей нет, они не сохраняются.
       </p>
     </div>

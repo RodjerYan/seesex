@@ -3,7 +3,8 @@ import { ChevronRight, Fingerprint, FileSpreadsheet, Lock, LogOut, Save } from '
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button, Card, ErrorText, Field, Input, SectionTitle } from '../components/ui/controls';
+import { Button, Card, ErrorText, Field, Input } from '../components/ui/controls';
+import { SectionHeader, ListRow } from '../components/ui/primitives';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { errorMessage } from '../lib/errors';
 import { formatDate } from '../lib/format';
@@ -50,30 +51,30 @@ export default function Settings(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">Настройки</h1>
+        <h1 className="text-[22px] font-semibold leading-7 text-ink">Настройки</h1>
       </div>
 
       <Card className="mb-4">
-        <SectionTitle>Профиль</SectionTitle>
+        <SectionHeader>Профиль</SectionHeader>
         {meQuery.isLoading ? (
           <LoadingBlock label="Загрузка профиля…" />
         ) : meQuery.isError ? (
           <ErrorBlock error={meQuery.error} onRetry={() => void meQuery.refetch()} />
         ) : meQuery.data ? (
           <dl>
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2">
-              <dt className="text-xs text-slate-500">E-mail</dt>
-              <dd className="truncate text-sm text-slate-200">{meQuery.data.email ?? '—'}</dd>
+            <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] py-2">
+              <dt className="type-label text-ink-dim">E-mail</dt>
+              <dd className="truncate text-sm text-ink">{meQuery.data.email ?? '—'}</dd>
             </div>
             <div className="flex items-start justify-between gap-4 py-2">
-              <dt className="text-xs text-slate-500">В сервисе с</dt>
-              <dd className="text-sm text-slate-200">{formatDate(meQuery.data.createdAt)}</dd>
+              <dt className="type-label text-ink-dim">В сервисе с</dt>
+              <dd className="text-sm text-ink">{formatDate(meQuery.data.createdAt)}</dd>
             </div>
           </dl>
         ) : (
           <EmptyBlock title="Профиль недоступен" />
         )}
-        <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-500">
+        <p className="mt-2 flex items-center gap-1 text-[13px] text-ink-dim">
           <Fingerprint className="h-3 w-3" aria-hidden="true" />
           Идентификатор: {meQuery.data?.id ?? '—'}
         </p>
@@ -86,16 +87,15 @@ export default function Settings(): ReactElement {
           <li key={item.to}>
             <Link
               to={item.to}
-              className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors press hover:border-white/10 active:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="glass block rounded-card transition-colors press hover:border-white/[0.12] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="mt-0.5 shrink-0">{item.icon}</span>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-100">{item.title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+              <ListRow
+                leading={item.icon}
+                trailing={<ChevronRight className="h-4 w-4 text-ink-dim" aria-hidden="true" />}
+              >
+                <p className="font-medium">{item.title}</p>
+                <p className="mt-0.5 text-[13px] font-normal leading-4 text-ink-muted">{item.description}</p>
+              </ListRow>
             </Link>
           </li>
         ))}
@@ -158,13 +158,13 @@ function ProfileCard(): ReactElement {
 
   return (
     <Card className="mb-4">
-      <SectionTitle>Никнейм и аватар</SectionTitle>
+      <SectionHeader>Никнейм и аватар</SectionHeader>
       <div className="mb-3 flex items-center gap-3">
         {avatarUrl.trim() ? (
           <img
             src={avatarUrl.trim()}
             alt="Аватар"
-            className="h-12 w-12 rounded-full object-cover ring-1 ring-white/20"
+            className="h-12 w-12 rounded-full object-cover ring-1 ring-white/[0.08]"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
@@ -172,12 +172,12 @@ function ProfileCard(): ReactElement {
         ) : (
           <div
             aria-hidden="true"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08] text-lg font-bold text-slate-300 ring-1 ring-white/20"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-elev-2 text-lg font-bold text-ink ring-1 ring-white/[0.08]"
           >
             {(displayName.trim()[0] ?? '?').toUpperCase()}
           </div>
         )}
-        <p className="min-w-0 truncate text-sm text-slate-300">
+        <p className="min-w-0 truncate text-sm text-ink-muted">
           {displayName.trim() || 'Имя не задано'}
         </p>
       </div>

@@ -157,10 +157,10 @@ export function PartnerForm({
           </Field>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex min-h-[40px] cursor-pointer items-center gap-2.5 py-1 text-[15px] text-ink">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-slate-600 bg-white/[0.08] text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="h-4 w-4 rounded border-white/[0.16] bg-white/[0.08] text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
             checked={isPrimary}
             onChange={(event) => setValue('isPrimary', event.target.checked)}
           />
@@ -188,7 +188,7 @@ export function PartnerForm({
               type="button"
               aria-label="Удалить поле"
               onClick={() => setPairs((current) => current.filter((_, i) => i !== index))}
-              className="shrink-0 rounded-lg border border-slate-700 px-3 text-slate-400 hover:bg-white/[0.06] hover:text-red-400"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-white/[0.08] bg-elev-2 text-ink-muted transition-colors hover:bg-elev-3 hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -198,8 +198,8 @@ export function PartnerForm({
           type="button"
           onClick={() => setPairs((current) => [...current, { key: '', value: '' }])}
           className={cx(
-            'flex items-center gap-1 rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-400',
-            'transition-colors hover:border-primary-400 hover:text-primary-400',
+            'flex min-h-[40px] items-center gap-1.5 rounded-control border border-dashed border-white/[0.16] px-3 py-2 text-[13px] text-ink-muted',
+            'transition-colors hover:border-primary-400 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
           )}
         >
           <Plus className="h-3.5 w-3.5" aria-hidden="true" />
@@ -208,7 +208,7 @@ export function PartnerForm({
       </Card>
 
       {formError ? (
-        <p role="alert" className="mb-3 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+        <p role="alert" className="mb-3 rounded-control border border-red-500/40 bg-red-500/10 px-3 py-2 text-[13px] text-red-400">
           {formError}
         </p>
       ) : null}

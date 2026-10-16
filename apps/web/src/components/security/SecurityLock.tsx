@@ -56,9 +56,9 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
       role="dialog"
       aria-modal="true"
       aria-label="Приложение заблокировано"
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-sm px-6"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0A0F]/85 backdrop-blur-[24px] px-6"
     >
-      <div className="w-full max-w-xs animate-[page-in_280ms_cubic-bezier(0.32,0.72,0,1)]">
+      <div className="w-full max-w-xs animate-[page-in_280ms_cubic-bezier(0.16,1,0.3,1)]">
         <div className="glass p-6 text-center">
           <span
             aria-hidden="true"
@@ -66,8 +66,8 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
           >
             <LockKeyhole className="h-7 w-7" />
           </span>
-          <h1 className="mt-4 text-lg font-bold text-slate-100">Приложение заблокировано</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="mt-4 text-[22px] font-semibold leading-7 text-ink">Приложение заблокировано</h1>
+          <p className="mt-1 text-[13px] text-ink-muted">
             {isPin ? 'Введите PIN, чтобы продолжить' : 'Введите пароль, чтобы продолжить'}
           </p>
 
@@ -82,7 +82,7 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
               aria-label={isPin ? 'PIN' : 'Пароль'}
               value={value}
               invalid={Boolean(error)}
-              className="text-center text-lg tracking-[0.4em]"
+              className="text-center text-xl tabular-nums tracking-[0.4em]"
               onChange={(event) => setValue(event.target.value)}
             />
             {error ? (
@@ -95,7 +95,7 @@ export function SecurityLock({ locked, settings, onUnlock }: SecurityLockProps):
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-slate-400">
+          <p className="mt-6 text-center text-[13px] text-ink-dim">
             Секрет хранится только на этом устройстве (sha-256 в localStorage).
           </p>
         </div>

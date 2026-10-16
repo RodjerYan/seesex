@@ -3,7 +3,8 @@ import { CalendarDays, Plus, Users } from 'lucide-react';
 import { useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
+import { Button, Card, ErrorText, Field, Input } from '../components/ui/controls';
+import { Badge, SectionHeader } from '../components/ui/primitives';
 import { CardSkeleton, EmptyState } from '../components/ui/listStates';
 import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
@@ -68,10 +69,10 @@ export default function GroupCalendarManager(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">
+        <h1 className="text-[22px] font-semibold leading-7 text-ink">
           Групповые календари
         </h1>
-        <p className="text-xs text-slate-500">Общий доступ к событиям по коду приглашения</p>
+        <p className="mt-0.5 text-[13px] text-ink-muted">Общий доступ к событиям по коду приглашения</p>
       </div>
 
       {actionError ? (
@@ -81,7 +82,7 @@ export default function GroupCalendarManager(): ReactElement {
       ) : null}
 
       <Card className="mb-4">
-        <SectionTitle>Создать календарь</SectionTitle>
+        <SectionHeader>Создать календарь</SectionHeader>
         <form onSubmit={onCreate}>
           <Field label="Название *" htmlFor="gcm-name">
             <Input
@@ -99,7 +100,7 @@ export default function GroupCalendarManager(): ReactElement {
       </Card>
 
       <Card className="mb-4">
-        <SectionTitle>Вступить по коду</SectionTitle>
+        <SectionHeader>Вступить по коду</SectionHeader>
         <form onSubmit={onJoin}>
           <Field label="Код приглашения" htmlFor="gcm-code" hint="8 символов из карточки календаря">
             <Input
@@ -117,9 +118,7 @@ export default function GroupCalendarManager(): ReactElement {
         </form>
       </Card>
 
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
-        Мои календари
-      </h2>
+      <SectionHeader className="mt-6">Мои календари</SectionHeader>
 
       {calendarsQuery.isLoading ? (
         <CardSkeleton label="Загрузка календарей…" />
@@ -143,20 +142,23 @@ export default function GroupCalendarManager(): ReactElement {
             <li key={calendar.id}>
               <Link
                 to={`/group-calendars/${calendar.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors press hover:border-white/10 active:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="glass press flex items-center justify-between gap-3 p-4 transition-colors hover:border-white/10 active:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-100">{calendar.name}</p>
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
-                    <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    <span className="min-w-0 truncate">
-                      {calendar.memberCount} участник(ов) · {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} ·{' '}
-                      {formatDate(calendar.createdAt)}
-                    </span>
+                  <p className="truncate text-[15px] font-medium text-ink">{calendar.name}</p>
+                  <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-muted">
+                    <Users className="h-3.5 w-3.5 shrink-0 text-ink-dim" aria-hidden="true" />
+                    <span className="num">{calendar.memberCount} участник(ов)</span>
+                    <span aria-hidden="true">·</span>
+                    <Badge tone={calendar.role === 'OWNER' ? 'violet' : 'sky'}>
+                      {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')}
+                    </Badge>
+                    <span aria-hidden="true">·</span>
+                    <span className="num">{formatDate(calendar.createdAt)}</span>
                   </p>
                 </div>
                 {calendar.inviteCode ? (
-                  <span className="shrink-0 rounded border border-slate-700 px-2 py-1 font-mono text-[11px] text-slate-400">
+                  <span className="num shrink-0 rounded-full bg-elev-2 px-2.5 py-1 font-mono text-[11px] text-ink-muted ring-1 ring-white/[0.08]">
                     {calendar.inviteCode}
                   </span>
                 ) : null}
@@ -166,9 +168,14 @@ export default function GroupCalendarManager(): ReactElement {
         </ul>
       )}
 
-      <Fab label="Создать календарь" onClick={() => document.getElementById('gcm-name')?.focus()}>
+      <button
+        type="button"
+        aria-label="Создать календарь"
+        onClick={() => document.getElementById('gcm-name')?.focus()}
+        className="press fab-mobile grad-intimate flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg shadow-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      >
         <Plus className="h-6 w-6" aria-hidden="true" />
-      </Fab>
+      </button>
     </section>
   );
 }

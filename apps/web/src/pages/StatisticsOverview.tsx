@@ -54,9 +54,9 @@ export function TypeBars({
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="truncate">{label}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-slate-400">{count}</span>
+            <span className="shrink-0 tabular-nums text-ink-muted">{count}</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className="bar-intimate h-full rounded-full animate-grow-x"
               style={{
@@ -121,7 +121,7 @@ export default function StatisticsOverview(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">Статистика</h1>
+        <h1 className="text-[22px] font-semibold text-ink">Статистика</h1>
         <Link
           to="/statistics/custom"
           className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary"
@@ -166,7 +166,7 @@ export default function StatisticsOverview(): ReactElement {
         <>
           <Card className="mb-4">
             <SectionTitle>Ключевые показатели (за всё время)</SectionTitle>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <StatTile label="Событий" value={numberOr(overviewQuery.data.totalEvents, '0')} />
               <StatTile label="Средняя оценка" value={numberOr(overviewQuery.data.avgRating)} />
               <StatTile
@@ -185,7 +185,16 @@ export default function StatisticsOverview(): ReactElement {
                     : `${Math.round(overviewQuery.data.avgHeartRate)} уд/мин`
                 }
               />
-              <StatTile label="Калории" value={`${overviewQuery.data.totalCalories} ккал`} />
+              {/* S3: единица — в hint, значение — число; пустая статистика — «—». */}
+              <StatTile
+                label="Калории"
+                value={
+                  overviewQuery.data.totalEvents > 0
+                    ? String(overviewQuery.data.totalCalories)
+                    : '—'
+                }
+                hint={overviewQuery.data.totalEvents > 0 ? 'ккал' : undefined}
+              />
               <StatTile
                 label="Вишлист"
                 value={`${overviewQuery.data.wishlist.completed}/${overviewQuery.data.wishlist.total}`}
@@ -220,7 +229,7 @@ export default function StatisticsOverview(): ReactElement {
               />
             ) : frequencyQuery.data ? (
               <>
-                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <StatTile label="Всего" value={numberOr(frequencyQuery.data.total, '0')} />
                   <StatTile
                     label="В среднем/мес"
@@ -247,7 +256,7 @@ export default function StatisticsOverview(): ReactElement {
                 {monthItems.length > 0 ? (
                   <ColumnBars items={monthItems} />
                 ) : (
-                  <p className="text-xs text-slate-500">За выбранный период событий нет.</p>
+                  <p className="text-[13px] text-ink-muted">За выбранный период событий нет.</p>
                 )}
               </>
             ) : null}
@@ -264,7 +273,7 @@ export default function StatisticsOverview(): ReactElement {
               />
             ) : ratingsQuery.data ? (
               <>
-                <p className="mb-3 text-xs text-slate-500">
+                <p className="num mb-3 text-[13px] text-ink-muted">
                   Оценено событий: {ratingsQuery.data.ratedEvents}
                   {ratingsQuery.data.avgRating !== null
                     ? ` · средняя оценка ${ratingsQuery.data.avgRating}`
@@ -273,7 +282,7 @@ export default function StatisticsOverview(): ReactElement {
                 {ratingItems.length > 0 ? (
                   <RowBars items={ratingItems} suffix=" шт." />
                 ) : (
-                  <p className="text-xs text-slate-500">Оценок за выбранный период нет.</p>
+                  <p className="text-[13px] text-ink-muted">Оценок за выбранный период нет.</p>
                 )}
               </>
             ) : null}
@@ -286,7 +295,7 @@ export default function StatisticsOverview(): ReactElement {
             ) : partnerItems.length > 0 ? (
               <RowBars items={partnerItems} suffix=" шт." />
             ) : (
-              <p className="text-xs text-slate-500">Нет данных за период.</p>
+              <p className="text-[13px] text-ink-muted">Нет данных за период.</p>
             )}
           </Card>
         </>

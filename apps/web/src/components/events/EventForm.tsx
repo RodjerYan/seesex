@@ -305,7 +305,7 @@ export function EventForm({
         <div
           ref={errorBannerRef}
           role="alert"
-          className="mb-4 scroll-mt-20 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3 text-sm font-medium text-red-300"
+          className="mb-4 scroll-mt-20 rounded-control border border-red-500/40 bg-red-500/15 px-4 py-3 text-sm font-medium text-red-300"
         >
           {formError}
         </div>
@@ -360,7 +360,7 @@ export function EventForm({
                 <option value="turndown">Отказ</option>
               </Select>
               <ChevronDown
-                className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-dim"
                 aria-hidden="true"
               />
             </div>
@@ -402,8 +402,8 @@ export function EventForm({
                     // S3: тактильный отклик на интимный тип — glow по hover/pressed + pop по тапу
                     'sensual-chip press-pop',
                     active
-                      ? 'border-primary-400 bg-primary/20 text-primary-400'
-                      : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',
+                      ? 'border-primary/40 bg-primary/[0.16] text-primary-400'
+                      : 'border-white/[0.08] text-ink-muted hover:bg-white/[0.06]',
                     typeFieldDisabled && 'cursor-not-allowed opacity-50',
                   )}
                 >
@@ -431,7 +431,7 @@ export function EventForm({
                       'inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                       'sensual-chip press-pop',
-                      'border-primary-400 bg-primary/20 text-primary-400',
+                      'border-primary/40 bg-primary/[0.16] text-primary-400',
                       typeFieldDisabled && 'cursor-not-allowed opacity-50',
                     )}
                   >
@@ -488,8 +488,8 @@ export function EventForm({
                     // S8: тап-зона ≥40px (было ~26px); цвета/рамки не менялись.
                     'inline-flex min-h-[40px] items-center justify-center rounded-full border px-3 text-xs transition-colors',
                     active
-                      ? 'border-primary-400 bg-primary/20 text-primary-400'
-                      : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',
+                      ? 'border-primary/40 bg-primary/[0.16] text-primary-400'
+                      : 'border-white/[0.08] text-ink-muted hover:bg-white/[0.06]',
                   )}
                 >
                   {partner.name}
@@ -505,7 +505,7 @@ export function EventForm({
         <SectionTitle>Детали</SectionTitle>
 
         <div className="mb-4">
-          <p className="mb-1 block text-xs font-medium text-slate-400">Оценка</p>
+          <p className="type-label mb-1 block text-ink-muted">Оценка</p>
           <Stars value={rating} onChange={setRating} onClear={() => setRating(null)} size="md" />
         </div>
 

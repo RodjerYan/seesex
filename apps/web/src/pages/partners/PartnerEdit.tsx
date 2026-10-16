@@ -48,11 +48,11 @@ export default function PartnerEdit(): ReactElement {
         <Link
           to={`/partners/${id ?? ''}`}
           aria-label="Назад к партнёру"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">
+        <h1 className="min-w-0 text-[22px] font-semibold leading-7 text-ink">
           Редактирование: {partnerQuery.data.name}
         </h1>
       </div>

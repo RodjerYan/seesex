@@ -94,8 +94,8 @@ export default function PeriodTracker(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">Цикл</h1>
-        <p className="text-xs text-slate-500">
+        <h1 className="text-[22px] font-semibold text-ink">Цикл</h1>
+        <p className="text-[13px] text-ink-muted">
           Журнал хранится в этом устройстве · справа — сводка с сервера по партнёрам
         </p>
       </div>
@@ -106,7 +106,7 @@ export default function PeriodTracker(): ReactElement {
         </div>
       ) : null}
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <StatTile label="Записей" value={String(records.length)} />
         <StatTile
           label="Средний цикл"
@@ -174,26 +174,26 @@ export default function PeriodTracker(): ReactElement {
             description="Отметьте первый день цикла — дальше прогнозы появятся автоматически."
           />
         ) : (
-          <ul className="divide-y divide-white/10">
+          <ul className="divide-y divide-white/[0.08]">
             {records.map((record) => (
               <li key={record.id} className="flex items-start justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-sm text-slate-100">
-                    <CalendarDays className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                  <p className="num flex items-center gap-1.5 text-[15px] leading-5 text-ink">
+                    <CalendarDays className="h-3.5 w-3.5 text-ink-dim" aria-hidden="true" />
                     {formatDate(record.startDate)}
                     {record.endDate ? ` — ${formatDate(record.endDate)}` : ''}
                   </p>
                   {record.notes ? (
-                    <p className="mt-0.5 truncate text-xs text-slate-500">{record.notes}</p>
+                    <p className="mt-0.5 truncate text-[13px] text-ink-muted">{record.notes}</p>
                   ) : null}
-                  <label className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
+                  <label className="mt-1.5 flex items-center gap-2 text-[12px] text-ink-muted">
                     Дата окончания:
                     <input
                       type="date"
                       value={record.endDate ?? ''}
                       min={record.startDate}
                       onChange={(event) => onUpdateEnd(record, event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                      className="rounded-control border border-white/[0.08] bg-elev-2 px-3 py-2 text-[16px] leading-5 text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,77,141,0.35)]"
                     />
                   </label>
                 </div>
@@ -201,7 +201,7 @@ export default function PeriodTracker(): ReactElement {
                   type="button"
                   aria-label="Удалить запись"
                   onClick={() => onDelete(record.id)}
-                  className="shrink-0 rounded-xl p-2 text-slate-400 hover:bg-white/[0.06] hover:text-red-400"
+                  className="press shrink-0 rounded-full p-3 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.06]"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -217,7 +217,7 @@ export default function PeriodTracker(): ReactElement {
           <LoadingBlock label="Загрузка сводки…" />
         ) : statsQuery.data ? (
           <>
-            <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <StatTile label="Записей всего" value={String(statsQuery.data.totalEntries)} />
               <StatTile
                 label="Средний цикл"
@@ -243,7 +243,7 @@ export default function PeriodTracker(): ReactElement {
               />
             </div>
             {statsQuery.data.trackings.length === 0 ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-[13px] text-ink-muted">
                 У партнёров пока нет данных цикла (API хранит их отдельно от этого журнала).
               </p>
             ) : (
@@ -251,15 +251,15 @@ export default function PeriodTracker(): ReactElement {
                 {statsQuery.data.trackings.map((tracking) => (
                   <li
                     key={tracking.partnerId}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-3 py-2 text-xs"
+                    className="flex items-center justify-between gap-3 rounded-tile bg-elev-2 px-3 py-2 text-xs ring-1 ring-white/[0.08]"
                   >
                     <Link
                       to={`/partners/${tracking.partnerId}`}
-                      className="truncate text-slate-200 hover:text-primary-400"
+                      className="truncate text-ink transition-colors hover:text-primary-400"
                     >
                       {partnerName(tracking.partnerId)}
                     </Link>
-                    <span className="shrink-0 text-slate-500">
+                    <span className="num shrink-0 text-ink-muted">
                       {tracking.entriesCount} зап. · цикл{' '}
                       {tracking.averageCycleLength ?? '—'} дн.
                     </span>

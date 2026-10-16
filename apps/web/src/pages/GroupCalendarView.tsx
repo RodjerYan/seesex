@@ -4,7 +4,8 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { EventForm, type EventPayload } from '../components/events/EventForm';
-import { Button, Card, ErrorText, SectionTitle } from '../components/ui/controls';
+import { Button, Card, ErrorText } from '../components/ui/controls';
+import { Badge, ListRow, SectionHeader, StatusPill } from '../components/ui/primitives';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
@@ -21,12 +22,20 @@ import type { CalendarStatus, EventView, GroupCalendarView } from '../types/api'
 import { eventMeta } from '../lib/eventMeta';
 import { STATUS_LABEL } from '../components/events/EventCard';
 
+/**
+ * Метаданные-строка (ListRow): label — .type-label ink-dim uppercase,
+ * значение — tabular-nums справа, разделитель — hairline.
+ * `-mx-4` растягивает строку во всю ширину карточки (компенсирует p-4 Card).
+ */
 function DataRow({ label, value }: { label: string; value: ReactNode }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2 last:border-b-0">
-      <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
-      <dd className="text-right text-sm text-slate-200">{value || '—'}</dd>
-    </div>
+    <ListRow
+      className="-mx-4 border-t border-white/[0.08] first:border-t-0"
+      leading={<span className="type-label uppercase text-ink-dim">{label}</span>}
+      trailing={<span className="num text-[15px] text-ink">{value || '—'}</span>}
+    >
+      {null}
+    </ListRow>
   );
 }
 
@@ -99,7 +108,7 @@ export default function GroupCalendarView(): ReactElement {
         <Link
           to="/group-calendars"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -116,9 +125,10 @@ export default function GroupCalendarView(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <h1 className="text-xl font-bold tracking-tight text-slate-100">{calendar.name}</h1>
-        <p className="mt-1 text-xs text-slate-500">
-          Ваша роль: {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} · создан {formatDate(calendar.createdAt)}
+        <h1 className="min-w-0 text-[22px] font-semibold leading-7 text-ink">{calendar.name}</h1>
+        <p className="mt-1 text-[13px] text-ink-muted">
+          Ваша роль: {tr(GROUP_ROLE_LABEL, calendar.role, 'Участник')} · создан{' '}
+          <span className="num">{formatDate(calendar.createdAt)}</span>
         </p>
       </div>
 
@@ -129,58 +139,63 @@ export default function GroupCalendarView(): ReactElement {
       ) : null}
 
       <Card className="mb-4">
-        <SectionTitle>Доступ</SectionTitle>
-        <dl>
-          <DataRow label="Участников" value={String(calendar.memberCount)} />
-          <DataRow
-            label="Код приглашения"
-            value={calendar.inviteCode ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="font-mono tracking-widest">{calendar.inviteCode}</span>
+        <SectionHeader>Доступ</SectionHeader>
+        <DataRow label="Участников" value={String(calendar.memberCount)} />
+        <DataRow
+          label="Код приглашения"
+          value={
+            calendar.inviteCode ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="num font-mono tracking-widest">{calendar.inviteCode}</span>
                 <button
                   type="button"
                   aria-label="Скопировать код"
                   onClick={() => void copyCode()}
-                  className="rounded p-1 text-slate-400 hover:bg-white/[0.06] hover:text-primary-400"
+                  className="flex h-10 w-10 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
-                  <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Copy className="h-4 w-4" aria-hidden="true" />
                 </button>
-                {copied ? <span className="text-[10px] text-emerald-400">скопирован</span> : null}
+                {copied ? <span className="text-[11px] text-emerald-400">скопирован</span> : null}
               </span>
-            ) : null}
-          />
-        </dl>
+            ) : null
+          }
+        />
 
-        <div className="mt-3">
-          <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="mt-4">
+          <p className="type-label flex items-center gap-1.5 uppercase text-ink-dim">
             <Users className="h-3.5 w-3.5" aria-hidden="true" />
             Участники
           </p>
-          <ul className="space-y-1.5">
-            {calendar.members.map((member) => (
-              <li
+          <ul className="mt-1">
+            {calendar.members.map((member, index) => (
+              <ListRow
                 key={member.id}
-                className="flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs"
+                as="li"
+                className={index > 0 ? '-mx-4 border-t border-white/[0.08]' : '-mx-4'}
+                trailing={
+                  <Badge tone={member.role === 'OWNER' ? 'violet' : 'sky'}>
+                    {tr(GROUP_ROLE_LABEL, member.role, 'Участник')}
+                  </Badge>
+                }
               >
-                <span className="truncate text-slate-300">{member.email ?? member.userId}</span>
-                <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
-                  {tr(GROUP_ROLE_LABEL, member.role, 'Участник')}
-                </span>
-              </li>
+                <span className="block truncate">{member.email ?? member.userId}</span>
+              </ListRow>
             ))}
           </ul>
         </div>
       </Card>
 
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          События группы
-        </h2>
-        <Button variant="ghost" onClick={() => setAdding((value) => !value)}>
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          {adding ? 'Свернуть' : 'Добавить'}
-        </Button>
-      </div>
+      <SectionHeader
+        className="mt-6"
+        action={
+          <Button variant="ghost" onClick={() => setAdding((value) => !value)}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {adding ? 'Свернуть' : 'Добавить'}
+          </Button>
+        }
+      >
+        События группы
+      </SectionHeader>
 
       {adding ? (
         <Card className="mb-4">
@@ -213,12 +228,12 @@ export default function GroupCalendarView(): ReactElement {
               <li key={event.id}>
                 <Link
                   to={`/events/${event.id}`}
-                  className="flex items-center justify-between gap-3 rounded-xl glass p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className="glass flex items-center justify-between gap-3 p-4 transition-colors hover:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {event.title ? (
-                        <p className="truncate text-sm font-medium text-slate-100">{event.title}</p>
+                        <p className="truncate text-[15px] font-medium text-ink">{event.title}</p>
                       ) : null}
                       <span
                         // S3 (review M-02): read-only чип — однократный twinkle при
@@ -234,13 +249,13 @@ export default function GroupCalendarView(): ReactElement {
                         {label}
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                    <p className="num mt-0.5 truncate text-[13px] text-ink-muted">
                       {formatDateTime(event.date)}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
+                  <StatusPill status={event.status}>
                     {STATUS_LABEL[event.status as CalendarStatus] ?? event.status}
-                  </span>
+                  </StatusPill>
                 </Link>
               </li>
             );

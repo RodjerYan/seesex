@@ -1,8 +1,13 @@
 /**
  * Графики без внешних библиотек (чистый CSS/SVG): столбчатые и линейные бары.
  * Решение S5: recharts не подключаем — MVP-статистики хватает CSS-барам.
+ * S1 «Премиальный нуар»: тултип — solid elev3 + hairline (без backdrop-blur),
+ * подписи осей text-ink-dim ≥11px, плитка StatTile — вложенный тайл elev2,
+ * числовые метрики — display/tabular-nums.
  */
 import type { ReactElement } from 'react';
+
+import { cx } from '../ui/controls';
 
 export interface ChartItem {
   label: string;
@@ -43,8 +48,9 @@ export function ColumnBars({
             key={`${item.label}-${index}`}
             className="group relative flex h-full min-w-0 max-w-[48px] flex-1 flex-col justify-end"
           >
-            {/* S8: тултип и подпись оси ≥11px (было 10/9px) — читаемость на мобильном. */}
-            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/[0.08] backdrop-blur-md border border-white/10 px-1.5 py-0.5 text-[11px] text-slate-200 group-hover:block group-active:block">
+            {/* S8: тултип и подпись оси ≥11px (было 10/9px) — читаемость на мобильном.
+                S1: solid elev3 + hairline + тень вместо blur-подложки. */}
+            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/[0.08] bg-elev-3 px-2 py-0.5 text-[11px] text-ink shadow-[0_4px_16px_rgba(0,0,0,0.5)] group-hover:block group-active:block">
               {valueLabel ? valueLabel(item.value) : item.value}
             </span>
             <div
@@ -52,7 +58,7 @@ export function ColumnBars({
               style={{ height: `${Math.max(2, ratio * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint ?? `${item.label}: ${item.value}`}
             />
-            <span className="mt-1 truncate text-center text-[11px] text-slate-400">{item.label}</span>
+            <span className="mt-1 truncate text-center text-[11px] text-ink-dim">{item.label}</span>
           </div>
         );
       })}
@@ -68,13 +74,13 @@ export function RowBars({ items, suffix }: { items: ChartItem[]; suffix?: string
       {items.map((item, index) => (
         <li key={`${item.label}-${index}`}>
           <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
-            <span className="truncate text-slate-300">{item.label}</span>
-            <span className="shrink-0 tabular-nums text-slate-400">
+            <span className="truncate text-ink-muted">{item.label}</span>
+            <span className="shrink-0 tabular-nums text-ink">
               {item.value}
               {suffix ?? ''}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className="bar-intimate h-full rounded-full animate-grow-x"
               style={{ width: `${Math.max(3, (item.value / max) * 100)}%`, animationDelay: `${index * 40}ms` }}
@@ -87,7 +93,11 @@ export function RowBars({ items, suffix }: { items: ChartItem[]; suffix?: string
   );
 }
 
-/** Плитка KPI. */
+/**
+ * Плитка KPI (вложенный тайл: elev2 + hairline, радиус 16), число — display/tabular-nums.
+ * Пустое значение («—») — приглушённый прочерк + подпись «нет данных»;
+ * длинные значения (диапазоны дат) не влезают в display-кегль — компактный кегль.
+ */
 export function StatTile({
   label,
   value,
@@ -97,12 +107,22 @@ export function StatTile({
   value: string;
   hint?: string;
 }): ReactElement {
+  const empty = value === '' || value === '—';
+  // «12 сентября 2026 — 16 октября 2026» display-кеглем в узкой плитке
+  // переносится на 4 строки и «ломает» карточку — переводим в 15px.
+  const compact = !empty && value.length > 12;
+  const valueClass = empty
+    ? 'type-display text-ink-dim'
+    : compact
+      ? 'text-[15px] font-semibold leading-5 tabular-nums text-ink'
+      : 'type-display text-ink';
   return (
-    // !rounded-2xl — перебивает border-radius:32px из .glass (плитка не должна быть pill)
-    <div className="glass !rounded-2xl p-2.5 flex flex-col gap-1">
-      <p className="text-[11px] uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="text-lg font-semibold tabular-nums text-slate-100 -mt-0.5">{value}</p>
-      {hint ? <p className="text-[11px] text-slate-400">{hint}</p> : null}
+    <div className="rounded-tile bg-elev-2 p-3 ring-1 ring-white/[0.08]">
+      <p className={cx('break-words', valueClass)}>{value}</p>
+      <p className="type-label mt-1 text-ink-dim">{label}</p>
+      {hint || empty ? (
+        <p className="mt-1 text-[13px] text-ink-muted">{hint ?? 'нет данных'}</p>
+      ) : null}
     </div>
   );
 }

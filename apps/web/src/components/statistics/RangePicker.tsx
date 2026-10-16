@@ -1,12 +1,16 @@
 /**
  * Выбор периода для статистики: пресеты (всё время/30/90/365 дней) + свои даты.
  * Общий для StatisticsOverview и StatisticsCustom.
+ * S1 «Премиальный нуар»: активный пресет — rose-пилюля (primary tint + ring),
+ * неактивные — ghost (elev2 + hairline); панель своих дат — Card-слой
+ * (elev1 + hairline), поля — Field/Input. Логика выбора (preset/from/to,
+ * min/max, onChange) не меняется.
  */
 import { type ReactElement } from 'react';
 
 import { MS_PER_DAY } from '../../lib/format';
 import type { StatsRange } from '../../lib/queries';
-import { cx } from '../ui/controls';
+import { cx, Field, Input } from '../ui/controls';
 
 export type RangePreset = 'all' | '30' | '90' | '365' | 'custom';
 
@@ -65,11 +69,13 @@ export function RangePicker({
             type="button"
             onClick={() => onChange({ ...value, preset: preset.value })}
             className={cx(
-              // S8: тап-зона ≥40px (было ~26px); цвета/рамки пресетов не менялись.
-              'inline-flex min-h-[40px] items-center justify-center rounded-full border px-3 text-xs transition-colors',
+              // S8: тап-зона ≥40px сохранена. На мобильном чипы делят строку
+              // пополам, «Свои даты» растягивается на всю строку — без кривой
+              // одиночной пилюли в углу; на sm+ — компактные по контенту.
+              'inline-flex min-h-[40px] grow basis-[calc(50%_-_0.25rem)] items-center justify-center whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors sm:grow-0 sm:basis-auto',
               value.preset === preset.value
-                ? 'border-primary-400 bg-primary/10 text-primary-400'
-                : 'border-slate-700 text-slate-400 hover:border-slate-600',
+                ? 'bg-primary/[0.16] text-primary-400 ring-1 ring-inset ring-primary/30'
+                : 'bg-elev-2 text-ink-muted ring-1 ring-inset ring-white/[0.08] hover:bg-elev-3 hover:text-ink',
             )}
           >
             {preset.label}
@@ -78,27 +84,31 @@ export function RangePicker({
       </div>
 
       {value.preset === 'custom' ? (
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className="mb-1 block text-xs text-slate-400">С</span>
-            <input
-              type="date"
-              value={value.from}
-              max={value.to || undefined}
-              onChange={(event) => onChange({ ...value, from: event.target.value })}
-              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:border-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs text-slate-400">По</span>
-            <input
-              type="date"
-              value={value.to}
-              min={value.from || undefined}
-              onChange={(event) => onChange({ ...value, to: event.target.value })}
-              className="w-full rounded-lg border border-slate-700 bg-white/[0.08] px-3 py-2 text-[16px] leading-5 text-slate-100 focus:border-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-            />
-          </label>
+        <div className="glass mt-3 rounded-tile p-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="-mb-4">
+              <Field label="С" htmlFor="stats-range-from">
+                <Input
+                  id="stats-range-from"
+                  type="date"
+                  value={value.from}
+                  max={value.to || undefined}
+                  onChange={(event) => onChange({ ...value, from: event.target.value })}
+                />
+              </Field>
+            </div>
+            <div className="-mb-4">
+              <Field label="По" htmlFor="stats-range-to">
+                <Input
+                  id="stats-range-to"
+                  type="date"
+                  value={value.to}
+                  min={value.from || undefined}
+                  onChange={(event) => onChange({ ...value, to: event.target.value })}
+                />
+              </Field>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

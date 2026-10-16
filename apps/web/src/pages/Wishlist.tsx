@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactElement } from 'react';
 
 import { Button, Card, ErrorText, Fab, Field, Input, SectionTitle } from '../components/ui/controls';
 import { CardSkeleton, EmptyState } from '../components/ui/listStates';
+import { Badge } from '../components/ui/primitives';
 import { ErrorBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
@@ -88,12 +89,12 @@ export default function Wishlist(): ReactElement {
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-slate-100">Вишлист</h1>
-          <p className="text-xs text-slate-500">
+          <h1 className="text-[22px] font-semibold text-ink">Вишлист</h1>
+          <p className="num text-[13px] text-ink-muted">
             {all.length > 0 ? `Выполнено ${completed} из ${all.length}` : 'Пока пусто'}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className="flex items-center gap-2 text-[13px] text-ink-muted">
           <input
             type="checkbox"
             className="h-4 w-4 rounded border-white/10 bg-white/[0.06] text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
@@ -168,25 +169,28 @@ export default function Wishlist(): ReactElement {
           {entries.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-center justify-between gap-3 glass px-3 py-2.5 transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20"
+              className="glass flex items-center justify-between gap-3 rounded-card px-3.5 py-3 transition-colors press hover:ring-1 hover:ring-white/[0.12] active:ring-1 active:ring-white/20"
             >
               <div className="min-w-0">
                 <p
                   className={
                     entry.isCompleted
-                      ? 'truncate text-sm font-medium text-slate-500 line-through'
-                      : 'truncate text-sm font-medium text-slate-100'
+                      ? 'truncate text-[15px] font-medium leading-5 text-ink-dim line-through'
+                      : 'truncate text-[15px] font-medium leading-5 text-ink'
                   }
                 >
                   {entryLabel(entry)}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] text-slate-500">
-                  {entryCategory(entry)} · добавлено{' '}
-                  {formatDate(entry.createdAt)}
-                  {entry.isCompleted && entry.completedAt
-                    ? ` · выполнено ${formatDate(entry.completedAt)}`
-                    : ''}
+                <p className="num mt-0.5 truncate text-[13px] text-ink-muted">
+                  {entryCategory(entry)} · добавлено {formatDate(entry.createdAt)}
                 </p>
+                {entry.isCompleted ? (
+                  <p className="mt-1.5">
+                    <Badge tone="emerald">
+                      выполнено{entry.completedAt ? ` ${formatDate(entry.completedAt)}` : ''}
+                    </Badge>
+                  </p>
+                ) : null}
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <button
@@ -195,7 +199,7 @@ export default function Wishlist(): ReactElement {
                   title={entry.isCompleted ? 'Вернуть в планы' : 'Отметить выполненным'}
                   onClick={() => toggle.mutate(entry)}
                   disabled={toggle.isPending}
-                  className="press press-heart rounded-lg p-2 transition-colors hover:bg-white/[0.06] hover:text-emerald-400"
+                  className="press press-heart rounded-full p-3 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-emerald-400 active:bg-white/[0.06]"
                 >
                   <Check className="press-heart-icon h-4 w-4" aria-hidden="true" />
                 </button>
@@ -206,7 +210,7 @@ export default function Wishlist(): ReactElement {
                   onClick={() => {
                     if (window.confirm('Удалить запись из вишлиста?')) remove.mutate(entry.id);
                   }}
-                  className="press rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-red-400"
+                  className="press rounded-full p-3 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.06]"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>

@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { Stars } from '../../components/ui/Stars';
 import { Button, Card, ErrorText, SectionTitle } from '../../components/ui/controls';
+import { StatusPill } from '../../components/ui/primitives';
 import { ErrorBlock, LoadingBlock } from '../../components/ui/states';
 import { api } from '../../lib/api';
 import { formatDate, formatDateTime, formatDuration, formatTime } from '../../lib/format';
@@ -20,15 +21,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 function Row({ label, children }: { label: string; children: ReactNode }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-2 last:border-b-0">
-      <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
-      <dd className="text-right text-sm text-slate-200">{children}</dd>
+    <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] py-2.5 last:border-b-0">
+      <dt className="shrink-0 text-[13px] text-ink-dim">{label}</dt>
+      <dd className="min-w-0 text-right text-[15px] leading-5 text-ink">{children}</dd>
     </div>
   );
 }
 
 function NamedList({ items, to }: { items: { id: string; name: string }[]; to?: (id: string) => string }) {
-  if (items.length === 0) return <span className="text-xs text-slate-500">—</span>;
+  if (items.length === 0) return <span className="text-[13px] text-ink-dim">—</span>;
   return (
     <span className="flex flex-wrap justify-end gap-1.5">
       {items.map((item) =>
@@ -36,12 +37,12 @@ function NamedList({ items, to }: { items: { id: string; name: string }[]; to?: 
           <Link
             key={item.id}
             to={to(item.id)}
-            className="rounded-full border border-slate-700 px-2 py-0.5 text-xs text-slate-300 hover:border-primary-400 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="rounded-full border border-white/[0.08] bg-elev-2 px-2.5 py-1 text-xs text-ink-muted hover:border-primary/40 hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
             {item.name}
           </Link>
         ) : (
-          <span key={item.id} className="rounded-full border border-slate-700 px-2 py-0.5 text-xs text-slate-300">
+          <span key={item.id} className="rounded-full border border-white/[0.08] bg-elev-2 px-2.5 py-1 text-xs text-ink-muted">
             {item.name}
           </span>
         ),
@@ -99,14 +100,14 @@ export default function EventDetail(): ReactElement {
         <Link
           to="/events"
           aria-label="Назад к списку"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          className="rounded-full p-2 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
         <div className="flex gap-2">
           <Link
             to={`/events/${item.id}/edit`}
-            className="flex items-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="inline-flex h-12 items-center gap-1.5 rounded-full border border-white/[0.08] bg-elev-2 px-4 text-sm text-ink transition-colors hover:bg-elev-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Pencil className="h-4 w-4" aria-hidden="true" />
             Изменить
@@ -119,14 +120,14 @@ export default function EventDetail(): ReactElement {
       </div>
 
       <div className="mb-4">
-        <p className="text-xs uppercase tracking-wide text-slate-500">
+        <StatusPill status={item.status}>
           {STATUS_LABEL[item.status] ?? item.status}
-        </p>
-        <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-100">
+        </StatusPill>
+        <h1 className="mt-2 text-[22px] font-semibold tracking-tight text-ink">
           {item.title || label}
-          {item.isCustomType ? <span className="ml-2 text-sm font-normal text-slate-500">(свой тип)</span> : null}
+          {item.isCustomType ? <span className="ml-2 text-[13px] font-normal text-ink-dim">(свой тип)</span> : null}
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="num mt-1 text-[13px] text-ink-muted">
           {formatDate(item.date)} · {formatTime(date)}
         </p>
       </div>
@@ -169,7 +170,7 @@ export default function EventDetail(): ReactElement {
                 {label}
               </span>
               {item.isCustomType && item.eventType.trim() !== label ? (
-                <span className="text-xs text-slate-500">{item.eventType}</span>
+                <span className="text-xs text-ink-dim">{item.eventType}</span>
               ) : null}
             </span>
           </Row>
@@ -208,7 +209,7 @@ export default function EventDetail(): ReactElement {
       {item.notes ? (
         <Card>
           <SectionTitle>Заметки</SectionTitle>
-          <p className="whitespace-pre-wrap text-sm text-slate-300">{item.notes}</p>
+          <p className="whitespace-pre-wrap text-[15px] leading-6 text-ink">{item.notes}</p>
         </Card>
       ) : null}
     </section>

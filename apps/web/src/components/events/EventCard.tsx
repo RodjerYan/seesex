@@ -5,20 +5,14 @@ import { Link } from 'react-router-dom';
 
 import { formatDate, formatDuration, formatTime } from '../../lib/format';
 import type { CalendarStatus, EventView } from '../../types/api';
-import { cx } from '../ui/controls';
 import { eventMeta } from '../../lib/eventMeta';
+import { StatusPill } from '../ui/primitives';
 import { Stars } from '../ui/Stars';
 
 export const STATUS_LABEL: Record<CalendarStatus, string> = {
   occurred: 'Состоялось',
   planned: 'Запланировано',
   turndown: 'Отказ',
-};
-
-const STATUS_CLASS: Record<CalendarStatus, string> = {
-  occurred: 'border-red-500/40 bg-red-500/10 text-red-300',
-  planned: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
-  turndown: 'border-white/10 bg-white/[0.06] text-slate-400',
 };
 
 interface EventCardProps {
@@ -36,16 +30,16 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
   const partnerNames = event.partners.map((partner) => partner.name);
 
   return (
-    <div className={cx('glass transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20')}>
+    <div className="glass transition-colors press hover:ring-1 hover:ring-white/10 active:ring-1 active:ring-white/20">
       <Link to={`/events/${event.id}`} className="block p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-100">
+            <p className="num text-sm font-medium text-ink">
               {formatDate(event.date)}
-              <span className="ml-2 text-xs font-normal text-slate-500">{formatTime(date)}</span>
+              <span className="ml-2 text-xs font-normal text-ink-muted">{formatTime(date)}</span>
             </p>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-              {event.title ? <p className="truncate text-xs text-slate-400">{event.title}</p> : null}
+              {event.title ? <p className="truncate text-xs text-ink-muted">{event.title}</p> : null}
               {types.map((type) => {
                 const { Icon, color, label } = eventMeta(type);
                 return (
@@ -67,24 +61,19 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
                   </span>
                 );
               })}
-              {types.length > 3 && <span className="text-[11px] text-slate-500">+{types.length - 3}</span>}
-              {event.isCustomType ? <span className="text-[11px] text-slate-500">свой тип</span> : null}
+              {types.length > 3 && <span className="text-[11px] text-ink-dim">+{types.length - 3}</span>}
+              {event.isCustomType ? <span className="text-[11px] text-ink-dim">свой тип</span> : null}
             </div>
           </div>
-          <span
-            className={cx(
-              'shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-              STATUS_CLASS[event.status],
-            )}
-          >
+          <StatusPill status={event.status} className="shrink-0">
             {STATUS_LABEL[event.status]}
-          </span>
+          </StatusPill>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           <Stars value={event.rating} />
           {event.duration !== null ? (
-            <span className="flex items-center gap-1 text-xs text-slate-500">
+            <span className="num flex items-center gap-1 text-xs text-ink-muted">
               <Clock className="h-3.5 w-3.5" aria-hidden="true" />
               {formatDuration(event.duration)}
             </span>
@@ -92,7 +81,7 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
         </div>
 
         {partnerNames.length > 0 ? (
-          <p className="mt-2 truncate text-xs text-slate-400">Партнёры: {partnerNames.join(', ')}</p>
+          <p className="mt-2 truncate text-xs text-ink-muted">Партнёры: {partnerNames.join(', ')}</p>
         ) : null}
         {showGroupName && event.groupCalendar ? (
           <p className="mt-1 text-xs text-primary-400">Групповой календарь: {event.groupCalendar.name}</p>
@@ -100,13 +89,13 @@ export function EventCard({ event, onDelete, showGroupName, isDeleting }: EventC
       </Link>
 
       {onDelete ? (
-        <div className="flex justify-end border-t border-white/10 px-3 py-2">
+        <div className="flex justify-end border-t border-white/[0.08] px-3 py-2">
           <button
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
             aria-label="Удалить событие"
-            className="press flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.12] active:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="press flex min-h-[40px] items-center gap-1 rounded-full px-3 py-1.5 text-xs text-ink-dim transition-colors hover:bg-white/[0.06] hover:text-red-400 active:bg-white/[0.12] active:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeleting ? (
               <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" aria-hidden="true">

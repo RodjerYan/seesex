@@ -9,7 +9,7 @@ import {
   rangeToStatsRange,
   type RangeState,
 } from '../components/statistics/RangePicker';
-import { Card, SectionTitle } from '../components/ui/controls';
+import { Card, cx, SectionTitle } from '../components/ui/controls';
 import { ErrorBlock, LoadingBlock } from '../components/ui/states';
 import { formatDate } from '../lib/format';
 import { useCustomStats, useGroupCalendars } from '../lib/queries';
@@ -40,27 +40,25 @@ export default function StatisticsCustom(): ReactElement {
         <Link
           to="/statistics"
           aria-label="Назад к статистике"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          className="press rounded-full p-2.5 text-ink-muted transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">
-          Расширенная статистика
-        </h1>
+        <h1 className="text-[22px] font-semibold text-ink">Расширенная статистика</h1>
       </div>
 
       <RangePicker value={range} onChange={setRange} />
 
       <Card className="mb-4">
         <SectionTitle>Групповые календари</SectionTitle>
-        <p className="mb-2 text-xs text-slate-500">
+        <p className="mb-2 text-[13px] text-ink-muted">
           Выберите группы — попадут только их события (включая чужие, если это общий календарь).
           Ничего не выбрано — считаются только ваши события.
         </p>
         {calendarsQuery.isLoading ? (
           <LoadingBlock label="Загрузка календарей…" />
         ) : (calendarsQuery.data ?? []).length === 0 ? (
-          <p className="text-xs text-slate-500">Групповых календарей пока нет.</p>
+          <p className="text-[13px] text-ink-muted">Групповых календарей пока нет.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {(calendarsQuery.data ?? []).map((calendar) => {
@@ -70,11 +68,13 @@ export default function StatisticsCustom(): ReactElement {
                   key={calendar.id}
                   type="button"
                   onClick={() => toggleGroup(calendar.id)}
-                  className={
+                  className={cx(
+                    // Тап-зона ≥40px; активный — rose-пилюля, неактивный — ghost (elev2 + hairline).
+                    'rounded-full px-3.5 py-2.5 text-[13px] font-medium transition-colors',
                     active
-                      ? 'rounded-full border border-primary-400 bg-primary/10 px-3 py-1 text-xs text-primary-400'
-                      : 'rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400'
-                  }
+                      ? 'bg-primary/[0.16] text-primary-400 ring-1 ring-inset ring-primary/30'
+                      : 'bg-elev-2 text-ink-muted ring-1 ring-inset ring-white/[0.08] hover:bg-elev-3 hover:text-ink',
+                  )}
                 >
                   {calendar.name}
                 </button>
@@ -91,7 +91,7 @@ export default function StatisticsCustom(): ReactElement {
       ) : statsQuery.data ? (
         <Card>
           <SectionTitle>Результат</SectionTitle>
-          <p className="mb-3 text-xs text-slate-500">
+          <p className="num mb-3 text-[13px] text-ink-muted">
             Период:{' '}
             {statsQuery.data.range.from ? formatDate(statsQuery.data.range.from) : 'начало'} —{' '}
             {statsQuery.data.range.to ? formatDate(statsQuery.data.range.to) : 'сегодня'}
@@ -100,7 +100,7 @@ export default function StatisticsCustom(): ReactElement {
               : ''}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <StatTile label="Событий" value={String(statsQuery.data.totalEvents)} />
             <StatTile
               label="Средняя оценка"
@@ -114,7 +114,12 @@ export default function StatisticsCustom(): ReactElement {
                   : `${Math.round(statsQuery.data.avgDurationMinutes)} мин`
               }
             />
-            <StatTile label="Калории" value={`${statsQuery.data.totalCalories} ккал`} />
+            {/* S3: единица — в hint, значение — число; пустая статистика — «—». */}
+            <StatTile
+              label="Калории"
+              value={statsQuery.data.totalEvents > 0 ? String(statsQuery.data.totalCalories) : '—'}
+              hint={statsQuery.data.totalEvents > 0 ? 'ккал' : undefined}
+            />
           </div>
 
           {statsQuery.data.eventsByType.length > 0 ? (
@@ -123,7 +128,7 @@ export default function StatisticsCustom(): ReactElement {
               <TypeBars items={statsQuery.data.eventsByType} />
             </div>
           ) : (
-            <p className="mt-3 text-xs text-slate-500">За выбранный период событий нет.</p>
+            <p className="mt-3 text-[13px] text-ink-muted">За выбранный период событий нет.</p>
           )}
         </Card>
       ) : null}

@@ -104,7 +104,7 @@ export default function TwoFactor(): ReactElement {
             autoComplete="one-time-code"
             placeholder="123456"
             maxLength={6}
-            className="text-center text-xl tracking-[0.5em]"
+            className="text-center text-2xl tabular-nums tracking-[0.5em]"
             invalid={Boolean(errors.code)}
             {...register('code')}
           />
@@ -120,7 +120,7 @@ export default function TwoFactor(): ReactElement {
 
       <Link
         to="/login"
-        className="mt-4 flex items-center justify-center gap-1 text-sm text-slate-400 hover:text-slate-200"
+        className="mt-4 flex items-center justify-center gap-1 text-sm text-ink-muted hover:text-ink"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Другой аккаунт
@@ -131,7 +131,7 @@ export default function TwoFactor(): ReactElement {
 
 function AuthShell({ title, children }: { title: string; children: ReactNode }): ReactElement {
   return (
-    <div className="flex app-dvh items-center justify-center bg-surface px-4 py-10">
+    <div className="flex app-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <span
@@ -140,10 +140,10 @@ function AuthShell({ title, children }: { title: string; children: ReactNode }):
           >
             S
           </span>
-          <h1 className="mt-3 text-xl font-bold tracking-tight text-slate-100">{title}</h1>
-          <p className="mt-1 text-sm text-slate-500">Введите 6-значный код</p>
+          <h1 className="mt-3 text-[22px] font-semibold leading-7 text-ink">{title}</h1>
+          <p className="mt-1 text-[13px] text-ink-muted">Введите 6-значный код</p>
         </div>
-        <div className="glass p-5">{children}</div>
+        <div className="glass rounded-card p-5">{children}</div>
       </div>
     </div>
   );

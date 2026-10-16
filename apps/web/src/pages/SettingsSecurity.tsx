@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button, Card, ErrorText, Field, Input, SectionTitle } from '../components/ui/controls';
+import { Badge } from '../components/ui/primitives';
 import { LoadingBlock } from '../components/ui/states';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/errors';
@@ -61,7 +62,7 @@ export default function SettingsSecurity(): ReactElement {
   return (
     <section className="px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <h1 className="text-lg font-bold tracking-tight text-slate-100">Безопасность</h1>
+        <h1 className="text-[22px] font-semibold leading-7 text-ink">Безопасность</h1>
       </div>
 
       <AppLockCard />
@@ -134,7 +135,7 @@ function AppLockCard(): ReactElement {
   return (
     <Card className="mb-4">
       <SectionTitle>Блокировка приложения</SectionTitle>
-      <p className="mb-3 text-sm text-slate-400">
+      <p className="mb-3 text-[15px] leading-5 text-ink-muted">
         {hasSecret
           ? `Секрет задан (${settings.lockMethod === 'PIN' ? 'PIN' : 'пароль'}), автоблокировка через ${settings.autoLockTimeout} с неактивности.`
           : 'Защитите приложение PIN-кодом или паролем — экран блокировки появится при входе и после неактивности.'}
@@ -148,10 +149,10 @@ function AppLockCard(): ReactElement {
               type="button"
               role="radio"
               aria-checked={method === m}
-              className={`press flex-1 rounded-xl border px-3 py-2 text-sm transition-colors ${
+              className={`press flex-1 rounded-control border px-3 py-2.5 text-sm transition-colors ${
                 method === m
-                  ? 'border-primary/60 bg-primary/15 text-slate-100'
-                  : 'border-white/10 bg-white/[0.04] text-slate-400 hover:text-slate-200'
+                  ? 'border-transparent bg-primary/[0.16] text-primary-400 ring-1 ring-inset ring-primary/30'
+                  : 'border-white/[0.08] bg-elev-2 text-ink-muted hover:text-ink'
               }`}
               onClick={() => {
                 setMethod(m);
@@ -198,7 +199,7 @@ function AppLockCard(): ReactElement {
       <Field label="Автоблокировка" htmlFor="lock-timeout">
         <select
           id="lock-timeout"
-          className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-200 focus:border-primary/50 focus:outline-none"
+          className="w-full rounded-control border border-white/[0.08] bg-elev-2 h-12 px-3 text-left text-[16px] leading-5 text-ink focus:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,77,141,0.35)]"
           value={timeoutSec}
           onChange={(e) => {
             setTimeoutSec(Number(e.target.value));
@@ -396,9 +397,12 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
 
       {hasTotp && !setupToken ? (
         <>
-          <p className="mb-3 flex items-center gap-2 text-sm text-emerald-400">
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            2FA включена — при входе нужен код из аутентификатора.
+          <p className="mb-3 flex flex-wrap items-center gap-2 text-[15px] leading-5 text-ink-muted">
+            <Badge tone="emerald">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              2FA включена
+            </Badge>
+            <span>— при входе нужен код из аутентификатора.</span>
           </p>
           {!disableOpen ? (
             <Button variant="ghost" className="w-full" onClick={() => setDisableOpen(true)}>
@@ -430,7 +434,7 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
         </>
       ) : setupToken ? (
         <>
-          <p className="mb-3 text-sm text-slate-400">
+          <p className="mb-3 text-[15px] leading-5 text-ink-muted">
             Откройте аутентификатор (Google Authenticator, 1Password и т.п.), отсканируйте QR-код
             и введите 6-значный код.
           </p>
@@ -447,8 +451,8 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
           </div>
           {setup.data ? (
             <details className="mb-3">
-              <summary className="cursor-pointer text-xs text-slate-500">Код не сканируется? Введите ключ вручную</summary>
-              <p className="mt-2 break-all rounded-lg bg-black/30 p-2 font-mono text-xs text-slate-300">
+              <summary className="cursor-pointer text-[13px] text-ink-dim">Код не сканируется? Введите ключ вручную</summary>
+              <p className="mt-2 break-all rounded-tile bg-elev-2 p-2 font-mono text-xs text-ink-muted">
                 {setup.data.secret}
               </p>
             </details>
@@ -461,7 +465,7 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
                 autoComplete="one-time-code"
                 placeholder="123456"
                 maxLength={6}
-                className="text-center text-xl tracking-[0.5em]"
+                className="text-center text-xl tabular-nums tracking-[0.5em]"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />
@@ -488,7 +492,7 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
         </>
       ) : (
         <>
-          <p className="mb-3 text-sm text-slate-400">
+          <p className="mb-3 text-[15px] leading-5 text-ink-muted">
             При входе дополнительно потребуется 6-значный код из приложения-аутентификатора.
           </p>
           {setup.isError ? <ErrorText>{errorMessage(setup.error)}</ErrorText> : null}
@@ -519,20 +523,20 @@ function SessionsCard(): ReactElement {
           {(sessionsQuery.data ?? []).map((session: SessionView) => (
             <li
               key={session.id}
-              className="flex items-start justify-between gap-3 rounded-xl border border-white/10 p-3"
+              className="flex items-start justify-between gap-3 rounded-tile bg-elev-2 p-3 ring-1 ring-inset ring-white/[0.08]"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm text-slate-200">
+                <p className="truncate text-[15px] leading-5 text-ink">
                   {session.userAgent ?? 'Неизвестное устройство'}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-[13px] text-ink-dim">
                   Вход: {formatDate(session.createdAt)} · Активность: {formatDate(session.lastSeenAt)}
                 </p>
               </div>
               <button
                 type="button"
                 aria-label="Закрыть сессию"
-                className="press shrink-0 rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="press shrink-0 rounded-control p-3 text-ink-dim transition-colors hover:bg-white/[0.06] hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 onClick={() => deleteSession.mutate(session.id)}
                 disabled={deleteSession.isPending}
               >

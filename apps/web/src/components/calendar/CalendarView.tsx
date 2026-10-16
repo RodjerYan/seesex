@@ -1,11 +1,12 @@
 /**
  * CalendarView — сетка месяца (неделя с понедельника), mobile-first.
- * Glass-редизайн (T-20261001-004/S4) + iOS-restyle (T-20261012-003): день —
- * glass-плитка rounded-2xl с active:scale-95, «сегодня» — тонкая pink-кольцо
- * на кружке числа, выбранный — iOS-кружок 32px (градиент primary + glow +
- * sensual-pulse), строка недели с сегодняшним днём — тонкий фон-бэнд,
- * выходные числа — brand-tint; заголовок месяца — крупный (text-2xl),
- * subtle brand-gradient по названию, iOS liquid-glass кнопки навигации.
+ * Премиальный нуар (T-20261016-006/S2): заголовок месяца — solid text-ink
+ * (type-display, без градиентного clip), кнопки навигации — solid elev2 +
+ * hairline (без backdrop-blur), плитки дней — rounded-tile. Состояния дня
+ * сохранены (T-20261001-004/S4 + iOS-restyle T-20261012-003): «сегодня» —
+ * тонкое pink-кольцо на кружке числа, выбранный — iOS-кружок 32px (градиент
+ * primary + glow + sensual-pulse), строка недели с сегодняшним днём — тонкий
+ * фон-бэнд, выходные числа — brand-tint.
  *
  * T-20261012-002: день с событиями — красное сердечко (Heart, fill-red-500)
  * вместо сегментного бара статусов; появление месяца — разовое магическое
@@ -15,9 +16,9 @@
  * Данные: GET /api/events/calendar?from&to за видимый месяц (useCalendar).
  *
  * B4 (T-20261005-005): долгий тап (≥350ms) на день с событиями —
- * компактный glass-тултип со списком событий (точка статуса из
- * STATUS_PILL, максимум 5 строк + «+N ещё»); тап по заголовку месяца —
- * мини-пикер 12 месяцев года курсора (3×4, glass-фон, overlay/Esc).
+ * компактный тултип со списком событий (точка статуса из STATUS_PILL,
+ * максимум 5 строк + «+N ещё»); тап по заголовку месяца — мини-пикер
+ * 12 месяцев года курсора (3×4, solid elev3 + hairline, overlay/Esc).
  */
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
@@ -36,11 +37,12 @@ import { ErrorBlock, LoadingBlock } from '../ui/states';
 
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
-/** Цвета сегментов бара статуса — в long-press тултипе и в легенде (единый источник). */
+/** Цвета сегментов бара статуса — в long-press тултипе и в легенде (единый источник).
+ *  S2 (T-20261016-006): целевые точки нуар-гаммы (rose / slate-500 / violet-500). */
 const STATUS_PILL: Record<CalendarStatus, string> = {
-  occurred: 'bg-[#EF4444]',
-  turndown: 'bg-[#94A3B8]',
-  planned: 'bg-[#8B5CF6]',
+  occurred: 'bg-[#F5296E]',
+  turndown: 'bg-[#8E8E93]',
+  planned: 'bg-[#BF5AF2]',
 };
 
 /** Иконка 4-го чипа легенды «тип» (только не-compact режим). */
@@ -70,14 +72,14 @@ const MONTHS_SHORT = [
   'Дек',
 ];
 
-/** Круглая кнопка-стрелка навигации: тач-зона 48×48, iOS liquid-glass
- *  (frosted backdrop + inset-highlight), hover/active/focus, touch-manipulation. */
+/** Круглая кнопка-стрелка навигации: тач-зона 48×48, solid elev2 + hairline
+ *  (без backdrop-blur), hover/active — лёгкий светлый overlay, touch-manipulation. */
 const NAV_BTN =
-  'flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/15 ' +
-  'bg-white/[0.07] backdrop-blur-md text-slate-200 transition-all ' +
-  'shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_2px_10px_rgba(0,0,0,0.30)] ' +
-  'hover:border-white/25 hover:bg-white/[0.13] hover:text-slate-50 ' +
-  'active:scale-90 active:bg-white/[0.17] ' +
+  'flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/[0.08] ' +
+  'bg-elev-2 text-ink-muted transition-all ' +
+  'shadow-[0_2px_10px_rgba(0,0,0,0.35)] ' +
+  'hover:border-white/[0.12] hover:bg-white/[0.08] hover:text-ink ' +
+  'active:scale-90 active:bg-white/[0.12] ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ' +
   'touch-manipulation';
 
@@ -370,17 +372,17 @@ export function CalendarView({
           -ml-1 висит на h2, НЕ на кнопке (T-20261005-006): на кнопке он урезал
           max-w-full на 4px и truncate обрезал год — «Октябрь 2...». */}
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <h2 className="-ml-1 min-w-0 text-2xl font-bold leading-tight tracking-tight text-slate-50">
+        <h2 className="-ml-1 min-w-0 leading-tight">
           <button
             type="button"
             onClick={() => setMonthPickerOpen((open) => !open)}
             aria-expanded={monthPickerOpen}
             aria-controls="cal-month-picker"
-            className="block max-w-full truncate rounded-xl px-1.5 py-0.5 text-left transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+            className="block max-w-full truncate rounded-xl px-1.5 py-1.5 text-left transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
           >
-            <span className="brand-gradient">{monthName}</span>
+            <span className="type-display text-ink">{monthName}</span>
             {yearName ? (
-              <span className="ml-1.5 text-sm font-medium text-slate-400">{yearName}</span>
+              <span className="ml-1.5 text-sm font-medium text-ink-muted">{yearName}</span>
             ) : null}
           </button>
         </h2>
@@ -394,7 +396,7 @@ export function CalendarView({
                   month: new Date().getMonth(),
                 })
               }
-              className="rounded-full border border-primary-400/30 bg-primary/20 px-2.5 py-1 text-[11px] font-medium text-primary-300 backdrop-blur-md transition-colors hover:bg-primary/30"
+              className="rounded-full border border-primary/30 bg-primary/20 px-2.5 py-1 text-[11px] font-medium text-primary-400 transition-colors hover:bg-primary/30"
             >
               Сегодня
             </button>
@@ -425,11 +427,10 @@ export function CalendarView({
           ref={pickerRef}
           id="cal-month-picker"
           className={cx(
-            'absolute left-0 top-full z-20 mt-2 w-full rounded-2xl border border-white/15',
-            // Непрозрачный тёмный фон (T-20261005-006): bg-white/[0.12] просвечивал —
-            // числа сетки читались сквозь пикер. Тёмный solid + blur как у модалок
-            // + inset-highlight сверху (iOS liquid glass, T-20261012-003).
-            'bg-[#12141C]/95 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl',
+            'absolute left-0 top-full z-20 mt-2 w-full rounded-card border border-line',
+            // S2 (T-20261016-006): непрозрачный solid elev3 + hairline, без blur —
+            // числа сетки не просвечивают сквозь пикер, «стеклянный шум» убран.
+            'bg-elev-3 p-2.5 shadow-[0_16px_40px_rgba(0,0,0,0.5)]',
             'transition-opacity duration-150',
             monthPickerOpen ? 'opacity-100' : 'pointer-events-none invisible opacity-0',
           )}
@@ -449,9 +450,9 @@ export function CalendarView({
                     'rounded-xl px-1 py-2 text-[11px] font-semibold leading-none transition-all',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 active:scale-95',
                     isTodayMonth
-                      ? 'bg-primary/20 text-primary-300'
-                      : 'text-slate-300 hover:bg-white/[0.08] hover:text-slate-50',
-                    isCursorMonth && 'bg-white/[0.10] text-white ring-1 ring-white/20',
+                      ? 'bg-primary/20 text-primary-400'
+                      : 'text-ink-muted hover:bg-white/[0.08] hover:text-ink',
+                    isCursorMonth && 'bg-white/[0.10] text-ink ring-1 ring-white/20',
                   )}
                 >
                   {label}
@@ -462,12 +463,12 @@ export function CalendarView({
         </div>
       </div>
 
-      {/* Дни недели: iOS-стиль — спокойный slate, без тяжёлого uppercase-трекинга. */}
+      {/* Дни недели: спокойный ink-muted, без тяжёлого uppercase-трекинга. */}
       <div className="mb-1 grid grid-cols-7 gap-1 px-1 text-center">
         {WEEKDAYS.map((weekday) => (
           <span
             key={weekday}
-            className="py-1 text-[11px] font-semibold tracking-wide text-slate-400"
+            className="py-1 text-[11px] font-semibold tracking-wide text-ink-muted"
           >
             {weekday}
           </span>
@@ -545,7 +546,7 @@ export function CalendarView({
                 onTouchCancel={clearLongPressTimer}
                 className={cx(
                   // select-none: долгий тап не должен запускать выделение текста (B4)
-                  'relative flex min-h-[52px] flex-col items-center justify-start rounded-2xl border px-0.5 pt-1.5 select-none',
+                  'relative flex min-h-[52px] flex-col items-center justify-start rounded-tile border px-0.5 pt-1.5 select-none',
                   // явный список вместо transition-all: на 42 ячейках анимируется
                   // только то, что реально меняется (T-20261012-001/S2)
                   'transition-[background-color,border-color,transform,box-shadow] duration-200 active:scale-95',
@@ -567,10 +568,10 @@ export function CalendarView({
                         : inMonth
                           ? isWeekend
                             ? 'font-medium text-primary-400/70'
-                            : 'font-medium text-slate-100'
-                          // S8: text-slate-600/60 давал ~1.7:1 — поднят до slate-500 (~3.5:1),
-                          // де-эмфазис вне месяца сохранён (слабее inMonth-дней).
-                          : 'font-normal text-slate-500',
+                            : 'font-medium text-ink'
+                          // S8: де-эмфазис вне месяца сохранён (слабее inMonth-дней);
+                          // S2: токен ink-dim (~3.6:1 на elev1) вместо slate-500.
+                          : 'font-normal text-ink-dim',
                   )}
                 >
                   {date.getDate()}
@@ -581,7 +582,7 @@ export function CalendarView({
                   <span className="mt-0.5 flex h-3 items-center gap-0.5" aria-hidden="true">
                     {types.map((type) => {
                       const { Icon } = eventMeta(type);
-                      return <Icon key={type} className="h-3 w-3 text-slate-400" />;
+                      return <Icon key={type} className="h-3 w-3 text-ink-dim" />;
                     })}
                   </span>
                 )}
@@ -610,10 +611,10 @@ export function CalendarView({
         </div>
       )}
 
-      {/* B4: long-press превью событий дня — компактный glass-тултип рядом с
-          ячейкой (координаты пересчитаны в showLongPressPreview). Вне grid —
-          не влияет на свайп, key и строки сетки. pointer-events-none: тап
-          «сквозь» тултип попадает в ячейку (выбор дня + закрытие превью). */}
+      {/* B4: long-press превью событий дня — компактный solid-тултип (elev3 +
+          hairline) рядом с ячейкой (координаты пересчитаны в showLongPressPreview).
+          Вне grid — не влияет на свайп, key и строки сетки. pointer-events-none:
+          тап «сквозь» тултип попадает в ячейку (выбор дня + закрытие превью). */}
       {longPress && (
         <div
           ref={tooltipRef}
@@ -624,7 +625,7 @@ export function CalendarView({
               ? { left: longPress.left, bottom: longPress.offset }
               : { left: longPress.left, top: longPress.offset }
           }
-          className="pointer-events-none absolute z-20 w-max max-w-[240px] -translate-x-1/2 rounded-2xl border border-white/15 bg-[#12141C]/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="pointer-events-none absolute z-20 w-max max-w-[240px] -translate-x-1/2 rounded-card border border-white/10 bg-elev-3 p-2 shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
         >
           <ul className="flex flex-col gap-0.5">
             {longPress.events.slice(0, TOOLTIP_MAX_ROWS).map((event) => (
@@ -633,14 +634,14 @@ export function CalendarView({
                   className={cx('h-1.5 w-1.5 shrink-0 rounded-full', STATUS_PILL[event.status])}
                   aria-hidden="true"
                 />
-                <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-slate-200">
+                <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-ink">
                   {event.title?.trim() || eventMeta(event.eventType).label}
                 </span>
               </li>
             ))}
           </ul>
           {longPress.events.length > TOOLTIP_MAX_ROWS ? (
-            <div className="px-1 pt-1 text-[11px] font-semibold leading-none text-slate-400">
+            <div className="px-1 pt-1 text-[11px] font-semibold leading-none text-ink-muted">
               +{longPress.events.length - TOOLTIP_MAX_ROWS} ещё
             </div>
           ) : null}
@@ -648,24 +649,24 @@ export function CalendarView({
       )}
 
       {/* Легенда (B2): фиксированный ряд из 4 чипов вместо <details>/<summary>,
-          виден всегда; в compact — скрыт. iOS-чипы (T-20261012-003): frosted
-          pill с inset-highlight. Строка разделителя — border-t. */}
+          виден всегда; в compact — скрыт. S2: нейтральные hairline-чипы
+          (white/[0.06], без inset/blur). Строка разделителя — border-t. */}
       {!compact && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.08] pt-3">
-          <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-ink-muted">
             <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.occurred)} aria-hidden="true" />
             состоялось
           </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-ink-muted">
             <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.turndown)} aria-hidden="true" />
             отказ
           </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-ink-muted">
             <span className={cx('h-1.5 w-1.5 rounded-full', STATUS_PILL.planned)} aria-hidden="true" />
             запланировано
           </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <TYPE_LEGEND_ICON className="h-3 w-3 text-slate-300" aria-hidden="true" />
+          <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-ink-muted">
+            <TYPE_LEGEND_ICON className="h-3 w-3 text-ink-muted" aria-hidden="true" />
             тип
           </span>
         </div>

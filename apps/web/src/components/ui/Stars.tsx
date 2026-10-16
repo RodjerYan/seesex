@@ -18,17 +18,17 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
   const rating = value ?? 0;
 
   if (!onChange) {
-    if (!rating) return <span className="text-xs text-slate-500">Без оценки</span>;
+    if (!rating) return <span className="text-xs text-ink-dim">Без оценки</span>;
     return (
       <span className="inline-flex items-center gap-0.5" aria-label={`Оценка ${rating} из 5`}>
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             aria-hidden="true"
-            className={cx(iconClass, star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-500')}
+            className={cx(iconClass, star <= rating ? 'fill-primary text-primary' : 'text-white/15')}
           />
         ))}
-        <span className="ml-1 text-xs text-slate-400">{rating} из 5</span>
+        <span className="num ml-1 text-xs text-ink-muted">{rating} из 5</span>
       </span>
     );
   }
@@ -49,7 +49,7 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
             aria-hidden="true"
             className={cx(
               iconClass,
-              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-500',
+              star <= rating ? 'fill-primary text-primary' : 'text-white/15',
               // S3: волна слева-направо по выбранной оценке.
               // 45ms — stagger между звёздами (magic number макета, review m-02):
               // достаточно, чтобы волна читалась, короче star-wave (380ms).
@@ -63,7 +63,7 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
         <button
           type="button"
           onClick={onClear}
-          className="ml-1 rounded px-1 text-xs text-slate-500 hover:text-slate-300"
+          className="ml-1 rounded px-1 text-xs text-ink-dim hover:text-ink"
         >
           сбросить
         </button>
