@@ -328,8 +328,10 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
     qrRendered.current = true;
     let cancelled = false;
     void import('qrcode')
+      // S8: стандарт сканеров — тёмные модули на белом фоне. Прежняя
+      // инверсия (светлые модули на прозрачном) камерой не читалась.
       .then((QRCode) =>
-        QRCode.toDataURL(setup.data.otpauthUrl, { margin: 1, width: 200, color: { dark: '#e2e8f0', light: '#00000000' } }),
+        QRCode.toDataURL(setup.data.otpauthUrl, { margin: 1, width: 200, color: { dark: '#000000', light: '#FFFFFF' } }),
       )
       .then((url) => {
         if (!cancelled) setQrDataUrl(url);
@@ -434,7 +436,11 @@ function TwoFactorCard({ hasTotp }: { hasTotp: boolean }): ReactElement {
           </p>
           <div className="mb-3 flex justify-center">
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR-код для настройки 2FA" className="rounded-xl" />
+              // S8: белая подложка вокруг QR — гарантия контраста для камеры
+              // независимо от темы (QR уже с белым фоном, подложка страхует).
+              <div className="rounded-xl bg-white p-3">
+                <img src={qrDataUrl} alt="QR-код для настройки 2FA" className="block" />
+              </div>
             ) : (
               <LoadingBlock label="Готовим QR…" />
             )}

@@ -43,7 +43,8 @@ export function ColumnBars({
             key={`${item.label}-${index}`}
             className="group relative flex h-full min-w-0 max-w-[48px] flex-1 flex-col justify-end"
           >
-            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/[0.08] backdrop-blur-md border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-200 group-hover:block group-active:block">
+            {/* S8: тултип и подпись оси ≥11px (было 10/9px) — читаемость на мобильном. */}
+            <span className="pointer-events-none absolute -top-5 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/[0.08] backdrop-blur-md border border-white/10 px-1.5 py-0.5 text-[11px] text-slate-200 group-hover:block group-active:block">
               {valueLabel ? valueLabel(item.value) : item.value}
             </span>
             <div
@@ -51,7 +52,7 @@ export function ColumnBars({
               style={{ height: `${Math.max(2, ratio * 100)}%`, animationDelay: `${index * 40}ms` }}
               title={item.hint ?? `${item.label}: ${item.value}`}
             />
-            <span className="mt-1 truncate text-center text-[9px] text-slate-400">{item.label}</span>
+            <span className="mt-1 truncate text-center text-[11px] text-slate-400">{item.label}</span>
           </div>
         );
       })}

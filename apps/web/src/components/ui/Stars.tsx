@@ -34,14 +34,16 @@ export function Stars({ value, onChange, onClear, size = 'sm' }: StarsProps): Re
   }
 
   return (
-    <span className="inline-flex items-center gap-1">
+    // S8: тап-зона каждой звезды ≥40px (p-2 при иконке 24px у «md»);
+    // gap сжат (0.5), чтобы ряд не разъезжался и влезал в карточку на узких экранах.
+    <span className="inline-flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           aria-label={`Оценка ${star}`}
           onClick={() => onChange(star)}
-          className="rounded p-0.5 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+          className="rounded p-2 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
         >
           <Star
             aria-hidden="true"

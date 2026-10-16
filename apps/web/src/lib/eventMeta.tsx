@@ -37,7 +37,9 @@ export const EVENT_META: Record<string, EventMeta> = {
   ORAL: { label: eventTypeLabel('ORAL'), Icon: emojiIcon('👄'), color: '#FB7185' },
   ANAL: { label: eventTypeLabel('ANAL'), Icon: emojiIcon('🍑'), color: '#FB923C' },
   OTHER: { label: eventTypeLabel('OTHER'), Icon: emojiIcon('🧩'), color: '#FF6BA3' },
-  TURNDOWN: { label: eventTypeLabel('TURNDOWN'), Icon: emojiIcon('🚫'), color: '#6B7280' },
+  // S8: #6B7280 давал контраст текста чипа ~3:1 на тёмном стекле — поднят
+  // до #9CA3AF (gray-400, ≥5.5:1): категорийный серый «отказа» сохранён.
+  TURNDOWN: { label: eventTypeLabel('TURNDOWN'), Icon: emojiIcon('🚫'), color: '#9CA3AF' },
 };
 
 /* Иконка/цвет фоллбэка «своего» типа (CUSTOM и любой произвольный ключ). */

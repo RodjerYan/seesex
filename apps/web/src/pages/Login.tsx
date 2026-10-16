@@ -121,11 +121,13 @@ export default function Login(): ReactElement {
                 className="pr-11"
                 {...register('password')}
               />
+              {/* S8: тап-зона ≥40px (p-3 при иконке 16px); right-1 компенсирует
+                  рост зоны — иконка визуально остаётся у края поля. */}
               <button
                 type="button"
                 aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-slate-400 transition-colors hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-3 text-slate-400 transition-colors hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" aria-hidden="true" />

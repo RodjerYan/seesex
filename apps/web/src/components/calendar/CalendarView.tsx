@@ -568,7 +568,9 @@ export function CalendarView({
                           ? isWeekend
                             ? 'font-medium text-primary-400/70'
                             : 'font-medium text-slate-100'
-                          : 'font-normal text-slate-600/60',
+                          // S8: text-slate-600/60 давал ~1.7:1 — поднят до slate-500 (~3.5:1),
+                          // де-эмфазис вне месяца сохранён (слабее inMonth-дней).
+                          : 'font-normal text-slate-500',
                   )}
                 >
                   {date.getDate()}

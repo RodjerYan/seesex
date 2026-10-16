@@ -485,7 +485,8 @@ export function EventForm({
                   aria-pressed={active}
                   onClick={() => toggle(partner.id, partnerIds, setPartnerIds)}
                   className={cx(
-                    'rounded-full border px-3 py-1 text-xs transition-colors',
+                    // S8: тап-зона ≥40px (было ~26px); цвета/рамки не менялись.
+                    'inline-flex min-h-[40px] items-center justify-center rounded-full border px-3 text-xs transition-colors',
                     active
                       ? 'border-primary-400 bg-primary/20 text-primary-400'
                       : 'border-slate-700 text-slate-400 hover:bg-white/[0.06]',

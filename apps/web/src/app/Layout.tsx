@@ -111,12 +111,12 @@ export default function Layout() {
               <img
                 src={profileQuery.data.avatarUrl}
                 alt=""
-                className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20"
+                className="h-10 w-10 rounded-full object-cover ring-1 ring-white/20"
               />
             ) : (
               <span
                 aria-hidden="true"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.08] text-sm font-bold text-slate-300 ring-1 ring-white/20"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.08] text-sm font-bold text-slate-300 ring-1 ring-white/20"
               >
                 {(profileQuery.data?.displayName?.[0] ?? '?').toUpperCase()}
               </span>
@@ -142,7 +142,7 @@ export default function Layout() {
               if (settings.secretHash) lock();
               else navigate('/settings/security'); // Секрет не задан — установить PIN.
             }}
-            className="press absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.06] text-slate-300 ring-1 ring-white/20 transition-colors hover:bg-white/[0.12] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="press absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.06] text-slate-300 ring-1 ring-white/20 transition-colors hover:bg-white/[0.12] hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
           </button>

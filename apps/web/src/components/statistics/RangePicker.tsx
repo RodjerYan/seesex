@@ -65,7 +65,8 @@ export function RangePicker({
             type="button"
             onClick={() => onChange({ ...value, preset: preset.value })}
             className={cx(
-              'rounded-full border px-3 py-1 text-xs transition-colors',
+              // S8: тап-зона ≥40px (было ~26px); цвета/рамки пресетов не менялись.
+              'inline-flex min-h-[40px] items-center justify-center rounded-full border px-3 text-xs transition-colors',
               value.preset === preset.value
                 ? 'border-primary-400 bg-primary/10 text-primary-400'
                 : 'border-slate-700 text-slate-400 hover:border-slate-600',
