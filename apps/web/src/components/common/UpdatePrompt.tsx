@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, RefreshCw, AlertCircle } from 'lucide-react';
 import { applyUpdate, PWA_NEED_REFRESH, hasNeedRefreshFired } from '../../lib/pwa';
 
@@ -11,6 +11,10 @@ import { applyUpdate, PWA_NEED_REFRESH, hasNeedRefreshFired } from '../../lib/pw
 export function UpdatePrompt(): JSX.Element | null {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updating, setUpdating] = useState(false);
+  // Guard от повторного выполнения hardReset: при успехе applyUpdate
+  // страница перезагрузится сама по controllerchange (таймер не успеет),
+  // а при «ничего не случилось» hardReset должен сработать ровно один раз.
+  const hardResetStartedRef = useRef(false);
 
   useEffect(() => {
     // Check if the event already fired before we mounted (race condition fix)
@@ -31,26 +35,9 @@ export function UpdatePrompt(): JSX.Element | null {
 
   if (!updateAvailable) return null;
 
-  const handleApplyUpdate = async (): Promise<void> => {
-    if (updating) return;
-    setUpdating(true);
-    try {
-      await applyUpdate();
-      // applyUpdate ждёт controllerchange (skipWaiting + reload). Если у
-      // браузера вдруг нет waiting-SW (сработал self-heal-баннер, а workbox
-      // обновление не увидел) — перезагрузка не придёт. Fallback: через
-      // 2.5с делаем полный сброс SW+кэш, чтобы обновление точно применилось.
-      setTimeout(() => {
-        void handleHardReset();
-      }, 2500);
-    } catch (err) {
-      console.warn('[UpdatePrompt] applyUpdate failed:', err);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
   const handleHardReset = async (): Promise<void> => {
+    if (hardResetStartedRef.current) return;
+    hardResetStartedRef.current = true;
     try {
       // Unregister all service worker registrations
       if ('serviceWorker' in navigator) {
@@ -67,6 +54,25 @@ export function UpdatePrompt(): JSX.Element | null {
     }
     // Force reload
     window.location.reload();
+  };
+
+  const handleApplyUpdate = async (): Promise<void> => {
+    if (updating) return;
+    setUpdating(true);
+    // Failsafe-таймер планируется СРАЗУ, до await applyUpdate(): подвисание
+    // промиса или исключение не отменяют страховку. Если controllerchange
+    // не придёт (workbox не отследил waiting-SW) — hardReset гарантированно
+    // сбросит SW+кэш и перезагрузит страницу.
+    window.setTimeout(() => {
+      void handleHardReset();
+    }, 2500);
+    try {
+      await applyUpdate();
+    } catch (err) {
+      console.warn('[UpdatePrompt] applyUpdate failed:', err);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleDismiss = (): void => {
