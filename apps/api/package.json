@@ -16,7 +16,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:migrate-neon": "node scripts/migrate-neon-to-sqlite.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -41,6 +42,7 @@
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.13.10",
     "@types/supertest": "^7.2.1",
+    "pg": "^8.23.1",
     "prisma": "^6.5.0",
     "supertest": "^7.3.0",
     "tsx": "^4.19.3",
