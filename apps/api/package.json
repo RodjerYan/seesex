@@ -7,12 +7,13 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/index.js",
+    "start": "node dist/boot.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src prisma",
     "test": "vitest run",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate",
+    "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed"

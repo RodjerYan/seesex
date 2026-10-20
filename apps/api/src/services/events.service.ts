@@ -70,11 +70,35 @@ function namedView(rows: { id: string; name: string | null }[] | undefined) {
 }
 
 /**
+ * eventTypes хранится в SQLite JSON-строкой (scalar lists не поддерживаются).
+ * Формат: ["SEX","ORAL"]. Legacy-значения (простой текст) тоже читаем.
+ */
+export function parseEventTypes(raw: string | null | undefined, fallback: string): string[] {
+  if (raw) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((value) => String(value));
+      }
+    } catch {
+      // Не JSON — legacy-значение одного типа.
+      return [raw];
+    }
+  }
+  return [fallback];
+}
+
+export function serializeEventTypes(types: string[]): string {
+  return JSON.stringify(types);
+}
+
+
+/**
  * API-представление события. notes — чувствительное поле: расшифровывается
  * и возвращается только владельцу события; остальным зрителям — null.
  */
 export function eventView(event: EventRow, viewerId: string): Record<string, unknown> {
-  const types = Array.isArray(event.eventTypes) && event.eventTypes.length ? event.eventTypes : [event.eventType];
+  const types = parseEventTypes(event.eventTypes, event.eventType);
   return {
     id: event.id,
     title: event.title,
@@ -219,7 +243,7 @@ function buildCreateData(userId: string, input: CreateEventInput): EventCreateDa
     userId,
     title: input.title ?? null,
     eventType: primaryType,
-    eventTypes: types,
+    eventTypes: serializeEventTypes(types),
     isCustomType,
     date: input.date,
     duration: input.duration ?? null,
@@ -262,12 +286,12 @@ function buildUpdateData(input: UpdateEventInput): EventUpdateData {
   if (input.eventTypes !== undefined) {
     const types = unique(input.eventTypes);
     data.eventType = types[0];
-    data.eventTypes = types;
+    data.eventTypes = serializeEventTypes(types);
     data.isCustomType = types.some((t: string) => !KNOWN_EVENT_TYPES.includes(t as (typeof KNOWN_EVENT_TYPES)[number]));
   } else if (input.eventType !== undefined) {
     // Legacy: single eventType provided
     data.eventType = input.eventType;
-    data.eventTypes = [input.eventType];
+    data.eventTypes = serializeEventTypes([input.eventType]);
     if (input.isCustomType !== undefined) {
       data.isCustomType = input.isCustomType;
     } else {
@@ -297,11 +321,11 @@ export async function listEvents(
   if (query.eventTypes) {
     const types = query.eventTypes.split(',').map((t) => t.trim()).filter(Boolean);
     if (types.length > 0) {
-      filters.push({ OR: types.map((t) => ({ eventTypes: { has: t } })) });
+      filters.push({ OR: types.map((t) => ({ eventTypes: { contains: JSON.stringify(t) } })) });
     }
   } else if (query.eventType) {
     // Legacy: filter by single eventType using eventTypes array
-    filters.push({ eventTypes: { has: query.eventType } });
+    filters.push({ eventTypes: { contains: JSON.stringify(query.eventType) } });
   }
   if (query.groupCalendarId) filters.push({ groupCalendarId: query.groupCalendarId });
   if (query.dateFrom || query.dateTo) {
@@ -413,7 +437,7 @@ export async function calendar(userId: string, from?: Date, to?: Date): Promise<
       day = { date: key, events: [] };
       byDay.set(key, day);
     }
-    const types = Array.isArray(row.eventTypes) && row.eventTypes.length ? row.eventTypes : [row.eventType];
+    const types = parseEventTypes(row.eventTypes, row.eventType);
     day.events.push({
       id: row.id,
       eventType: types[0],

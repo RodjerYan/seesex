@@ -10,6 +10,17 @@ const EnvSchema = z.object({
   PORT: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(65535).default(3001)),
   // Обязательные секреты/подключение — при отсутствии падаем с понятной ошибкой.
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  // Локальный SQLite-файл (prod: boot.ts подставляет путь сам).
+  SQLITE_PATH: z.preprocess(emptyToUndefined, z.string().optional()),
+  // Google Drive (OAuth пользователя): файл БД живёт в его папке.
+  GOOGLE_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().optional()),
+  GOOGLE_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().optional()),
+  GOOGLE_REFRESH_TOKEN: z.preprocess(emptyToUndefined, z.string().optional()),
+  GOOGLE_DRIVE_FOLDER_ID: z.preprocess(emptyToUndefined, z.string().optional()),
+  DRIVE_SYNC_INTERVAL_MS: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().positive().default(60_000),
+  ),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   // Для S3 (шифрование чувствительных данных) — опциональна в S2.
   ENCRYPTION_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),

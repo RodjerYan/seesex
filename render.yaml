@@ -1,26 +1,30 @@
 # xTracker — Render Blueprint
 # Деплой: GitHub -> Render (auto-deploy on push to main).
-# Тариф free — карта не требуется; persistent disk на free недоступен.
+# Тариф free — карта не требуется; persistent disk на free недоступен,
+# поэтому SQLite-файл БД живёт в Google Drive пользователя и синхронизируется
+# приложением (boot.ts скачивает файл, drive-sync.ts заливает снапшоты).
 # Секреты (JWT_SECRET, ENCRYPTION_KEY) Render сгенерирует сам (generateValue).
-# DATABASE_URL — внешняя БД Neon (https://neon.tech): значение подставляется вручную
-# в Render Dashboard -> Environment (env ниже помечен sync: false).
+# Google OAuth (GOOGLE_*) — значения задаются вручную в Render Dashboard
+# -> Environment (env ниже помечен sync: false).
 services:
   - type: web
     name: xtracker-web
     runtime: node
     plan: free
-    buildCommand: cd apps/api && npm install --include=dev && npx prisma generate && npm run build && DATABASE_URL="$(echo "$DATABASE_URL" | sed 's/-pooler//')" npx prisma migrate deploy && npx prisma db seed && cd ../web && npm install --include=dev && npm run build && cp -r ./dist ../api/public
-    startCommand: cd apps/api && node dist/index.js
+    buildCommand: cd apps/api && npm install --include=dev && DATABASE_URL="file:./build.db" npx prisma generate && npm run build && cd ../web && npm install --include=dev && npm run build && cp -r ./dist ../api/public
+    startCommand: cd apps/api && node dist/boot.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
+      - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: JWT_SECRET
-        generateValue: true
-      - key: ENCRYPTION_KEY
-        generateValue: true
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
       - key: FRONTEND_URL
         value: https://xtracker-web.onrender.com
       - key: ALLOWED_ORIGINS

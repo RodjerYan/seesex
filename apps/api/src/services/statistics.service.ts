@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client';
+import { parseEventTypes } from './events.service';
 import { monthKey } from '../lib/date';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../middleware/error';
@@ -53,7 +54,7 @@ export async function overview(userId: string): Promise<Record<string, unknown>>
       const typeRows = await prisma.event.findMany({ where, select: { eventTypes: true, eventType: true } });
       const typeCounts = new Map<string, number>();
       for (const r of typeRows) {
-        const types = r.eventTypes?.length ? r.eventTypes : [r.eventType];
+        const types = parseEventTypes(r.eventTypes, r.eventType);
         for (const t of new Set(types)) {
           typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
         }
@@ -342,7 +343,7 @@ export async function custom(
       const typeRows = await prisma.event.findMany({ where, select: { eventTypes: true, eventType: true } });
       const typeCounts = new Map<string, number>();
       for (const r of typeRows) {
-        const types = r.eventTypes?.length ? r.eventTypes : [r.eventType];
+        const types = parseEventTypes(r.eventTypes, r.eventType);
         for (const t of new Set(types)) {
           typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
         }

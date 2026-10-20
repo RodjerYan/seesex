@@ -15,6 +15,13 @@ apps/api/public/
 # пользовательские данные (фото)
 uploads/
 
+# SQLite: локальная копия БД (в проде файл живёт в Google Drive)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+apps/api/data/
+
 # логи
 *.log
 npm-debug.log*

@@ -1,4 +1,4 @@
-// xTracker — Prisma schema (PostgreSQL 15)
+// xTracker — Prisma schema (SQLite, файл БД хранится в Google Drive)
 // Поля User/Event/Partner/Wishlist/GroupCalendar — точно по request.md;
 // Profile/Session/RefreshToken/Mood/Place/Accessory/
 // PeriodTracking/PeriodEntry/GroupCalendarMember — вспомогательные модели связей.
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -101,7 +101,8 @@ model Event {
   userId          String
   title           String?
   eventType       String    @default("SEX")
-  eventTypes      String[]  @default([])
+  // SQLite не поддерживает scalar lists: JSON-массив строк, напр. ["SEX","ORAL"].
+  eventTypes      String    @default("[]")
   isCustomType    Boolean   @default(false)
   date            DateTime
   duration        Int?
