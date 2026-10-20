@@ -10,11 +10,49 @@ import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import dotenv from 'dotenv';
 import { driveConfigured, downloadDatabase } from './lib/drive';
 
 const DEFAULT_DB_PATH = path.resolve(process.cwd(), 'data', 'seesex.db');
 
+/** Render Secret File (или локальный файл) с GOOGLE_* — вне git и вне env-логов. */
+function loadGoogleSecrets(): void {
+  const dirs = [
+    '/etc/secrets',
+    process.cwd(),
+    path.resolve(process.cwd(), '..'),
+    path.resolve(process.cwd(), '..', '..'),
+  ];
+  const found: string[] = [];
+  for (const dir of dirs) {
+    try {
+      if (!fs.existsSync(dir)) {
+        console.log(`[boot] secrets: ${dir} not found`);
+        continue;
+      }
+      const entries = fs.readdirSync(dir);
+      console.log(`[boot] secrets: ${dir} -> ${entries.slice(0, 25).join(', ') || '(empty)'}`);
+      for (const entry of entries) {
+        if (entry === 'seesex-google.env' || entry.endsWith('.env') || entry.includes('google')) {
+          found.push(path.join(dir, entry));
+        }
+      }
+    } catch (error) {
+      console.log(`[boot] secrets: ${dir} error ${String(error)}`);
+    }
+  }
+  for (const candidate of found) {
+    if (fs.existsSync(candidate)) {
+      dotenv.config({ path: candidate });
+      console.log(`[boot] Google secrets loaded from ${candidate}`);
+      return;
+    }
+  }
+  console.log('[boot] Google secrets file not found');
+}
+
 async function main(): Promise<void> {
+  loadGoogleSecrets();
   const dbPath = process.env.SQLITE_PATH?.trim() || DEFAULT_DB_PATH;
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   process.env.DATABASE_URL = `file:${dbPath.replace(/\\/g, '/')}`;
